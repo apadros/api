@@ -1,0 +1,5 @@
+
+- The goal is to give the client code the ability to detect errors inside and outside their program
+
+- Error logging using the logging API
+	- Stack trace printing through win32
