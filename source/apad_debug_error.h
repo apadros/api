@@ -13,7 +13,6 @@ imported_function void ExitProgram(bool error);
 imported_function bool 				IsExitIfErrorSet();
 imported_function void 				SetExitIfError(bool b);
 
-
 imported_function void 				ClearError();
 imported_function bool 				ErrorIsSet();
 imported_function const char* GetError();
