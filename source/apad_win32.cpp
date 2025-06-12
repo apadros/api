@@ -1,3 +1,7 @@
+// #define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <Windows.h>
+
 #include "apad_base_types.h"
 #include "apad_debug_error.h"
 
