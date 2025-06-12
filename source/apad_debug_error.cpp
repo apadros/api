@@ -14,8 +14,8 @@
 #include "apad_debug_error.h"
 
 program_local const ui8  errorStringMaxLength = UI8Max;
-program_local 			char errorString[errorStringMaxLength] = {};
-program_external    bool exitIfError = false;
+program_local char errorString[errorStringMaxLength] = {};
+program_local bool exitIfError = false;
 
 // ******************** Local API end ******************** //
 
@@ -62,6 +62,10 @@ void ExitProgram(bool error) {
 
 exported_function void SetExitIfError(bool b) {
   exitIfError = b;
+}
+
+exported_function bool IsExitIfErrorSet() {
+	return exitIfError;
 }
 
 program_local void main() {
