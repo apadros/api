@@ -1,0 +1,3 @@
+
+Memory
+	- Replace malloc() and free() in the memory API with the new Win32 memory functions
