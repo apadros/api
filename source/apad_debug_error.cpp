@@ -64,6 +64,10 @@ exported_function void SetExitIfError(bool b) {
   exitIfError = b;
 }
 
+exported_function bool IsExitIfErrorSet() {
+	return exitIfError;
+}
+
 program_local void main() {
   SetExitIfError(true);
 	
