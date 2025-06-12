@@ -5,6 +5,12 @@
 #include "apad_base_types.h"
 #include "apad_debug_error.h"
 
+// ******************** Local API start ******************** //
+
+
+
+// ******************** Local API end ******************** //
+
 void* AllocateWin32Memory(ui32 size) {
   Assert(size > 0);
   
