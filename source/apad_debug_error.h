@@ -10,7 +10,7 @@ imported_function void ExitProgram(bool error);
 // ******************** Error checking and setting ******************** //
 
 // Use these to create an error message which is then logged by outside code (e.g. error within a function, need it available when returning)
-exported_function bool 				IsExitIfErrorSet();
+imported_function bool 				IsExitIfErrorSet();
 imported_function void 				SetExitIfError(bool b);
 
 
