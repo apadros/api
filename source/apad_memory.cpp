@@ -8,7 +8,7 @@
 #define imported_function exported_function
 #include "apad_memory.h"
 
-// Copy these to BUCKET_memory_types.h if changed
+// Copy these to apad_memory_types.h if changed
 #define KB(value) (value * 1024)
 #define MB(value) (KB(value) * 1024)
 #define ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))

@@ -19,7 +19,7 @@ imported_function void 				SetError(const char* string);
 // ******************** Assertions ******************** //
 
 #include "apad_base_types.h"
-#ifdef BUCKET_DEBUG
+#ifdef APAD_DEBUG
 
 #define Assert(_condition) { \
   if(!(_condition)) { \
