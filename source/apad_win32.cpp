@@ -37,9 +37,6 @@ exported_function void FreeWin32Memory(void* mem) {
 }
 
 program_local int main() {
-	void* mem = AllocateWin32Memory(1024);
-	
-	FreeWin32Memory(mem);
 	
 	return 0;
 }
