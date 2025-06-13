@@ -9,6 +9,8 @@
 
 // ******************** Memory ********************  //
 
+
+// Will automatically clear allocated memory
 imported_function void* AllocateWin32Memory(ui32 size);
 imported_function void  FreeWin32Memory(void* mem);
 

@@ -1,3 +1,4 @@
-
+Debug
+	- Test whether ExitProgram() exits only lib function or entire program
 Memory
 	- Replace malloc() and free() in the memory API with the new Win32 memory functions

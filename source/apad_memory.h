@@ -38,7 +38,7 @@ imported_function void CopyMemory(void* source, memory_size size, void* destinat
 
 // ******************** Allocation & Deallocation ******************** //
 
-imported_function memory_block AllocateMemory(memory_size size, b8 clear);
+imported_function memory_block AllocateMemory(ui32 size);
 imported_function void*        GetMemory(memory_block block);
 imported_function void         FreeMemory(memory_block block);
 imported_function bool         IsValid(memory_block block);
