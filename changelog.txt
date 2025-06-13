@@ -1,6 +1,6 @@
 v0.1.1
-	- Remove all typedefs from memory.h, all unneeded
-	- Removed use of memory.h typedefs from memory.cpp
+	- Replace contents of debug Assert() with __debugbreak()
+	- Removed all typedefs from memory.h and their use in memory.cpp 
 
 v0.1.0
 	- Base types
