@@ -1,3 +1,7 @@
+v0.1.1
+	- Remove all typedefs from memory.h, all unneeded
+	- Removed use of memory.h typedefs from memory.cpp
+
 v0.1.0
 	- Base types
 	- Intrinsic macros

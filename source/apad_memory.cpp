@@ -15,7 +15,7 @@
 #define ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
 
 // #include "apad_debug_error.h"
-exported_function void ClearMemory(void* memory, memory_size size) {
+exported_function void ClearMemory(void* memory, ui32 size) {
 	Assert(memory != Null);
 	if(ErrorIsSet() == true)
 		return;
@@ -24,11 +24,11 @@ exported_function void ClearMemory(void* memory, memory_size size) {
 	if(ErrorIsSet() == true)
 		return;
 	
-  for (memory_size it = 0; it < size; it++)
+  for (ui32 it = 0; it < size; it++)
 		((ui8*)memory)[it] = 0;
 }
 
-exported_function void CopyMemory(void* source, memory_size size, void* destination) {
+exported_function void CopyMemory(void* source, ui32 size, void* destination) {
   Assert(source != Null);
 	if(ErrorIsSet() == true)
 		return;
@@ -48,7 +48,7 @@ exported_function void CopyMemory(void* source, memory_size size, void* destinat
   ui8* ps = (ui8*)source;
   ui8* pd = (ui8*)destination;
   
-  for (memory_size it = 0; it < size; it++)
+  for (ui32 it = 0; it < size; it++)
     pd[it] = ps[it];
 }
 

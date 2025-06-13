@@ -10,31 +10,27 @@
 
 // ******************** Background ******************** //
 
-typedef ui32 memory_size;
-typedef si32 memory_offset;
-typedef ui16 memory_block_id;
-
 #define NullMemoryBlockID Null
 #define MemoryBlockIDMax  UI16Max
 
 struct memory_block {
-  void*       memory;
-  memory_size size;
+  void* memory;
+  ui32  size;
 };
 #define NullMemoryBlock memory_block()
 
 struct memory_stack {
-  void*       memory;
-  memory_size size;
-  memory_size capacity;
+  void* memory;
+  ui32  size;
+  ui32  capacity;
 };
 
 #define KB(value) 		 (value * 1024)
 #define MB(value) 		 (KB(value) * 1024)
 #define ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
 
-imported_function void ClearMemory(void* memory, memory_size size);
-imported_function void CopyMemory(void* source, memory_size size, void* destination);
+imported_function void ClearMemory(void* memory, ui32 size);
+imported_function void CopyMemory(void* source, ui32 size, void* destination);
 
 // ******************** Allocation & Deallocation ******************** //
 
