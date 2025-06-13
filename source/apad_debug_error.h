@@ -5,7 +5,7 @@
 
 // ******************** Generic ******************** //
 
-imported_function void ExitProgram(bool error);
+imported_function void ExitProgram(bool error); // This will not work within DLL functions
 
 // ******************** Error checking and setting ******************** //
 
@@ -33,6 +33,7 @@ imported_function void 				SetError(const char* string);
 #else
 	
 #define Assert(_condition) \
+  ClearError(); \
   if(!(_condition)) { \
 		SetError("ERROR - " ## #_condition ## ", file " ## __FILE__); \
 		if(IsExitIfErrorSet() == true) \

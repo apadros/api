@@ -1,2 +1,0 @@
-- Test the new lib and dlls in a sample program
-	- Call functions, check for errors etc
