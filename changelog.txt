@@ -3,7 +3,7 @@ v0.1.0
 	- Intrinsic macros
 	- Debug assertions for internal use only and initial version of release assertions
 	- Basic error setting, getting and clearing
-	- Basic memory types and operations using the c standard library
+	- Basic memory types and operations using custom win32 code
 	  - Clearing, allocation, copying, deallocation, validation, setting as invalid
 		- Casting and reading macros
 	- String
