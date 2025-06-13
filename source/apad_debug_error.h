@@ -20,14 +20,12 @@ imported_function void 				SetError(const char* string);
 
 // ******************** Assertions ******************** //
 
-#include "apad_base_types.h"
+#include <intrin.h>
 #ifdef APAD_DEBUG
 
 #define Assert(_condition) { \
-  if(!(_condition)) { \
-		ui64* ptr = Null; \
-    ui64 _u = *ptr; \
-	} \
+  if(!(_condition)) \
+		__debugbreak(); \
 }
 
 #else

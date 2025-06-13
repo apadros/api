@@ -67,7 +67,3 @@ exported_function void SetExitIfError(bool b) {
 exported_function bool IsExitIfErrorSet() {
 	return exitIfError;
 }
-
-program_local void main() {
-  
-}
