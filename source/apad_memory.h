@@ -8,7 +8,7 @@
 #include "apad_intrinsics.h"
 
 
-// ******************** Background ******************** //
+// ******************** Generic ******************** //
 
 #define NullMemoryBlockID Null
 #define MemoryBlockIDMax  UI16Max
@@ -20,27 +20,25 @@ struct memory_block {
 };
 #define NullMemoryBlock memory_block()
 
-#define KiB(value) 		  ((value) * 1024)
-#define MiB(value) 		  (KiB(value) * 1024)
-#define GiB(value) 			(MiB(value) * 1024)
-#define ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
+#define 								KiB(value) ((value) * 1024)
+#define 								MiB(value) (KiB(value) * 1024)
+#define 								GiB(value) (MiB(value) * 1024)
 
-imported_function void ClearMemory(void* memory, ui32 size);
-imported_function void CopyMemory(void* source, ui32 size, void* destination);
+#define 								MovePtr(_ptr, _bytes) (_ptr) = (decltype(_ptr))((ui8*)(_ptr) + (_bytes))
+#define 								CastMemMovePtr(_mem, _dataType) ((_dataType*)(_mem)); MovePtr(_mem, sizeof(_dataType))
+#define 								ReadMemMovePtr(_mem, _dataType) *CastMemMovePtr(_mem, _dataType)
 
-// ******************** Allocation & Deallocation ******************** //
+imported_function void  ClearMemory(void* memory, ui32 size);
+#define 								ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
+imported_function void  CopyMemory(void* source, ui32 size, void* destination);
+
+// ******************** Memory blocks ******************** //
 
 imported_function memory_block AllocateMemory(ui32 size);
 imported_function void*        GetMemory(memory_block block);
 imported_function void         FreeMemory(memory_block& block); // Clears block afterwards
 imported_function bool         IsValid(memory_block block);
 imported_function void         SetInvalid(memory_block& block);
-
-// ******************** Casting and reading ******************** //
-
-#define MovePtr(_ptr, _bytes) (_ptr) = (decltype(_ptr))((ui8*)(_ptr) + (_bytes))
-#define CastMemMovePtr(_mem, _dataType) ((_dataType*)(_mem)); MovePtr(_mem, sizeof(_dataType))
-#define ReadMemMovePtr(_mem, _dataType) *CastMemMovePtr(_mem, _dataType)
 
 // ******************** Stack ******************** //
 
