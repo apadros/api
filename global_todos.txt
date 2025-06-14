@@ -6,3 +6,6 @@ Debug
 Logging
   - Basic logging functionality
 	- Stack trace printing
+	
+Memory
+	- Allow client code to set max allocation size within PushMemory()
