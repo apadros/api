@@ -1,3 +1,7 @@
+v0.2.0
+	- Added stack functionality to apad_memory.cpp
+		- Allocation, pushing and deallocation
+
 v0.1.1
 	- Renamed build.bat to build_dll.bat and updated its contents
 	- Replaced contents of debug Assert() with __debugbreak()

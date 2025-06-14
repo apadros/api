@@ -4,10 +4,9 @@ if %1.==. ( goto Help )
 
 REM Setup build directory
 if not exist build ( mkdir build )
-del build\* /q
 pushd build
 
-cl ..\%1.cpp /c
+cl ..\%1 /c
 
 popd
 exit /b REM Exit batch script

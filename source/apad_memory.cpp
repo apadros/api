@@ -9,11 +9,6 @@
 #define imported_function exported_function
 #include "apad_memory.h"
 
-// Copy these to apad_memory_types.h if changed
-#define KB(value) (value * 1024)
-#define MB(value) (KB(value) * 1024)
-#define ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
-
 // #include "apad_debug_error.h"
 exported_function void ClearMemory(void* memory, ui32 size) {
 	Assert(memory != Null);
@@ -67,8 +62,9 @@ exported_function memory_block AllocateMemory(ui32 size) {
 }
 
 #include "apad_win32.h"
-exported_function void FreeMemory(memory_block block) {
+exported_function void FreeMemory(memory_block& block) {
 	FreeWin32Memory(block.memory);
+	ClearStruct(block);
 }
 
 exported_function void* GetMemory(memory_block block) {
@@ -85,6 +81,68 @@ exported_function void SetInvalid(memory_block& block) {
 	block.size = 0;
 }
 
-program_local int main() {
+exported_function memory_block AllocateStack(ui32 capacity) {
+	auto block = AllocateMemory(capacity);
+	block.capacity = block.size;
+	block.size = 0;
+	return block;
+}
+
+exported_function void FreeStack(memory_block& stack) {
+  Assert(stack.capacity != 0);
+	if(ErrorIsSet() == true)
+		return;
+	Assert(stack.size <= stack.capacity);
+	if(ErrorIsSet() == true)
+		return;
+  
+	FreeMemory(stack);
+}
+
+exported_function void* PushMemory(ui32 size, memory_block& stack) {
+	Assert(stack.memory != Null);
+	if(ErrorIsSet() == true)
+		return Null;
+	Assert(stack.size < stack.capacity);
+	if(ErrorIsSet() == true)
+		return Null;
+	Assert(stack.capacity > 0);
+	if(ErrorIsSet() == true)
+		return Null;
+  
+	if(size + stack.size <= stack.capacity) { // If allocating within stack capacity
+		void* ret = (ui8*)stack.memory + stack.size;
+		stack.size += size;
+		return ret;
+	}
+	else { // Else allocate new stack, copy contents over, then free old stack
+		// Set a constraint to avoid a potential recursive bug
+	  const ui32 maxCapacity = GiB(1);
+		Assert(stack.capacity * 2 <= maxCapacity);
+		if(ErrorIsSet() == true)
+			return Null;
+		
+		auto  newStack = AllocateStack(stack.capacity * 2);
+		newStack.size = stack.size;
+		void* retMem = PushMemory(size, newStack); // Recursive call until right capacity found
+		CopyMemory(stack.memory, stack.size, retMem);
+		FreeMemory(stack);
+		stack = newStack;
+		return retMem;
+	}
+}
+
+exported_function void PushData(void* data, ui32 size, memory_block& stack) {
+  void* mem = PushMemory(size, stack);
+	CopyMemory(data, size, mem);
+}
+
+program_local int main(void) {
+	auto stack = AllocateStack(KiB(64));
+	void* mem = PushMemory(KiB(1), stack);
+	mem = PushMemory(KiB(128), stack);
+	mem = PushMemory(MiB(1), stack);
+	FreeStack(stack);
+	
 	return 0;
 }
