@@ -136,13 +136,3 @@ exported_function void PushData(void* data, ui32 size, memory_block& stack) {
   void* mem = PushMemory(size, stack);
 	CopyMemory(data, size, mem);
 }
-
-program_local int main(void) {
-	auto stack = AllocateStack(KiB(64));
-	void* mem = PushMemory(KiB(1), stack);
-	mem = PushMemory(KiB(128), stack);
-	mem = PushMemory(MiB(1), stack);
-	FreeStack(stack);
-	
-	return 0;
-}
