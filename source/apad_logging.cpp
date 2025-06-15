@@ -6,8 +6,6 @@
 // ******************** Internal API start ******************** //
 
 
-// program_local memory_block logFile = NullMemoryBlock;
-
 // ******************** Internal API end ******************** //
 
 exported_function memory_block OpenLogFile() {

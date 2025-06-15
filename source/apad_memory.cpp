@@ -81,17 +81,23 @@ exported_function void FreeMemory(memory_block& block) {
 }
 
 exported_function void* GetMemory(memory_block block) {
-	Assert(block.memory != Null);
+	AssertRet(block.memory != Null, Null);
 	return block.memory;
 }
 
 exported_function bool IsValid(memory_block block) {
-	return block.memory != Null && block.size != Null;
+	AssertRet(block.memory != Null, false);
+	if(block.capacity > 0)
+		AssertRet(block.size <= block.capacity, false)
+	else
+		AssertRet(block.size != 0, false)
+	return true;
 }
 
 exported_function void SetInvalid(memory_block& block) {
 	block.memory = Null;
 	block.size = 0;
+	block.capacity = 0;
 }
 
 exported_function memory_block AllocateStack(ui32 capacity) {
@@ -103,10 +109,7 @@ exported_function memory_block AllocateStack(ui32 capacity) {
 }
 
 exported_function void FreeStack(memory_block& stack) {
-  Assert(stack.capacity != 0);
-	if(ErrorIsSet() == true)
-		return;
-	Assert(stack.size <= stack.capacity);
+	Assert(IsValid(stack));
 	if(ErrorIsSet() == true)
 		return;
   
@@ -114,15 +117,7 @@ exported_function void FreeStack(memory_block& stack) {
 }
 
 exported_function void* PushMemory(ui32 size, memory_block& stack) {
-	Assert(stack.memory != Null);
-	if(ErrorIsSet() == true)
-		return Null;
-	Assert(stack.size < stack.capacity);
-	if(ErrorIsSet() == true)
-		return Null;
-	Assert(stack.capacity > 0);
-	if(ErrorIsSet() == true)
-		return Null;
+	AssertRet(IsValid(stack), Null);
   
 	if(size + stack.size <= stack.capacity) { // If allocating within stack capacity
 		void* ret = (ui8*)stack.memory + stack.size;

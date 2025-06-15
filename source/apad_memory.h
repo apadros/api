@@ -5,16 +5,10 @@
 #ifndef APAD_MEMORY_H
 #define APAD_MEMORY_H
 
+#include "apad_base_types.h"
 #include "apad_intrinsics.h"
 
 // ******************** Generic ******************** //
-
-struct memory_block {
-  void* memory;
-  ui32  size;
-	ui32  capacity; // Stack functionality, will == 0 if not used this way
-};
-#define NullMemoryBlock memory_block()
 
 #define 							 KiB(value) ((value) * 1024)
 #define 							 MiB(value) (KiB(value) * 1024)
@@ -29,6 +23,13 @@ imported_function void ClearMemory(void* memory, ui32 size);
 imported_function void CopyMemory(void* source, ui32 size, void* destination);
 
 // ******************** Memory blocks ******************** //
+
+struct memory_block {
+  void* memory;
+  ui32  size;
+	ui32  capacity; // Stack functionality, will == 0 if not used this way
+};
+#define NullMemoryBlock memory_block()
 
 imported_function memory_block AllocateMemory(ui32 size);
 imported_function void*        GetMemory(memory_block block);
