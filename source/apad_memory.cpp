@@ -95,6 +95,7 @@ exported_function void SetInvalid(memory_block& block) {
 }
 
 exported_function memory_block AllocateStack(ui32 capacity) {
+	AssertRet(capacity <= maxStackCapacity, memory_block());
 	auto block = AllocateMemory(capacity);
 	block.capacity = block.size;
 	block.size = 0;
@@ -137,6 +138,8 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 		auto  newStack = AllocateStack(stack.capacity * 2);
 		newStack.size = stack.size;
 		void* retMem = PushMemory(size, newStack); // Recursive call until right capacity found
+		if(ErrorIsSet() == true)
+			return Null;
 		CopyMemory(stack.memory, stack.size, retMem);
 		FreeMemory(stack);
 		stack = newStack;
