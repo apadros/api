@@ -1,5 +1,5 @@
-#ifndef APAD_DEBUG_ERROR
-#define APAD_DEBUG_ERROR
+#ifndef APAD_ERROR
+#define APAD_ERROR
 
 #include "apad_intrinsics.h"
 
