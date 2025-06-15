@@ -20,7 +20,7 @@ imported_function void 				SetError(const char* string);
 
 // ******************** Assertions ******************** //
 
-#include <intrin.h>
+#include <intrin.h> // For __debugbreak()
 #ifdef APAD_DEBUG
 
 #define Assert(_condition) { \
@@ -28,15 +28,25 @@ imported_function void 				SetError(const char* string);
 		__debugbreak(); \
 }
 
+#define AssertRet(_condition, _retValue) \
+	Assert(_condition)
+
 #else
 	
-#define Assert(_condition) \
+#define Assert(_condition) { \
   ClearError(); \
   if(!(_condition)) { \
 		SetError("ERROR - " ## #_condition ## ", file " ## __FILE__); \
 		if(IsExitIfErrorSet() == true) \
 		  ExitProgram(true); \
-	}
+	} \
+}
+	
+#define AssertRet(_condition, _retValue) { \
+	Assert(_condition); \
+	if(ErrorIsSet() == true) \
+	  return (_retValue); \
+}
 
 #endif
 

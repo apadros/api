@@ -1,8 +1,3 @@
-Debug
-	- Test whether ExitProgram() exits only lib function or entire program
-	- Updated assertion code so that client code doesn't need to check for errors and return
-		- Assertions with return type
-	
 Logging
   - Basic logging functionality
 	- Stack trace printing
