@@ -10,7 +10,7 @@ if not exist build ( mkdir build )
 del build\* /q
 pushd build
 
-cl /O2 /LD ..\%1 ..\..\bin\apad_error.lib
+cl /O2 /LD ..\%1 ..\..\bin\apad_error.lib ..\..\bin\apad_win32.lib
 if exist *.lib (
 	move *.lib ..\..\bin
 	move *.dll ..\..\bin
