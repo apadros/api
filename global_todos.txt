@@ -3,4 +3,5 @@ Logging
 	- Stack trace printing
 	
 Memory
-	- Allow client code to set max allocation size within PushMemory()
+	- Allow client code to set a global maximum for memory allocation
+		(i.e. I don't want my program to allocate more than X globally)

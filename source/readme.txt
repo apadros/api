@@ -1,3 +1,5 @@
-Use following flags for compilation:
-	- APAD_DEBUG
-		- If not used, compiler will assume a release build using /O2''
+Compilation flags:
+	
+	APAD_DEBUG 
+		- Will enable debug assertions useful only when using a debugger
+		- Otherwise release assertions with global error setting will be enabled

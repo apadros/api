@@ -2,6 +2,19 @@
 #include "apad_debug_error.h"
 #include "apad_intrinsics.h"
 
+// ******************** Local API start ******************** //
+
+// To avoid compiler silliness when compilling the dll
+#ifdef imported_function
+#undef imported_function
+#define imported_function exported_function
+#endif
+#include "apad_memory.h"
+ui32 maxStackCapacity = MiB(1);
+
+// ******************** Local API end ******************** //
+
+
 // Adjust the linkage before adding apad_memory.h
 #ifdef imported_function
 #undef imported_function
@@ -117,8 +130,7 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
 		// Set a constraint to avoid a potential recursive bug
-	  const ui32 maxCapacity = GiB(1);
-		Assert(stack.capacity * 2 <= maxCapacity);
+	  Assert(stack.capacity * 2 <= maxStackCapacity);
 		if(ErrorIsSet() == true)
 			return Null;
 		
@@ -135,4 +147,8 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 exported_function void PushData(void* data, ui32 size, memory_block& stack) {
   void* mem = PushMemory(size, stack);
 	CopyMemory(data, size, mem);
+}
+
+exported_function void SetMaxStackCapacity(ui32 capacity) {
+	maxStackCapacity = capacity;
 }

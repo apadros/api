@@ -3,6 +3,7 @@ v0.2.0
 		- Allocation, pushing and deallocation
 	- Added AssertRet() for use in functions where returning is preferable to exiting the 
 		process if an error is found
+	- Added support for custom setting of maximum individual stack size for the client code (SetMaxStackCapacity())
 
 v0.1.1
 	- Renamed build.bat to build_dll.bat and updated its contents
