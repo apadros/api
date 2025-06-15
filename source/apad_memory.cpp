@@ -1,5 +1,5 @@
 #include "apad_base_types.h"
-#include "apad_debug_error.h"
+#include "apad_error.h"
 #include "apad_intrinsics.h"
 
 // ******************** Local API start ******************** //
@@ -22,7 +22,7 @@ ui32 maxStackCapacity = MiB(1);
 #define imported_function exported_function
 #include "apad_memory.h"
 
-// #include "apad_debug_error.h"
+// #include "apad_error.h"
 exported_function void ClearMemory(void* memory, ui32 size) {
 	Assert(memory != Null);
 	if(ErrorIsSet() == true)

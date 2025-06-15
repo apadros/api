@@ -11,7 +11,7 @@
 #undef imported_function
 #define imported_function exported_function
 #endif
-#include "apad_debug_error.h"
+#include "apad_error.h"
 
 program_local const ui8  errorStringMaxLength = UI8Max;
 program_local 			char errorString[errorStringMaxLength] = {};

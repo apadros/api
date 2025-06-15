@@ -25,7 +25,7 @@ imported_function void 				SetError(const char* string);
 
 #define Assert(_condition) { \
   if(!(_condition)) \
-		__debugbreak(); \
+		__debugbreak(); /* This will stop program execution in release mode */ \
 }
 
 #define AssertRet(_condition, _retValue) \

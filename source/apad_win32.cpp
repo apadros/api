@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include "apad_base_types.h"
-#include "apad_debug_error.h"
+#include "apad_error.h"
 #include "apad_intrinsics.h"
 
 // ******************** Local API start ******************** //
