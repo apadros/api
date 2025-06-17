@@ -36,7 +36,97 @@ exported_function void FreeWin32Memory(void* mem) {
 	Assert(ret != 0);
 }
 
-program_local int main() {
+#include "apad_string.h"
+exported_function bool Win32FileExists(const char* path) {
+	AssertRet(path != Null, false);
+	AssertRet(GetStringLength(path, true) <= MAX_PATH, false);
 	
-	return 0;
+	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  auto error = GetLastError();
+	// @TODO - Double check all of this and side effects
+  if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND))
+    return false;
+
+  CloseHandle(handle);
+  return true;
+}
+
+#include "apad_memory.h"
+exported_function memory_block LoadWin32File(const char* path) {
+	AssertRet(Win32FileExists(path), NullMemoryBlock);
+	
+  HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	Assert(handle != INVALID_HANDLE_VALUE);
+	if(ErrorIsSet() == true) {
+    auto error = GetLastError();
+		AssertRet(error != ERROR_FILE_NOT_FOUND, NullMemoryBlock);
+		AssertRet(error != ERROR_PATH_NOT_FOUND, NullMemoryBlock);
+		AssertRet(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
+		// @TODO - More logging
+		return NullMemoryBlock;
+	}
+
+  LARGE_INTEGER li = {};
+  BOOL b = GetFileSizeEx(handle, &li);
+  Assert(b != 0);
+	if(ErrorIsSet() == true) {
+		CloseHandle(handle);
+		return NullMemoryBlock;
+	}
+  Assert(li.QuadPart <= 0xFFFFFFFF);
+	if(ErrorIsSet() == true) {
+		CloseHandle(handle);
+		return NullMemoryBlock;
+	}
+  
+  DWORD fileSize = (DWORD)li.QuadPart;
+  auto  allocatedMemory = AllocateMemory((ui32)fileSize);
+  DWORD bytesRead = 0;
+  b = ReadFile(handle, allocatedMemory.memory, fileSize, &bytesRead, NULL); // If it fails, returns FALSE
+  Assert(b == TRUE);
+  if(ErrorIsSet() == true) {
+		CloseHandle(handle);
+		return NullMemoryBlock;
+	}
+  Assert(bytesRead == fileSize);
+	if(ErrorIsSet() == true) {
+		CloseHandle(handle);
+		return NullMemoryBlock;
+	}
+
+	CloseHandle(handle);
+  return allocatedMemory;
+}
+
+exported_function void SaveWin32File(void* data, ui32 dataSize, const char* path) {
+  Assert(data != Null);
+	if(ErrorIsSet() == true)
+		return;
+	Assert(dataSize > 0);
+	if(ErrorIsSet() == true)
+	return;
+
+	Assert(Win32FileExists(path));
+	if(ErrorIsSet() == true)
+	return;
+
+  HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	Assert(handle != INVALID_HANDLE_VALUE);
+	if(ErrorIsSet() == true) {
+		auto error = GetLastError();
+    // @TODO - Logging
+		return;
+  }
+	
+  DWORD written = 0;
+  BOOL result = WriteFile(handle, data, dataSize, &written, NULL);
+	Assert(result != FALSE);
+	if(ErrorIsSet() == true) {
+    auto error = GetLastError();
+		// @TODO - Logging
+		CloseHandle(handle);
+		return;
+  }
+  
+  CloseHandle(handle); // No need to assert, handle will be closed on program exit at the latest
 }
