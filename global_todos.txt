@@ -11,3 +11,6 @@ String
 	- IntToString()
 	- F32ToString()
 		- Maybe just bundle into ToString(f32 / ui32) ...
+		
+Win32
+	- More in-depth logging in case of error detection / failure

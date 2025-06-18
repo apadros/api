@@ -3,6 +3,7 @@
 
 #include "apad_base_types.h"
 #include "apad_intrinsics.h"
+#include "apad_memory.h"
 
 // The first argument corresponds to the program name
 #define ConsoleAppEntryPoint(_argumentsID, _argumentCountID) int main(int _argumentCountID, char** _argumentsID)

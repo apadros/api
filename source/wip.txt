@@ -1,10 +1,2 @@
-Implemented
-- Win32FileExists()
-- LoadWin32File()
-- SaveWin32File()
-
 TODOs
-- Test FileExists(), LoadFile() and SaveFile()
-- Update Win32.lib & .dll
 - Incorporate into the File API
-- Check all @TODO in win32.cpp

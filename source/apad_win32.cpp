@@ -43,7 +43,6 @@ exported_function bool Win32FileExists(const char* path) {
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   auto error = GetLastError();
-	// @TODO - Double check all of this and side effects
   if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND))
     return false;
 
@@ -103,10 +102,6 @@ exported_function void SaveWin32File(void* data, ui32 dataSize, const char* path
 	if(ErrorIsSet() == true)
 		return;
 	Assert(dataSize > 0);
-	if(ErrorIsSet() == true)
-	return;
-
-	Assert(Win32FileExists(path));
 	if(ErrorIsSet() == true)
 	return;
 
