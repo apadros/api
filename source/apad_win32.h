@@ -11,13 +11,13 @@
 // ******************** Memory ********************  //
 
 // Will automatically clear allocated memory
-imported_function void* AllocateWin32Memory(ui32 size);
-imported_function void  FreeWin32Memory(void* mem);
+imported_function void* Win32AllocateMemory(ui32 size);
+imported_function void  Win32FreeMemory(void* mem);
 
 // ******************** Files ********************  //
 
 imported_function bool 				 Win32FileExists(const char* path);
-imported_function memory_block LoadWin32File(const char* path);
-imported_function void 				 SaveWin32File(void* data, ui32 dataSize, const char* path);
+imported_function memory_block Win32LoadFile(const char* path);
+imported_function void 				 Win32SaveFile(void* data, ui32 dataSize, const char* path);
 
 #endif

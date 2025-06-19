@@ -7,8 +7,9 @@ v0.2.0
 	- Added assertions to string.cpp
 	- Renamed debug_error.* to error.*
 	- Added stack validity checking to IsValid(memory_block) in memory.cpp
-	- Added Win32 file functions
-		- Win32FileExists(), LoadWin32File(), SaveWin32File()
+	- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
+	- Renamed all Win32 function names to have Win32 first for homogeneity
+	- Added version numbers to individual libs & dlls
 
 v0.1.1
 	- Renamed build.bat to build_dll.bat and updated its contents

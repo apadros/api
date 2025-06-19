@@ -12,7 +12,7 @@
 
 // ******************** Local API end ******************** //
 
-exported_function void* AllocateWin32Memory(ui32 size) {
+exported_function void* Win32AllocateMemory(ui32 size) {
   void* errorRet = Null;
 	
   Assert(size > 0);
@@ -27,7 +27,7 @@ exported_function void* AllocateWin32Memory(ui32 size) {
   return mem;
 }
 
-exported_function void FreeWin32Memory(void* mem) {
+exported_function void Win32FreeMemory(void* mem) {
 	Assert(mem != Null);
 	if(ErrorIsSet() == true)
 		return;
@@ -51,7 +51,7 @@ exported_function bool Win32FileExists(const char* path) {
 }
 
 #include "apad_memory.h"
-exported_function memory_block LoadWin32File(const char* path) {
+exported_function memory_block Win32LoadFile(const char* path) {
 	AssertRet(Win32FileExists(path), NullMemoryBlock);
 	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -97,7 +97,7 @@ exported_function memory_block LoadWin32File(const char* path) {
   return allocatedMemory;
 }
 
-exported_function void SaveWin32File(void* data, ui32 dataSize, const char* path) {
+exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
   Assert(data != Null);
 	if(ErrorIsSet() == true)
 		return;

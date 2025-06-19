@@ -14,7 +14,6 @@ ui32 maxStackCapacity = MiB(1);
 
 // ******************** Local API end ******************** //
 
-
 // Adjust the linkage before adding apad_memory.h
 #ifdef imported_function
 #undef imported_function
@@ -62,7 +61,7 @@ exported_function void CopyMemory(void* source, ui32 size, void* destination) {
 
 #include "apad_win32.h"
 exported_function memory_block AllocateMemory(ui32 size) {
-	void* memory = AllocateWin32Memory(size);
+	void* memory = Win32AllocateMemory(size);
 	if(ErrorIsSet() == true)
 		return NullMemoryBlock;
 		
@@ -76,7 +75,7 @@ exported_function memory_block AllocateMemory(ui32 size) {
 
 #include "apad_win32.h"
 exported_function void FreeMemory(memory_block& block) {
-	FreeWin32Memory(block.memory);
+	Win32FreeMemory(block.memory);
 	ClearStruct(block);
 }
 
