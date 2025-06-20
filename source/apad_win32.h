@@ -17,7 +17,10 @@ imported_function void  Win32FreeMemory(void* mem);
 // ******************** Files ********************  //
 
 imported_function bool 				 Win32FileExists(const char* path);
+															 // Calls Win32FileExists() first, returns if false
 imported_function memory_block Win32LoadFile(const char* path);
+															 // Will create a new file if it doesn't exist. 
+															 // If it does it'll get replaced.
 imported_function void 				 Win32SaveFile(void* data, ui32 dataSize, const char* path);
 
 #endif
