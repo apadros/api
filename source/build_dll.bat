@@ -19,6 +19,5 @@ exit /b REM Exit batch script
 REM Help message
 :Help
 echo:
-echo Function: Compiles to lib and dll and moves them to the bin folder
-echo Usage:    build_dll.bat x.cpp file_name
+echo Usage: build_dll.bat file.cpp exe_name
 echo:
