@@ -1,3 +1,6 @@
+File
+	- Add a FreeFile() functions which just points to FreeMemory() is the memory API
+
 Logging
   - Basic logging functionality - WIP
 	- Stack trace printing
