@@ -3,11 +3,7 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 
-bool FileExists(const char* path) {
-	AssertRet(path != Null, false);
-	
-	
-}
-
-memory_block LoadFile() {
-}
+#include "apad_win32.h"
+exported_function bool 				 (*FileExists)(const char* path) = Win32FileExists;
+exported_function memory_block (*LoadFile)(const char* path) = Win32LoadFile;
+exported_function void 				 (*SaveFile)(void* data, ui32 dataSize, const char* path) = Win32SaveFile;

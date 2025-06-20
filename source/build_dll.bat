@@ -11,7 +11,7 @@ if not exist build ( mkdir build )
 del build\* /q
 pushd build
 
-cl /O2 /LD ..\%1 /Fe%2 ..\..\lib64\apad_debug_v0_2_0.lib ..\..\lib64\apad_win32_v0_2_0.lib
+cl /O2 /LD ..\%1 /Fe%2 ..\..\lib64v0_2_0\apad_win32_v0_2_0.lib
 
 popd
 exit /b REM Exit batch script
