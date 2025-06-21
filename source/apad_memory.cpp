@@ -2,26 +2,21 @@
 #include "apad_error.h"
 #include "apad_intrinsics.h"
 
-// ******************** Local API start ******************** //
-
 // To avoid compiler silliness when compilling the dll
 #ifdef imported_function
 #undef imported_function
 #define imported_function exported_function
 #endif
 #include "apad_memory.h"
+
+#include "apad_win32.h"
+
+// ******************** Local API start ******************** //
+
 ui32 maxStackCapacity = MiB(1);
 
 // ******************** Local API end ******************** //
 
-// Adjust the linkage before adding apad_memory.h
-#ifdef imported_function
-#undef imported_function
-#endif
-#define imported_function exported_function
-#include "apad_memory.h"
-
-// #include "apad_error.h"
 exported_function void ClearMemory(void* memory, ui32 size) {
 	Assert(memory != Null);
 	if(ErrorIsSet() == true)
@@ -59,7 +54,6 @@ exported_function void CopyMemory(void* source, ui32 size, void* destination) {
     pd[it] = ps[it];
 }
 
-#include "apad_win32.h"
 exported_function memory_block AllocateMemory(ui32 size) {
 	void* memory = Win32AllocateMemory(size);
 	if(ErrorIsSet() == true)
@@ -73,7 +67,6 @@ exported_function memory_block AllocateMemory(ui32 size) {
 	return ret;
 }
 
-#include "apad_win32.h"
 exported_function void FreeMemory(memory_block& block) {
 	Win32FreeMemory(block.memory);
 	ClearStruct(block);
@@ -141,9 +134,10 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 	}
 }
 
-exported_function void PushData(void* data, ui32 size, memory_block& stack) {
+exported_function void* PushData(void* data, ui32 size, memory_block& stack) {
   void* mem = PushMemory(size, stack);
 	CopyMemory(data, size, mem);
+	return mem;
 }
 
 exported_function void SetMaxStackCapacity(ui32 capacity) {

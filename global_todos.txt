@@ -2,7 +2,8 @@ File
 	- Add a FreeFile() functions which just points to FreeMemory() is the memory API
 
 Logging
-  - Basic logging functionality - WIP
+  - Basic logging functionality
+		- Requires IntToString(), PushString() & F32ToString()
 	- Stack trace printing
 	
 Memory
@@ -10,10 +11,9 @@ Memory
 		(i.e. I don't want my program to allocate more than X globally)
 		
 String
-	- PushString()
-	- IntToString()
-	- F32ToString()
-		- Maybe just bundle into ToString(f32 / ui32) ...
+	- Bundle I64ToString() & F32ToString() int ToString()
+	- Rounding withing F32ToString()
+	- Automatic casting of short_string to char*
 		
 Win32
 	- More in-depth logging in case of error detection / failure
