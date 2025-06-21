@@ -1,4 +1,4 @@
-v0.2.0
+v0.2.0 - WIP
 	Background
 		- Added version numbers to individual libs & dlls
 		- Split lib & dll files into separate version folders
