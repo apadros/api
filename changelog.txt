@@ -17,8 +17,8 @@ v0.2.0
 		- Added assertions
 		- Added I64ToString(), F32ToString() & PushString()
 	Win32 API
-	- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
-	- Renamed all function names to have Win32 first for homogeneity
+		- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
+		- Renamed all function names to have Win32 first for homogeneity
 	
 v0.1.1
 	- Renamed build.bat to build_dll.bat and updated its contents
