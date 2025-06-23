@@ -23,10 +23,10 @@ exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
 };
 
 #include <stdio.h>
-exported_function short_string I64ToString(int i) {
+exported_function short_string I64ToString(si64 i) {
   short_string ret;
 	ClearStruct(ret);
-	sprintf(ret.string, "%i", i);
+	sprintf(ret.string, "%i", (int)i);
 	return ret;
 }
 
@@ -38,8 +38,8 @@ exported_function short_string F32ToString(f32 f) {
 	return ret;
 }
 
-exported_function const char* PushString(const char* string, memory_block& stack) {
-  auto length = GetStringLength(string, true);
+exported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack) {
+  auto length = GetStringLength(string, includeEOS);
 	if(ErrorIsSet() == true)
 		return Null;
 	void* mem = PushData((void*)string, length, stack);
