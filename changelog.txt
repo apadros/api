@@ -7,7 +7,7 @@ v0.2.0 - WIP
 			process if an error is found
 		- Renamed files from debug_error.* to error.*
 	File API
-		- Added basic functions FileExists(), LoadFile() & SaveFile()
+		- Added basic functions FileExists(), LoadFile(), FreeFile(), IsValid(file), SaveFile()
 	Memory API
 		- Added stack functionality
 			- Allocation, pushing and deallocation
