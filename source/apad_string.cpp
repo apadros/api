@@ -2,12 +2,6 @@
 #include "apad_error.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
-
-// To avoid compiler silliness when compilling the dll
-#ifdef imported_function
-#undef imported_function
-#define imported_function exported_function
-#endif
 #include "apad_string.h"
 
 exported_function ui16 GetStringLength(const char* s, bool includeEOS) {

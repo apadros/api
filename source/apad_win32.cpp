@@ -5,6 +5,8 @@
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
+#include "apad_memory.h"
+#include "apad_string.h"
 
 // ******************** Local API start ******************** //
 
@@ -36,7 +38,6 @@ exported_function void Win32FreeMemory(void* mem) {
 	Assert(ret != 0);
 }
 
-#include "apad_string.h"
 exported_function bool Win32FileExists(const char* path) {
 	AssertRet(path != Null, false);
 	AssertRet(GetStringLength(path, true) <= MAX_PATH, false);
@@ -50,7 +51,6 @@ exported_function bool Win32FileExists(const char* path) {
   return true;
 }
 
-#include "apad_memory.h"
 exported_function memory_block Win32LoadFile(const char* path) {
 	AssertRet(Win32FileExists(path), NullMemoryBlock);
 	
