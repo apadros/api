@@ -1,17 +1,11 @@
 #include "apad_base_types.h"
+#include "apad_error.h"
 #include "apad_intrinsics.h"
 
 // ******************** Imported libs ******************** //
 
 
 // ******************** Local API start ******************** //
-
-// To avoid compiler silliness when compilling the dll
-#ifdef imported_function
-#undef imported_function
-#define imported_function exported_function
-#endif
-#include "apad_error.h"
 
 program_local const ui8  errorStringMaxLength = UI8Max;
 program_local 			char errorString[errorStringMaxLength] = {};
