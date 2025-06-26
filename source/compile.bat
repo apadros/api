@@ -6,7 +6,7 @@ REM Setup build directory
 if not exist build ( mkdir build )
 pushd build
 
-cl ..\%1 /c
+cl ..\%1 /c /w
 
 popd
 exit /b REM Exit batch script
