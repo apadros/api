@@ -16,7 +16,8 @@ v0.2.0 - WIP
 		- Added stack validity checking to IsValid(memory_block)
 	String API
 		- Added assertions
-		- Added I64ToString(), F32ToString() & PushString()
+		- Added ToString() for all available types
+		- Added PushString()
 	Win32 API
 		- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
 		- Renamed all function names to have Win32 first for homogeneity
