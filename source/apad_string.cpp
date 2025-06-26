@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
@@ -16,19 +17,73 @@ exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
   return includeEOS ? counter : counter - 1;
 };
 
-#include <stdio.h>
-exported_function short_string I64ToString(si64 i) {
+exported_function short_string ToString(si8 i) {
   short_string ret;
 	ClearStruct(ret);
-	sprintf(ret.string, "%i", (int)i);
+	sprintf(ret.string, "%hhi", i);
 	return ret;
 }
 
-#include <stdio.h>
-exported_function short_string F32ToString(f32 f) {
+exported_function short_string ToString(ui8 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%hhu", i);
+	return ret;
+}
+
+exported_function short_string ToString(si16 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%hi", i);
+	return ret;
+}
+
+exported_function short_string ToString(ui16 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%hu", i);
+	return ret;
+}
+
+exported_function short_string ToString(si32 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%li", i);
+	return ret;
+}
+
+exported_function short_string ToString(ui32 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%lu", i);
+	return ret;
+}
+
+exported_function short_string ToString(si64 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%lli", i);
+	return ret;
+}
+
+exported_function short_string ToString(ui64 i) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%llu", i);
+	return ret;
+}
+
+exported_function short_string ToString(f32 f) {
   short_string ret;
 	ClearStruct(ret);
 	sprintf(ret.string, "%.2f", f);
+	return ret;
+}
+
+exported_function short_string ToString(f64 f) {
+  short_string ret;
+	ClearStruct(ret);
+	sprintf(ret.string, "%.2Lf", f);
 	return ret;
 }
 

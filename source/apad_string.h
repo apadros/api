@@ -13,7 +13,14 @@ struct short_string {
 	char string[32];
 };
 
-imported_function short_string I64ToString(si64 i);
+imported_function short_string ToString(si8 i);
+imported_function short_string ToString(ui8 i);
+imported_function short_string ToString(si16 i);
+imported_function short_string ToString(ui16 i);
+imported_function short_string ToString(si32 i);
+imported_function short_string ToString(ui32 i);
+imported_function short_string ToString(si64 i);
+imported_function short_string ToString(ui64 i);
 															 // Return limited to 2 decimal places without rounding
 imported_function short_string F32ToString(f32 f);
 imported_function const char*  PushString(const char* string, bool includeEOS, memory_block& stack);

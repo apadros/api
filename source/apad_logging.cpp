@@ -37,8 +37,8 @@ exported_function void Log(log_file& log, const char* string, ...) {
 		if(c == '%' && it < length - 1) { // Formatting string
 			it += 1;
 			c = string[it];
-			if(c == 'i') { // Integer
-				si64 i = va_arg(args, si64);
+			if(c == 'si32') { // SI32
+				si64 i = va_arg(args, si32);
 				const char* s = I64ToString(i).string;
 				PushString(s, false, log);
 			}

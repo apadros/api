@@ -1,12 +1,15 @@
 TODO
 - @TODOs
+- Separate SI8, UI8, SI16, UI16, SI32, SI64, UI32, UI64 to string functions - ToString()
 
 TO TEST
-- Log() in test.cpp
-
+- Log testing with integers
+- Log testing with floating point
+- Log testing with multiple numbers & strings
 
 DONE
 - Added includeEOS as argument to PushString() 
 - Corrected a typo in I64ToString() in string.cpp
+- Log testing pure strings
 
 TO ADD TO TODOS.TXT
