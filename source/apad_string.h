@@ -22,7 +22,9 @@ imported_function short_string ToString(ui32 i);
 imported_function short_string ToString(si64 i);
 imported_function short_string ToString(ui64 i);
 															 // Return limited to 2 decimal places without rounding
-imported_function short_string F32ToString(f32 f);
+imported_function short_string ToString(f32 f);
+															 // Return limited to 2 decimal places without rounding
+imported_function short_string ToString(f64 f);
 imported_function const char*  PushString(const char* string, bool includeEOS, memory_block& stack);
 
 #endif
