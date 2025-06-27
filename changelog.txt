@@ -18,6 +18,9 @@ v0.2.0 - WIP
 		- Added assertions
 		- Added ToString() for all available types
 		- Added PushString()
+		- Added StringsAreEqual()
+		- Added FindSubstring()
+		- Added ContainsAnySubstring()
 	Win32 API
 		- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
 		- Renamed all function names to have Win32 first for homogeneity

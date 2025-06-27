@@ -5,8 +5,6 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 
-imported_function ui16 GetStringLength(const char*s, bool includeEOS);
-
 // ******************** Number conversion ******************** //
 
 struct short_string {
@@ -28,6 +26,10 @@ imported_function short_string ToString(f64 f);
 
 // ******************** Others ******************** //
 
-imported_function const char*  PushString(const char* string, bool includeEOS, memory_block& stack);
+imported_function bool 				ContainsAnySubstring(const char* string, const char** substrings, ui8 length);
+imported_function const char* FindSubstring(const char*sub, const char*string);
+imported_function ui16 				GetStringLength(const char*s, bool includeEOS);
+imported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack);
+imported_function bool 				StringsAreEqual(const char* s1, const char* s2);
 
 #endif

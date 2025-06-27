@@ -16,7 +16,6 @@ exported_function memory_block OpenLogFile() {
   if(ErrorIsSet() == true)
 		return NullMemoryBlock;
 	return file;
-  // Log("\n");
 }
 
 exported_function void CloseLogFile(memory_block& log) {
@@ -35,8 +34,33 @@ exported_function void Log(log_file& log, const char* string, ...) {
   ForAll(length) {
     char c = string[it];
 		if(c == '%' && it < length - 1) { // Formatting string
-			it += 1;
+		  it += 1;
+			if(length - it < 3) // Not enough string left for correct format setting
+				break;
+			
+			const char* formatStrings[] = { "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
+			if(length - it == 3) { // 3 chars left
+			  const char* formatStrings[] = { "si8", "ui8", "f32", "f64" };
+			
+			}
+			else if(length - it == 4) { // 4 chars left
+			  
+			}
+			else { // More than 4 chars left in string
+			  char temp = string[it + 4];
+				string[it + 4] = '\0';
+				
+				// @TODO - Get array length function
+				bool found = ContainsAnySubstring(string, formateStrings, const char** substrings, ui8 length);
+
+				
+				string[it + 4] = temp;
+			}
+			
 			c = string[it];
+			if(c == '\0')
+				break;
+			
 			if(c == 'si32') { // SI32
 				si64 i = va_arg(args, si32);
 				const char* s = I64ToString(i).string;

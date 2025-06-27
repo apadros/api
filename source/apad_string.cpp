@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
@@ -93,4 +94,42 @@ exported_function const char* PushString(const char* string, bool includeEOS, me
 		return Null;
 	void* mem = PushData((void*)string, length, stack);
 	return (const char*)mem;
+}
+
+exported_function bool StringsAreEqual(const char* s1, const char* s2) {
+  AssertRet(s1 != Null, false);
+	AssertRet(s2 != Null, false);
+	
+  ui16 counter = 0;
+  do {
+    char c1 = s1[counter];
+    char c2 = s2[counter];
+		if(c1 == '\0' || c2 == '\0') {
+			if(c1 == c2)
+				return true;
+			else
+				return false;
+		}
+		else if(c1 != c2)
+			return false;
+
+		counter += 1;
+  }
+  while(true);
+}
+
+exported_function const char* FindSubstring(const char*sub, const char*string) {
+  AssertRet(string != Null, Null);
+  AssertRet(sub != Null, Null);
+  return strstr(string, sub);
+}
+
+exported_function bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
+  ForAll(length) {
+    auto* sub = substrings[it];
+		AssertRet(sub != Null, false);
+		if(FindSubstring(sub, string) != Null)
+			return true;
+	}
+  return false;
 }
