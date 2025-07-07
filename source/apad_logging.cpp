@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdarg.h> // For varargs
+#include "apad_array.h"
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
@@ -33,25 +34,33 @@ exported_function void Log(log_file& log, const char* string, ...) {
   auto length = GetStringLength(string, false);
   ForAll(length) {
     char c = string[it];
-		if(c == '%' && it < length - 1) { // Formatting string
+		if(c == '%') { // Formatting string
 		  it += 1;
 			if(length - it < 3) // Not enough string left for correct format setting
 				break;
 			
+			// @TODO - Find a better way of doing all of this - scan along string from % till end of sub string / end of string, then check
+			
 			const char* formatStrings[] = { "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
+			ui8         formatStringsLength = GetArrayLength(formatStrings);
 			if(length - it == 3) { // 3 chars left
 			  const char* formatStrings[] = { "si8", "ui8", "f32", "f64" };
-			
+			  // if(ContainsAnySubstring(const char* string, const char** substrings, ui8 length);
 			}
 			else if(length - it == 4) { // 4 chars left
 			  
 			}
 			else { // More than 4 chars left in string
-			  char temp = string[it + 4];
-				string[it + 4] = '\0';
+				ui16       stringIt = it;
+				const char subString[5] = { 0, 0, 0, 0, '\0' };
+				ForAll(4) 
+					subString[it] = string[stringIt + it];
+			  
+				// char temp = string[it + 4];
+				// string[it + 4] = '\0';
 				
 				// @TODO - Get array length function
-				bool found = ContainsAnySubstring(string, formateStrings, const char** substrings, ui8 length);
+				bool found = ContainsAnySubstring(string, formateStrings, ui8 length);
 
 				
 				string[it + 4] = temp;
@@ -61,7 +70,8 @@ exported_function void Log(log_file& log, const char* string, ...) {
 			if(c == '\0')
 				break;
 			
-			if(c == 'si32') { // SI32
+			// @TODO - Add all types
+			if(c == 'si32') { // SI32 // @TODO - Replace with string function
 				si64 i = va_arg(args, si32);
 				const char* s = I64ToString(i).string;
 				PushString(s, false, log);
