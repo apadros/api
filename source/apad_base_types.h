@@ -27,5 +27,6 @@ typedef double			   		 f64;
 #define UI8Max 0xFF
 #define UI16Max 0xFFFF
 #define UI32Max 0xFFFF'FFFF
+#define UI64Max 0xFFFF'FFFF'FFFF'FFFF
 
 #endif

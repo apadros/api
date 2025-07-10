@@ -3,6 +3,8 @@ v0.2.0 - WIP
 		- Added version numbers to individual libs & dlls
 		- Split lib & dll files into separate version folders
 		- Removed the need for macro linkage change when including .h files into their respective .cpp files
+	Array API
+		- Added first iteration
   Error API
 		- Added AssertRet() for use in functions where returning is preferable to exiting the 
 			process if an error is found
@@ -16,7 +18,11 @@ v0.2.0 - WIP
 		- Added stack validity checking to IsValid(memory_block)
 	String API
 		- Added assertions
-		- Added I64ToString(), F32ToString() & PushString()
+		- Added ToString() for all available types
+		- Added PushString()
+		- Added StringsAreEqual()
+		- Added FindSubstring()
+		- Added ContainsAnySubstring()
 	Win32 API
 		- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
 		- Renamed all function names to have Win32 first for homogeneity
