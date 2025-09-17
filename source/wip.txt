@@ -3,6 +3,7 @@ TODO
 
 TO TEST
 - Log() in test.cpp
+- Add @TEST tags in code directly
 
 
 DONE
