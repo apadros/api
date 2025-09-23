@@ -11,7 +11,7 @@ if not exist build ( mkdir build )
 del build\* /q
 pushd build
 
-cl /O2 /LD ..\%1 /DAPAD_BUILD_DLL /Fe%2 ..\..\lib64v0_2_0\apad_error_v0_2_0.lib ..\..\lib64v0_2_0\apad_win32_v0_2_0.lib
+cl /nologo /DAPAD_DLL /O2 /LD ..\%1 /Fe%2 /w ..\..\lib64v0_2_0\apad_error_v0_2_0.lib ..\..\lib64v0_2_0\apad_memory_v0_2_0.lib ..\..\lib64v0_2_0\apad_win32_v0_2_0.lib
 
 del *.exp
 del *.obj

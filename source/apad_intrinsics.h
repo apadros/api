@@ -53,8 +53,14 @@
 #define SetBit(_bit, _field) (_field = decltype(_field)((ui32)(_field) | (ui32)(_bit)))
 
 // DLLs
+#ifdef APAD_DLL
 #define imported_function __declspec( dllimport )
 #define exported_function __declspec( dllexport )
+#else
+#define imported_function 
+#define exported_function 
+#endif
+	
 
 // Others
 #define Toggle(_data) (_data) = !(_data)

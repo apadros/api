@@ -6,7 +6,7 @@ REM Setup build directory
 if not exist build ( mkdir build )
 pushd build
 
-cl ..\%1 /c /w
+cl ..\%1 /c /w /nologo
 
 popd
 exit /b REM Exit batch script
@@ -15,5 +15,5 @@ exit /b REM Exit batch script
 echo:
 echo Function: Only checks compilation for target file.
 echo:
-echo Usage: compile file_without_extension
+echo Usage: compile file_with_extension
 echo:

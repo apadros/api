@@ -1,21 +1,25 @@
-v0.2.0 - WIP
+WIP
 	Background
 		- Added version numbers to individual libs & dlls
 		- Split lib & dll files into separate version folders
 		- Removed the need for macro linkage change when including .h files into their respective .cpp files
+		- Added APAD_DLL macro to avoid having to recompile dlls when testing
+		
 	Array API
 		- Added first iteration
+		
   Error API
-		- Added AssertRet() for use in functions where returning is preferable to exiting the 
-			process if an error is found
+		- Added AssertRet() for use in functions where returning is preferable to exiting the process if an error is found
 		- Renamed files from debug_error.* to error.*
+		
 	File API
 		- Added basic functions FileExists(), LoadFile(), FreeFile(), IsValid(file), SaveFile()
+		
 	Memory API
-		- Added stack functionality
-			- Allocation, pushing and deallocation
+		- Added stack allocation, pushing and deallocation
 		- Added support for custom setting of maximum individual stack size for the client code (SetMaxStackCapacity())
 		- Added stack validity checking to IsValid(memory_block)
+		
 	String API
 		- Added assertions
 		- Added ToString() for all available types
@@ -23,9 +27,10 @@ v0.2.0 - WIP
 		- Added StringsAreEqual()
 		- Added FindSubstring()
 		- Added ContainsAnySubstring()
+		
 	Win32 API
-		- Added Win32 file functions Win32FileExists(), LoadWin32File() and SaveWin32File()
-		- Renamed all function names to have Win32 first for homogeneity
+		- Added functions Win32FileExists(), Win32LoadFile() and Win32SaveFile()
+		- Renamed all functions to have Win32 first for homogeneity
 	
 v0.1.1
 	- Renamed build.bat to build_dll.bat and updated its contents

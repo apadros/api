@@ -1,3 +1,9 @@
+Array
+	- A structure to encapsulate both static and dynamic arrays into a single type
+		- Initializer overloads
+		- Supporting generic functions
+		- ForArray()
+
 File
 
 Logging
