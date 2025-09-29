@@ -3,6 +3,8 @@ Array
 		- Initializer overloads
 		- Supporting generic functions
 		- ForArray()
+	- Add to array function
+	- Clear array function
 
 File
 
@@ -15,15 +17,21 @@ Memory
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
 		
+Misc
+	- Any code marked as @EXPORT_API in calendar project
+		
 String
 	- Rounding withing F32ToString()
 	- Automatic casting of short_string to char*
-  - bool IsLetter(char c) {
-			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-		}
-	- bool IsNumber(char c) {
-			return c >= '0' && c <= '9';
-		}
+  - Initialisation of short_string with string literals
+	- CopyString()
+		
+Time
+	 - Current date and time
+	 - Conversion from string into dd/mm/yyyy and vice versa
+	 - Date + days into dd/mm/yyyy
+	 - Days of the week into dd/mm/yyyy
+	 - Work days?
 		
 Win32
 	- More in-depth logging in case of error detection / failure
