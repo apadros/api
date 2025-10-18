@@ -20,19 +20,21 @@ imported_function void 				SetError(const char* string);
 
 // ******************** Assertions ******************** //
 
+// Assert()
 #include <intrin.h> // For __debugbreak()
 #ifdef APAD_DEBUG
 
+// Will break into the debugger in debug mode and stop and exit program execution in release mode
 #define Assert(_condition) { \
   if(!(_condition)) \
-		__debugbreak(); /* This will stop and exit program execution in release mode */ \
+		__debugbreak(); \
 }
 
-#define AssertRet(_condition, _retValue) \
-	Assert(_condition)
-
 #else
-	
+
+// If IsExitIfErrorSet() == true, will exit program execution. Otherwise, need to 
+// manually check afterwards for errors and manually decide execution from there.
+// IsExitIfErrorSet() == false by default.
 #define Assert(_condition) { \
   ClearError(); \
   if(!(_condition)) { \
@@ -41,6 +43,16 @@ imported_function void 				SetError(const char* string);
 		  ExitProgram(true); \
 	} \
 }
+
+#endif
+
+// AssertRet()
+#ifdef APAD_DEBUG
+
+#define AssertRet(_condition, _retValue) \
+	Assert(_condition)
+
+#else
 	
 #define AssertRet(_condition, _retValue) { \
 	Assert(_condition); \
