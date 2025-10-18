@@ -6,10 +6,13 @@ Array
 	- Add to array function
 	- Clear array function
 
+Error
+ - AssertRet() variation for functions with no return type
+
 File
 
 Logging
-  - Basic logging functionality WIP
+  - Basic logging functionality @WIP
 		- Requires IntToString(), PushString() & F32ToString()
 	- Stack trace printing
 	
@@ -21,17 +24,14 @@ Misc
 	- Any code marked as @EXPORT_API in calendar project
 		
 String
-	- Rounding withing F32ToString()
+	- Rounding within F32ToString()
 	- Automatic casting of short_string to char*
   - Initialisation of short_string with string literals
-	- CopyString()
 		
 Time
-	 - Current date and time
-	 - Conversion from string into dd/mm/yyyy and vice versa
-	 - Date + days into dd/mm/yyyy
-	 - Days of the week into dd/mm/yyyy
-	 - Work days?
+	 - Creation of a date struct from a string
+	 - Days of the week into date struct
+	 - Consideration of work days in all relevant functionality
 		
 Win32
 	- More in-depth logging in case of error detection / failure
