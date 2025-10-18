@@ -133,3 +133,34 @@ exported_function bool ContainsAnySubstring(const char* string, const char** sub
 	}
   return false;
 }
+
+exported_function void CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS) {
+	Assert(source != Null);
+	Assert(srcLength > 0 || srcLength == -1);
+	Assert(destination != Null);
+	Assert(destLength > 0);
+	if(ErrorIsSet() == true)
+		return;
+	
+	auto realSourceLength = srcLength == -1 ? GetStringLength(source, true) : srcLength;
+	Assert(realSourceLength <= destLength);
+	if(ErrorIsSet() == true)
+		return;
+	
+	ForAll(realSourceLength)
+	  destination[it] = source[it];
+}
+
+bool IsLetter(char c) {
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+}
+
+bool IsNumber(char c) {
+	return c >= '0' && c <= '9';
+}
+
+#include <stdlib.h>
+si32 StringToInt(const char* string) {
+  AssertRet(string != Null, Null);
+  return atoi(string);
+}
