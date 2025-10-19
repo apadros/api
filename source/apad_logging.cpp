@@ -27,9 +27,7 @@ exported_function void CloseLogFile(log_file& log) {
 // @TODO - Can the log file be set after the ... ?
 // Format strings - s, si8, ui8, si16, ui16, si32, ui32, si64, ui64, f32, f64
 exported_function void Log(log_file& log, const char* formatString, ...) {
-  Assert(formatString != Null);
-	if(ErrorIsSet() == true)
-		return;
+  AssertRet(formatString != Null);
 	
 	va_list args;
 	va_start(args, formatString);

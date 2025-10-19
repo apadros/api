@@ -11,34 +11,19 @@ ui32 maxStackCapacity = MiB(1);
 // ******************** Local API end ******************** //
 
 exported_function void ClearMemory(void* memory, ui32 size) {
-	Assert(memory != Null);
-	if(ErrorIsSet() == true)
-		return;
+	AssertRet(memory != Null);
 	
-  Assert(size > 0);
-	if(ErrorIsSet() == true)
-		return;
+  AssertRet(size > 0);
 	
   for (ui32 it = 0; it < size; it++)
 		((ui8*)memory)[it] = 0;
 }
 
 exported_function void CopyMemory(void* source, ui32 size, void* destination) {
-  Assert(source != Null);
-	if(ErrorIsSet() == true)
-		return;
-	
-  Assert(size > 0);
-	if(ErrorIsSet() == true)
-		return;
-	
-  Assert(destination != Null);
-	if(ErrorIsSet() == true)
-		return;
-	
-	Assert(source != destination);
-	if(ErrorIsSet() == true)
-		return;
+  AssertRet(source != Null);
+  AssertRet(size > 0);
+  AssertRet(destination != Null);
+	AssertRet(source != destination);
 	
   ui8* ps = (ui8*)source;
   ui8* pd = (ui8*)destination;
@@ -66,16 +51,16 @@ exported_function void FreeMemory(memory_block& block) {
 }
 
 exported_function void* GetMemory(memory_block block) {
-	AssertRet(block.memory != Null, Null);
+	AssertRetType(block.memory != Null, Null);
 	return block.memory;
 }
 
 exported_function bool IsValid(memory_block block) {
-	AssertRet(block.memory != Null, false);
+	AssertRetType(block.memory != Null, false);
 	if(block.capacity > 0)
-		AssertRet(block.size <= block.capacity, false)
+		AssertRetType(block.size <= block.capacity, false)
 	else
-		AssertRet(block.size != 0, false)
+		AssertRetType(block.size != 0, false)
 	return true;
 }
 
@@ -86,7 +71,7 @@ exported_function void SetInvalid(memory_block& block) {
 }
 
 exported_function memory_block AllocateStack(ui32 capacity) {
-	AssertRet(capacity <= maxStackCapacity, memory_block());
+	AssertRetType(capacity <= maxStackCapacity, memory_block());
 	auto block = AllocateMemory(capacity);
 	block.capacity = block.size;
 	block.size = 0;
@@ -94,15 +79,13 @@ exported_function memory_block AllocateStack(ui32 capacity) {
 }
 
 exported_function void FreeStack(memory_block& stack) {
-	Assert(IsValid(stack));
-	if(ErrorIsSet() == true)
-		return;
-  
+	AssertRet(IsValid(stack));
+	
 	FreeMemory(stack);
 }
 
 exported_function void* PushMemory(ui32 size, memory_block& stack) {
-	AssertRet(IsValid(stack), Null);
+	AssertRetType(IsValid(stack), Null);
   
 	if(size + stack.size <= stack.capacity) { // If allocating within stack capacity
 		void* ret = (ui8*)stack.memory + stack.size;
@@ -111,9 +94,7 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
 		// Set a constraint to avoid a potential recursive bug
-	  Assert(stack.capacity * 2 <= maxStackCapacity);
-		if(ErrorIsSet() == true)
-			return Null;
+	  AssertRet(stack.capacity * 2 <= maxStackCapacity);
 		
 		auto  newStack = AllocateStack(stack.capacity * 2);
 		newStack.size = stack.size;

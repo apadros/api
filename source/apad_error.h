@@ -49,12 +49,28 @@ imported_function void 				SetError(const char* string);
 // AssertRet()
 #ifdef APAD_DEBUG
 
-#define AssertRet(_condition, _retValue) \
+#define AssertRet(_condition) \
 	Assert(_condition)
 
 #else
 	
-#define AssertRet(_condition, _retValue) { \
+#define AssertRet(_condition) { \
+	Assert(_condition); \
+	if(ErrorIsSet() == true) \
+	  return; \
+}
+
+#endif
+
+// AssertRetType()
+#ifdef APAD_DEBUG
+
+#define AssertRetType(_condition, _retValue) \
+	Assert(_condition)
+
+#else
+	
+#define AssertRetType(_condition, _retValue) { \
 	Assert(_condition); \
 	if(ErrorIsSet() == true) \
 	  return (_retValue); \

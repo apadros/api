@@ -15,32 +15,24 @@
 // ******************** Local API end ******************** //
 
 exported_function void* Win32AllocateMemory(ui32 size) {
-  void* errorRet = Null;
+	AssertRetType(size > 0, Null);
 	
-  Assert(size > 0);
-	if(ErrorIsSet() == true)
-		return errorRet;
-  
   void* mem = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-  Assert(mem != NULL);
-	if(ErrorIsSet() == true)
-		return errorRet;
+  AssertRetType(mem != NULL, Null);
 	
   return mem;
 }
 
 exported_function void Win32FreeMemory(void* mem) {
-	Assert(mem != Null);
-	if(ErrorIsSet() == true)
-		return;
+	AssertRet(mem != Null);
 	
   auto ret = VirtualFree(mem, 0, MEM_RELEASE);
 	Assert(ret != 0);
 }
 
 exported_function bool Win32FileExists(const char* path) {
-	AssertRet(path != Null, false);
-	AssertRet(GetStringLength(path, true) <= MAX_PATH, false);
+	AssertRetType(path != Null, false);
+	AssertRetType(GetStringLength(path, true) <= MAX_PATH, false);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   auto error = GetLastError();
@@ -52,15 +44,15 @@ exported_function bool Win32FileExists(const char* path) {
 }
 
 exported_function memory_block Win32LoadFile(const char* path) {
-	AssertRet(Win32FileExists(path), NullMemoryBlock);
+	AssertRetType(Win32FileExists(path), NullMemoryBlock);
 	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	Assert(handle != INVALID_HANDLE_VALUE);
 	if(ErrorIsSet() == true) {
     auto error = GetLastError();
-		AssertRet(error != ERROR_FILE_NOT_FOUND, NullMemoryBlock);
-		AssertRet(error != ERROR_PATH_NOT_FOUND, NullMemoryBlock);
-		AssertRet(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
+		AssertRetType(error != ERROR_FILE_NOT_FOUND, NullMemoryBlock);
+		AssertRetType(error != ERROR_PATH_NOT_FOUND, NullMemoryBlock);
+		AssertRetType(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
 		// @TODO - More logging
 		return NullMemoryBlock;
 	}
@@ -98,13 +90,9 @@ exported_function memory_block Win32LoadFile(const char* path) {
 }
 
 exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
-  Assert(data != Null);
-	if(ErrorIsSet() == true)
-		return;
-	Assert(dataSize > 0);
-	if(ErrorIsSet() == true)
-	return;
-
+  AssertRet(data != Null);
+	AssertRet(dataSize > 0);
+	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	Assert(handle != INVALID_HANDLE_VALUE);
 	if(ErrorIsSet() == true) {

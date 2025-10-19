@@ -7,7 +7,6 @@ Array
 	- Clear array function
 
 Error
- - AssertRet() variation for functions with no return type
 
 File
 

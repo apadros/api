@@ -7,7 +7,7 @@
 #include "apad_string.h"
 
 exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
-  AssertRet(s != Null, Null);
+  AssertRetType(s != Null, Null);
   
   char c;
   ui16 counter = 0;
@@ -97,8 +97,8 @@ exported_function const char* PushString(const char* string, bool includeEOS, me
 }
 
 exported_function bool StringsAreEqual(const char* s1, const char* s2) {
-  AssertRet(s1 != Null, false);
-	AssertRet(s2 != Null, false);
+  AssertRetType(s1 != Null, false);
+	AssertRetType(s2 != Null, false);
 	
   ui16 counter = 0;
   do {
@@ -119,15 +119,15 @@ exported_function bool StringsAreEqual(const char* s1, const char* s2) {
 }
 
 exported_function const char* FindSubstring(const char*sub, const char*string) {
-  AssertRet(string != Null, Null);
-  AssertRet(sub != Null, Null);
+  AssertRetType(string != Null, Null);
+  AssertRetType(sub != Null, Null);
   return strstr(string, sub);
 }
 
 exported_function bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
   ForAll(length) {
     auto* sub = substrings[it];
-		AssertRet(sub != Null, false);
+		AssertRetType(sub != Null, false);
 		if(FindSubstring(sub, string) != Null)
 			return true;
 	}
@@ -135,17 +135,13 @@ exported_function bool ContainsAnySubstring(const char* string, const char** sub
 }
 
 exported_function void CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS) {
-	Assert(source != Null);
-	Assert(srcLength > 0 || srcLength == -1);
-	Assert(destination != Null);
-	Assert(destLength > 0);
-	if(ErrorIsSet() == true)
-		return;
+	AssertRet(source != Null);
+	AssertRet(srcLength > 0 || srcLength == -1);
+	AssertRet(destination != Null);
+	AssertRet(destLength > 0);
 	
 	auto realSourceLength = srcLength == -1 ? GetStringLength(source, true) : srcLength;
-	Assert(realSourceLength <= destLength);
-	if(ErrorIsSet() == true)
-		return;
+	AssertRet(realSourceLength <= destLength);
 	
 	ForAll(realSourceLength)
 	  destination[it] = source[it];
@@ -161,6 +157,6 @@ bool IsNumber(char c) {
 
 #include <stdlib.h>
 si32 StringToInt(const char* string) {
-  AssertRet(string != Null, Null);
+  AssertRetType(string != Null, Null);
   return atoi(string);
 }
