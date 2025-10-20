@@ -6,13 +6,8 @@ Array
 	- Add to array function
 	- Clear array function
 
-Error
-
-File
-
 Logging
   - Basic logging functionality @WIP
-		- Requires IntToString(), PushString() & F32ToString()
 	- Stack trace printing
 	
 Memory

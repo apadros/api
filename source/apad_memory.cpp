@@ -94,7 +94,7 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
 		// Set a constraint to avoid a potential recursive bug
-	  AssertRet(stack.capacity * 2 <= maxStackCapacity);
+	  AssertRetType(stack.capacity * 2 <= maxStackCapacity, Null);
 		
 		auto  newStack = AllocateStack(stack.capacity * 2);
 		newStack.size = stack.size;

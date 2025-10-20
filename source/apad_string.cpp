@@ -160,3 +160,13 @@ si32 StringToInt(const char* string) {
   AssertRetType(string != Null, Null);
   return atoi(string);
 }
+
+exported_function short_string ExtractSubstring(const char* string, ui8 count) {
+	AssertRetType(count <= ShortStringMaxLength, short_string());
+	AssertRetType(GetStringLength(string, false) >= count, short_string());
+	
+	short_string ret = {};
+	CopyString(string, count, ret.string, ShortStringMaxLength, false);
+	
+	return ret;
+}

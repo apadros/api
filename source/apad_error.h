@@ -35,10 +35,16 @@ imported_function void 				SetError(const char* string);
 // If IsExitIfErrorSet() == true, will exit program execution. Otherwise, need to 
 // manually check afterwards for errors and manually decide execution from there.
 // IsExitIfErrorSet() == false by default.
+#include <stdio.h> // For sprintf
 #define Assert(_condition) { \
   ClearError(); \
   if(!(_condition)) { \
-		SetError("ERROR - " ## #_condition ## ", file " ## __FILE__); \
+	  char buffer[256] = {}; \
+		sprintf(buffer, "Assertion failed \
+										 \nCondition - %s, \
+										 \nFile      - %s, \
+										 \nLine      - %lu", #_condition, __FILE__, __LINE__); \
+		SetError((const char*)buffer); \
 		if(IsExitIfErrorSet() == true) \
 		  ExitProgram(true); \
 	} \

@@ -7,8 +7,9 @@
 
 // ******************** Conversions ******************** //
 
+const ui8 ShortStringMaxLength = 32;
 struct short_string {
-	char string[32];
+	char string[ShortStringMaxLength];
 };
 
 imported_function short_string ToString(si8 i);
@@ -31,12 +32,14 @@ imported_function si32 				 StringToInt(const char* string);
 imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
 
-imported_function bool 				ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
-															// Set srcLength -1 to copy entire source
-imported_function void 				CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
-imported_function const char* FindSubstring(const char*sub, const char*string);
-imported_function ui16 				GetStringLength(const char*s, bool includeEOS);
-imported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack);
-imported_function bool 				StringsAreEqual(const char* s1, const char* s2);
+imported_function bool 				 ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
+															 // Set srcLength -1 to copy entire source
+imported_function void 				 CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
+															 // Will set global error if string + count surpasses string length
+imported_function short_string ExtractSubstring(const char* string, ui8 count);
+imported_function const char*  FindSubstring(const char*sub, const char*string);
+imported_function ui16 				 GetStringLength(const char*s, bool includeEOS);
+imported_function const char*  PushString(const char* string, bool includeEOS, memory_block& stack);
+imported_function bool 				 StringsAreEqual(const char* s1, const char* s2);
 
 #endif
