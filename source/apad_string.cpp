@@ -161,6 +161,7 @@ si32 StringToInt(const char* string) {
   return atoi(string);
 }
 
+// @TODO - Allow for count == -1 to extract remaining string from that point
 exported_function short_string ExtractSubstring(const char* string, ui8 count) {
 	AssertRetType(count <= ShortStringMaxLength, short_string());
 	AssertRetType(GetStringLength(string, false) >= count, short_string());

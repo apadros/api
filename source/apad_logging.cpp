@@ -32,7 +32,7 @@ exported_function void Log(log_file& log, const char* formatString, ...) {
 	va_list args;
 	va_start(args, formatString);
 	
-  auto formatStringLength = GetStringLength(formatString, false);
+	auto formatStringLength = GetStringLength(formatString, false);
   ForAll(formatStringLength) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
@@ -51,6 +51,10 @@ exported_function void Log(log_file& log, const char* formatString, ...) {
 			}
 			
 			// Check for remaining format substrings
+			
+			// @TODO - Replace the separation of 3 and 4 char-long format strings with ExtractSubstring()
+			//         Extract 4, check agains list of 4 long formats. If it fails or none found, check again 3 long formats
+			//         If everything else fails, compare against string format %s.
 			
 			// 3 char-long strings
 			if(it <= formatStringLength - 3) { // At least 3 chars remaining in the format string
