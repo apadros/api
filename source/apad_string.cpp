@@ -3,6 +3,7 @@
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
+#include "apad_maths.h"
 #include "apad_memory.h"
 #include "apad_string.h"
 
@@ -161,13 +162,14 @@ si32 StringToInt(const char* string) {
   return atoi(string);
 }
 
-// @TODO - Allow for count == -1 to extract remaining string from that point
-exported_function short_string ExtractSubstring(const char* string, ui8 count) {
+exported_function short_string ExtractSubstring(const char* string, si8 count) {
 	AssertRetType(count <= ShortStringMaxLength, short_string());
-	AssertRetType(GetStringLength(string, false) >= count, short_string());
+	
+	auto stringLength = GetStringLength(string, false);
+	ui16 copyLength = count == -1 ? stringLength : Min(stringLength, count);
 	
 	short_string ret = {};
-	CopyString(string, count, ret.string, ShortStringMaxLength, false);
+	CopyString(string, copyLength, ret.string, ShortStringMaxLength, false);
 	
 	return ret;
 }

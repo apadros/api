@@ -35,8 +35,9 @@ imported_function bool IsNumber(char c);
 imported_function bool 				 ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
 															 // Set srcLength -1 to copy entire source
 imported_function void 				 CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
-															 // Will set global error if string + count surpasses string length
-imported_function short_string ExtractSubstring(const char* string, ui8 count);
+															 // Set count == -1 to extract until the end of the string.
+															 // Will do so automatically if count > string length.
+imported_function short_string ExtractSubstring(const char* string, si8 count);
 imported_function const char*  FindSubstring(const char*sub, const char*string);
 imported_function ui16 				 GetStringLength(const char*s, bool includeEOS);
 imported_function const char*  PushString(const char* string, bool includeEOS, memory_block& stack);
