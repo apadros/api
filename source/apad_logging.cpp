@@ -37,130 +37,129 @@ exported_function void Log(log_file& log, const char* formatString, ...) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
 		  it += 1;
-			if(it > formatStringLength - 1) // Not enough string left for at least the 's' format char
+			if(formatString[it] == '\0')
 				return;
 				
-			// Check for the 's' format char separately
-			if(formatString[it] == 's') {
-				it += 1;
-				if(formatString[it] != 'i' || it == formatStringLength) { // If we're not checking for a signed integer or we have reached the end of the format string, this is a string format 
-					auto s = va_arg(args, char*);
-					PushString(s, false, log);
-					continue; // Continue formatString scan
-				}
-			}
+			const char* formats[] = { "s", "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
 			
-			// Check for remaining format substrings
-			
-			// @TODO - Replace the separation of 3 and 4 char-long format strings with ExtractSubstring()
-			//         Extract 4, check agains list of 4 long formats. If it fails or none found, check again 3 long formats
-			//         If everything else fails, compare against string format %s.
-			
-			// 3 char-long strings
-			if(it <= formatStringLength - 3) { // At least 3 chars remaining in the format string
-				char testString[] = { formatString[it], formatString[it + 1], formatString[it + 2] };
-								
-				const char* substrings[] = { "f32", "f64" };
-				ui8         substringsLength = GetArrayLength(substrings);
-				bool        formatFound = false;
-				ForAll(substringsLength) {
-					if(StringsAreEqual(testString, substrings[it]) == true) { // Formatting substring found
-					  if(it == 0) { // F32
-							f32 f = (f32)va_arg(args, f32);
-							auto s = ToString(f).string;
-							PushString(s, false, log);
-						}
-						else { // F64
-						  f64 f = va_arg(args, f64);
-							auto s = ToString(f).string;
-							PushString(s, false, log);
-						}
-						
-						formatFound = true;
-					}
-				}				
+			// Find the correct format
+			si8 formatIndex = -1;
+			{
+				ui8  formatsLength = GetArrayLength(formats);
+				auto sub = ExtractSubstring(formatString + it, 4);
 				
-				if(formatFound == true) {
-					it += 3;
-					continue; // Continue scanning formatString
-				}
-			}
-			
-			if(it <= formatStringLength - 4) { // At least 4 chars remaining in the format string
-				char testString[] = { formatString[it], formatString[it + 1], formatString[it + 2], formatString[it + 3] };
-				
-				const char* substrings[] = { "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64" };
-				ui8         substringsLength = GetArrayLength(substrings);
-				bool        formatFound = false;
-				ForAll(substringsLength) {
-					if(StringsAreEqual(testString, substrings[it]) == true) { // Formatting substring found
-					  switch(it) {
-							case 0: { // SI8
-								si8 i = va_arg(args, si8);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-							  break;
-							};
-							case 1: { // UI8
-								ui8 i = va_arg(args, ui8);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 2: { // SI16
-								si16 i = va_arg(args, si16);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 3: { // UI16
-								ui16 i = va_arg(args, ui16);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 4: { // SI32
-								si32 i = va_arg(args, si32);
-								const char* s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 5: { // UI32
-								ui32 i = va_arg(args, ui32);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 6: { // SI64
-								si64 i = va_arg(args, si64);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							case 7: { // UI64
-								ui64 i = va_arg(args, ui64);
-								auto s = ToString(i).string;
-								PushString(s, false, log);
-								break;
-							};
-							default: break;
-						}
-						
-						formatFound = true;
+				ForAll(formatsLength) {
+					if(StringsAreEqual(sub.string, formats[it]) == true) { // Found the format
+						formatIndex = it;
 						break;
 					}
 				}
 				
-				if(formatFound == true) {
-					it += 4;
-					continue; // Continue scanning formatString
+				if(formatIndex == -1) {
+					sub.string[3] = '\0';
+					
+					ForAll(formatsLength) {
+						if(StringsAreEqual(sub.string, formats[it]) == true) { // Found the format
+							formatIndex = it;
+							break;
+						}
+					}
+					
+					if(formatIndex == -1) { // Last attempt, compare to string format
+						sub.string[1] = '\0';
+						if(StringsAreEqual(sub.string, formats[0]) == true) 
+							formatIndex = 0;
+					}
 				}
-				else
-					PushData(&c, sizeof(c), log); // It may be part of the string literal
-			}			
+			}
+			AssertRet(formatIndex != -1); // @TODO - Do we want to exit more gracefully or continue execution for the rest of the format string?
+			
+			// Process argument
+			switch(formatIndex) {
+				case 0: { // String
+				  auto s = va_arg(args, char*);
+					PushString(s, false, log);
+					it += 1;
+				} break;
+				
+				case 1: { // SI8
+					si8 i = va_arg(args, si8);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 3;
+				} break;
+				
+				case 2: { // UI8
+					ui8 i = va_arg(args, ui8);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 3;
+				} break;
+				
+				case 3: { // SI16
+					si16 i = va_arg(args, si16);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 4: { // UI16
+					ui16 i = va_arg(args, ui16);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 5: { // SI32
+					si32 i = va_arg(args, si32);
+					const char* s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 6: { // UI32
+					ui32 i = va_arg(args, ui32);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 7: { // SI64
+					si64 i = va_arg(args, si64);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 8: { // UI64
+					ui64 i = va_arg(args, ui64);
+					auto s = ToString(i).string;
+					PushString(s, false, log);
+					it += 4;
+				} break;
+				
+				case 9: { // F32
+					f32 f = (f32)va_arg(args, f64);
+					auto s = ToString(f).string;
+					PushString(s, false, log);
+					it += 3;
+				} break;
+				
+				case 10: { // F64
+				  f64 f = va_arg(args, f64);
+					auto s = ToString(f).string;
+					PushString(s, false, log);
+					it += 3;
+				} break;
+				
+				default: break;
+			};		
+			
+			it -= 1; // To compensate the +1 in the loop header
 		}
 		else
 			PushData(&c, sizeof(c), log);
   }
+	
 	va_end(args);
 }
