@@ -20,20 +20,6 @@ v WIP
 		- Added date struct
 		- Added GetDate(), DateToString()
 		
-		
-Initial version of Log() finished and tested
-Added Min(), updated ExtractString() to scan until \0 if count == -1 or count > string length
-WIP Log()
-Updated Assert() to include line numbers, added ShortStringMaxLength and ExtractSubstring() to string API
-Replace AssertRet() in with AssertRetType(), added AssertRet() again to return with no type. Replaced all instances of old AssertRet() with new AssertRetType() in all cpp files
-Updated todos.txt
-First iteration of time API; added date struct, DateToString() and GetDate()
-Added CopyString(), StringToInt(), IsLetter() and IsNumber()
-Added apad_maths.h first iteration
-Reorganised and commented apad_error.h for clarity
-Updated todos.txt
-Update to todos.txt, added apad_array.h to latest release
-
 v0.2.0
 	Background
 		- Added version numbers to individual libs & dlls
