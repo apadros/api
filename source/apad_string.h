@@ -10,6 +10,12 @@
 const ui8 ShortStringMaxLength = 32;
 struct short_string {
 	char string[ShortStringMaxLength];
+	
+	short_string();
+  short_string(const char* s); // Allows short_string ss = const char*
+	
+			 operator char*(); // Automatic type casting to char*
+	void operator= (const char* s); // Allows ss = const char* if ss already defined
 };
 
 imported_function short_string ToString(si8 i);
@@ -33,7 +39,7 @@ imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
 
 imported_function bool 				 ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
-															 // Set srcLength -1 to copy entire source
+															 // Set srcLength -1 to copy entire source including the \0
 imported_function void 				 CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
 															 // Set count == -1 to extract until the end of the string.
 															 // Will do so automatically if count > string length.

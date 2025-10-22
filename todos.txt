@@ -7,8 +7,7 @@ Array
 	- Clear array function
 
 Logging
-  - Basic logging functionality @WIP
-	- Stack trace printing
+  - Stack trace printing
 	
 Memory
 	- Allow client code to set a global maximum for memory allocation
@@ -19,8 +18,8 @@ Misc
 		
 String
 	- Rounding within F32ToString()
-	- Automatic casting of short_string to char*
-  - Initialisation of short_string with string literals
+	- Concatenation
+		 - Use short_string or temp dynamic memory?
 		
 Time
 	 - Creation of a date struct from a string

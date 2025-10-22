@@ -5,7 +5,7 @@
 
 // @TODO - Use UTC time instead of local to avoid issues when travelling between different time zones
 #include <time.h>
-date GetDate(si32 offsetDays) {
+exported_function date GetDate(si32 offsetDays) {
 	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
 	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time
 	
@@ -17,7 +17,7 @@ date GetDate(si32 offsetDays) {
 	return ret;
 }
 
-short_string DateToString(date d) {
+exported_function short_string DateToString(date d) {
 	const char* format = "dd/mm/yyyy";
 	short_string ret = {};
 	CopyString(format, -1, ret.string, GetStringLength(format, true), true);

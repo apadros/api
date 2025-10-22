@@ -7,6 +7,23 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
+short_string::short_string() {
+	ForAll(ShortStringMaxLength)
+		this->string[it] = '\0';
+}
+
+short_string::short_string(const char* s) : short_string() {
+	CopyString(s, GetStringLength(s, false), this->string, ShortStringMaxLength, false);
+}
+
+short_string::operator char*() {
+	return (char*)this->string;
+};
+
+void short_string::operator= (const char* s) {
+	*this = short_string(s);
+}
+
 exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
   AssertRetType(s != Null, Null);
   
@@ -148,16 +165,16 @@ exported_function void CopyString(const char* source, si16 srcLength, char* dest
 	  destination[it] = source[it];
 }
 
-bool IsLetter(char c) {
+exported_function bool IsLetter(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
 
-bool IsNumber(char c) {
+exported_function bool IsNumber(char c) {
 	return c >= '0' && c <= '9';
 }
 
 #include <stdlib.h>
-si32 StringToInt(const char* string) {
+exported_function si32 StringToInt(const char* string) {
   AssertRetType(string != Null, Null);
   return atoi(string);
 }
