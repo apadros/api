@@ -18,9 +18,7 @@ exported_function date GetDate(si32 offsetDays) {
 }
 
 exported_function short_string DateToString(date d) {
-	const char* format = "dd/mm/yyyy";
-	short_string ret = {};
-	CopyString(format, -1, ret.string, GetStringLength(format, true), true);
+	short_string ret = "dd/mm/yyyy";
 	if(ErrorIsSet() == true)
 		return ret;
 	
@@ -28,31 +26,31 @@ exported_function short_string DateToString(date d) {
 	if(ErrorIsSet() == true)
 		return ret;
 	if(d.day <= 9) {
-		ret.string[0] = '0';
-		ret.string[1] = temp.string[0];
+		ret[0] = '0';
+		ret[1] = temp[0];
 	}
 	else {
-		ret.string[0] = temp.string[0];
-		ret.string[1] = temp.string[1];
+		ret[0] = temp[0];
+		ret[1] = temp[1];
 	}
 	
 	temp = ToString(d.month);
 	if(d.month <= 9) {
-		ret.string[3] = '0';
-		ret.string[4] = temp.string[0];
+		ret[3] = '0';
+		ret[4] = temp[0];
 	}
 	else {
-		ret.string[3] = temp.string[0];
-		ret.string[4] = temp.string[1];
+		ret[3] = temp[0];
+		ret[4] = temp[1];
 	}
 	
 	temp = ToString(d.year);
 	if(ErrorIsSet() == true)
 		return ret;
-	ret.string[6] = temp.string[0];
-	ret.string[7] = temp.string[1];
-	ret.string[8] = temp.string[2];
-	ret.string[9] = temp.string[3];
+	ret[6] = temp[0];
+	ret[7] = temp[1];
+	ret[8] = temp[2];
+	ret[9] = temp[3];
 	
 	return ret;
 }

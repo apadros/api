@@ -7,25 +7,25 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
-char& short_string::operator[] (ui8 i) {
+exported_function char& short_string::operator[] (ui8 i) {
 	AssertRetType(i < ShortStringMaxLength, this->string[0]);
   return this->string[i];
 }
 
-short_string::short_string() {
+exported_function short_string::short_string() {
 	ForAll(ShortStringMaxLength)
 		this->string[it] = '\0';
 }
 
-short_string::short_string(const char* s) : short_string() {
+exported_function short_string::short_string(const char* s) : short_string() {
 	CopyString(s, GetStringLength(s, false), this->string, ShortStringMaxLength, false);
 }
 
-short_string::operator char*() {
+exported_function short_string::operator char*() {
 	return (char*)this->string;
 };
 
-void short_string::operator= (const char* s) {
+exported_function void short_string::operator= (const char* s) {
 	*this = short_string(s);
 }
 

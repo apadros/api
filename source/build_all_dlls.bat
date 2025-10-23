@@ -53,6 +53,13 @@ echo:
 
 cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_logging.cpp /Feapad_logging_%1 apad_error_%1.lib apad_memory_%1.lib apad_string_%1.lib
 
+echo:
+echo #################### TIME ####################
+echo:
+
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_time.cpp /Feapad_time_%1 apad_error_%1.lib apad_string_%1.lib
+
+
 del temp.txt
 del *.obj
 del *.exp
