@@ -7,6 +7,11 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
+char& short_string::operator[] (ui8 i) {
+	AssertRetType(i < ShortStringMaxLength, this->string[0]);
+  return this->string[i];
+}
+
 short_string::short_string() {
 	ForAll(ShortStringMaxLength)
 		this->string[it] = '\0';

@@ -14,6 +14,8 @@ struct short_string {
 	short_string();
   short_string(const char* s); // Allows short_string ss = const char*
 	
+	char& operator[] (ui8 i);
+	
 			 operator char*(); // Automatic type casting to char*
 	void operator= (const char* s); // Allows ss = const char* if ss already defined
 };

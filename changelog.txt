@@ -1,4 +1,4 @@
-v WIP
+v0.3.0
 	- Array
 		- Added GetArrayLength()
 		
@@ -12,9 +12,10 @@ v WIP
 		- Added Min(), Max() and Magnitude()
 		
 	- String
-		- Added dunctionalities short_string ss = const char*, ss (already defined) = const char* and const char* = ss (aldeady defined). char* can be used instead of const char*.
+		- Added functionalities short_string ss = const char*, ss (already defined) = const char* and const char* = ss (aldeady defined). char* can be used instead of const char*.
 		- Added functions IsLetter(), IsNumber(), CopyString(), StringToInt(), ExtractSubstring()
 		- Added a max length variable for short_string
+		- Added [] operator to short_string
 			
 	- Time
 		- Added date struct
