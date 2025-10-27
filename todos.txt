@@ -20,6 +20,22 @@ String
 	- Rounding within F32ToString()
 	- Concatenation
 		 - Use short_string or temp dynamic memory?
+	- Updating short_string to use dynamic memory to allow for variables / required lengths
+		- 2 options 
+			- 1. Keep a table of dynamic memory pointers for each allocation
+				- Fixed size still presents a limit, unless this is also dynamically allocated
+					- If so, needs to be freed at program exit.
+						- Requires an Init / Shutdown pair of functions
+					- Give user ability to specify the table length. E.g. are user and API every going to allocate more than 1024 or more dynamic memory pointers during program execution? Depends on the type of program.
+					- Allow user to manually free memory as they go 
+					- Make use of already-existing stack pushing functionality for the table, and manually free it at program exit - back to Init / Shutdown functions.
+						- Shutdown can be made to be called automatically by API during program exit, need to find the relative function.
+							- Can the same be done with Init() ?
+			- 2. Perform a new dynamic memory allocation for each of these strings, having to call a deallocation function at some point. 
+				- Contrains user to manually keep track of dynamic memory and call the deallocation function.
+				- Freedom of allocation for the API and the user without need of Init / Shutdown functions and fixed-sized memory tables.
+			- Currently prefer option 1 with a dynamically-allocated pointer table, automatically inited during program startup and freed during shutdown without need for intervention by the user.
+				- Also allow user to manually free memory as the go, best of both options.
 		
 Time
 	 - Creation of a date struct from a string
