@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h> // For atexit()
 #include <string.h>
 #include "apad_base_types.h"
 #include "apad_error.h"
@@ -6,27 +7,66 @@
 #include "apad_maths.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_win32.h"
 
-exported_function char& short_string::operator[] (ui8 i) {
-	AssertRetType(i < ShortStringMaxLength, this->string[0]);
-  return this->string[i];
+// ******************** Local API start ******************** //
+
+// @TODO - Replace stack functionality with pool allocation ?
+memory_block stringTable; // Array of memory pointers
+
+program_local void ExitStringAPI() {
+	if(IsValid(stringTable) == true) {
+		// Free all pointers contained within the table
+		ui32 addresses = stringTable.size / sizeof(void*);
+		ForAll(addresses) {
+			void** table = (void**)stringTable.memory;
+			void*  address = table[it];
+			Win32FreeMemory(address); // Assumes no pointers have been freed.
+		}
+		
+		FreeStack(stringTable);
+	}
 }
 
-exported_function short_string::short_string() {
-	ForAll(ShortStringMaxLength)
-		this->string[it] = '\0';
+// ******************** Local API end ******************** //
+
+
+exported_function char& string::operator[] (ui32 i) {
+	AssertRetType(i < this->length, this->chars[0]);
+  return this->chars[i];
 }
 
-exported_function short_string::short_string(const char* s) : short_string() {
-	CopyString(s, GetStringLength(s, false), this->string, ShortStringMaxLength, false);
+exported_function string::string() {
+  if(IsValid(stringTable) == false) { // Init table
+	  stringTable = AllocateStack(KiB(1));
+		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
+	}
+		
+	this->chars = Null;
+	this->length = Null;
 }
 
-exported_function short_string::operator char*() {
-	return (char*)this->string;
+exported_function string::string(const char* s) : string() {
+  AssertRet(s != Null);
+	
+	auto length = GetStringLength(s, true);
+	AssertRet(length > 1);
+	
+	void* mem = Win32AllocateMemory(length);
+	CopyMemory((void*)s, length, mem);
+	
+	PushData(&mem, sizeof(void*), stringTable);
+		
+	this->chars = (char*)mem;
+	this->length = length - 1; // Exclude EOS
+}
+
+exported_function string::operator char*() {
+	return this->chars;
 };
 
-exported_function void short_string::operator= (const char* s) {
-	*this = short_string(s);
+exported_function void string::operator= (const char* s) {
+	*this = string(s);
 }
 
 exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
@@ -41,74 +81,64 @@ exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
   return includeEOS ? counter : counter - 1;
 };
 
-exported_function short_string ToString(si8 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%hhi", i);
-	return ret;
+exported_function string ToString(si8 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%hhi", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(ui8 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%hhu", i);
-	return ret;
+exported_function string ToString(ui8 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%hhu", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(si16 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%hi", i);
-	return ret;
+exported_function string ToString(si16 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%hi", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(ui16 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%hu", i);
-	return ret;
+exported_function string ToString(ui16 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%hu", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(si32 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%li", i);
-	return ret;
+exported_function string ToString(si32 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%li", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(ui32 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%lu", i);
-	return ret;
+exported_function string ToString(ui32 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%lu", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(si64 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%lli", i);
-	return ret;
+exported_function string ToString(si64 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%lli", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(ui64 i) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%llu", i);
-	return ret;
+exported_function string ToString(ui64 i) {
+  char buffer[32] = { '\0' };
+  sprintf(buffer, "%llu", i);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(f32 f) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%.2f", f);
-	return ret;
+exported_function string ToString(f32 f) {
+	char buffer[32] = { '\0' };
+  sprintf(buffer, "%.2f", f);
+	return string((char*)buffer);
 }
 
-exported_function short_string ToString(f64 f) {
-  short_string ret;
-	ClearStruct(ret);
-	sprintf(ret.string, "%.2Lf", f);
-	return ret;
+exported_function string ToString(f64 f) {
+	char buffer[32] = { '\0' };
+  sprintf(buffer, "%.2Lf", f);
+	return string((char*)buffer);
 }
 
 exported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack) {
@@ -184,14 +214,14 @@ exported_function si32 StringToInt(const char* string) {
   return atoi(string);
 }
 
-exported_function short_string ExtractSubstring(const char* string, si8 count) {
-	AssertRetType(count <= ShortStringMaxLength, short_string());
+exported_function string ExtractSubstring(const char* s, si8 count) {
+	AssertRetType(count != 0, string());
 	
-	auto stringLength = GetStringLength(string, false);
-	ui16 copyLength = count == -1 ? stringLength : Min(stringLength, count);
-	
-	short_string ret = {};
-	CopyString(string, copyLength, ret.string, ShortStringMaxLength, false);
+	string ret(s);
+	if(count != -1 && count < ret.length) {
+		ret.chars[count] = '\0';
+		ret.length = count;
+	}
 	
 	return ret;
 }

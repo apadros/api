@@ -6,8 +6,6 @@
 
 // ******************** Local API start ******************** //
 
-ui32 maxStackCapacity = MiB(1);
-
 // ******************** Local API end ******************** //
 
 exported_function void ClearMemory(void* memory, ui32 size) {
@@ -56,11 +54,14 @@ exported_function void* GetMemory(memory_block block) {
 }
 
 exported_function bool IsValid(memory_block block) {
-	AssertRetType(block.memory != Null, false);
+	if(block.memory == Null)
+		return false;
+	
 	if(block.capacity > 0)
-		AssertRetType(block.size <= block.capacity, false)
+		return block.size <= block.capacity;
 	else
-		AssertRetType(block.size != 0, false)
+		return block.size > 0;
+	
 	return true;
 }
 
@@ -71,7 +72,6 @@ exported_function void SetInvalid(memory_block& block) {
 }
 
 exported_function memory_block AllocateStack(ui32 capacity) {
-	AssertRetType(capacity <= maxStackCapacity, memory_block());
 	auto block = AllocateMemory(capacity);
 	block.capacity = block.size;
 	block.size = 0;
@@ -93,10 +93,7 @@ exported_function void* PushMemory(ui32 size, memory_block& stack) {
 		return ret;
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
-		// Set a constraint to avoid a potential recursive bug
-	  AssertRetType(stack.capacity * 2 <= maxStackCapacity, Null);
-		
-		auto  newStack = AllocateStack(stack.capacity * 2);
+		auto newStack = AllocateStack(stack.capacity * 2);
 		newStack.size = stack.size;
 		void* retMem = PushMemory(size, newStack); // Recursive call until right capacity found
 		if(ErrorIsSet() == true)
@@ -112,8 +109,4 @@ exported_function void* PushData(void* data, ui32 size, memory_block& stack) {
   void* mem = PushMemory(size, stack);
 	CopyMemory(data, size, mem);
 	return mem;
-}
-
-exported_function void SetMaxStackCapacity(ui32 capacity) {
-	maxStackCapacity = capacity;
 }
