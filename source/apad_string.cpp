@@ -11,6 +11,8 @@
 
 // ******************** Local API start ******************** //
 
+const ui16 MaxStringLength = UI16Max;
+
 // @TODO - Replace stack functionality with pool allocation ?
 memory_block stringTable; // Array of memory pointers
 
@@ -29,7 +31,6 @@ program_local void ExitStringAPI() {
 }
 
 // ******************** Local API end ******************** //
-
 
 exported_function char& string::operator[] (ui32 i) {
 	AssertRetType(i < this->length, this->chars[0]);
@@ -73,12 +74,15 @@ exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
   AssertRetType(s != Null, Null);
   
   char c;
-  ui16 counter = 0;
+  ui64 counter = 0;
   
   do	 	c = s[counter++];
   while (c != '\0');
+	
+	ui64 fullLength = includeEOS ? counter : counter - 1;
+	AssertRetType(fullLength<= UI16Max, Null);
   
-  return includeEOS ? counter : counter - 1;
+  return fullLength;
 };
 
 exported_function string ToString(si8 i) {

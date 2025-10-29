@@ -7,18 +7,15 @@
 
 // ******************** Conversions ******************** //
 
-const ui32 MaxStringLength = UI32Max;
 struct string {
 	char* chars;
-	ui32  length; // Without the EOS
+	ui16  length; // Without the EOS
 	
-	imported_function string();
-  imported_function string(const char* s); // Allows string ss = const char*
-	
+	imported_function 			string();
+  imported_function 			string(const char* s); // Allows string ss = const char*
 	imported_function char& operator[] (ui32 i);
-	
-	imported_function 		 operator char*(); // Automatic type casting to char*
-	imported_function void operator= (const char* s); // Allows ss = const char* if ss already defined
+	imported_function 		  operator char*(); // Automatic type casting to char*
+	imported_function void  operator= (const char* s); // Allows ss = const char* if ss already defined
 };
 
 imported_function string ToString(si8 i);
@@ -29,9 +26,9 @@ imported_function string ToString(si32 i);
 imported_function string ToString(ui32 i);
 imported_function string ToString(si64 i);
 imported_function string ToString(ui64 i);
-															 // Return limited to 2 decimal places without rounding
+												 // Return limited to 2 decimal places without rounding
 imported_function string ToString(f32 f);
-															 // Return limited to 2 decimal places without rounding
+												 // Return limited to 2 decimal places without rounding
 imported_function string ToString(f64 f);
 
 imported_function si32 	 StringToInt(const char* string);

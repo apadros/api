@@ -11,7 +11,7 @@ struct date {
   ui16 year;
 };
 
-imported_function short_string DateToString(date d);
-imported_function date 				 GetDate(si32 offsetDays);
+imported_function string DateToString(date d);
+imported_function date 	 GetDate(si32 offsetDays);
 
 #endif

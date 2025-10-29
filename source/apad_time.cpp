@@ -17,8 +17,8 @@ exported_function date GetDate(si32 offsetDays) {
 	return ret;
 }
 
-exported_function short_string DateToString(date d) {
-	short_string ret = "dd/mm/yyyy";
+exported_function string DateToString(date d) {
+	string ret = "dd/mm/yyyy";
 	if(ErrorIsSet() == true)
 		return ret;
 	

@@ -19,10 +19,7 @@ Misc
 String
 	- Rounding within F32ToString()
 	- Concatenation
-		 - Use short_string or temp dynamic memory?
-	- Updating short_string to use dynamic memory to allow for variables / required lengths @WIP
-		- Option for user to manually free strings as they wish
-		- Incorporate MaxStringLength in required functions
+	- Option for user to manually free dynamic strings as they wish
 		
 Time
 	 - Creation of a date struct from a string
