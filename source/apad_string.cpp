@@ -7,30 +7,55 @@
 #include "apad_maths.h"
 #include "apad_memory.h"
 #include "apad_string.h"
-#include "apad_win32.h"
 
 // ******************** Local API start ******************** //
 
 const ui16 MaxStringLength = UI16Max;
 
 // @TODO - Replace stack functionality with pool allocation ?
-memory_block stringTable; // Array of memory pointers
+memory_block stringTable; // Array of memory_blocks containing dynamically-allocated memory pointers
 
 program_local void ExitStringAPI() {
 	if(IsValid(stringTable) == true) {
-		// Free all pointers contained within the table
-		ui32 addresses = stringTable.size / sizeof(void*);
-		ForAll(addresses) {
-			void** table = (void**)stringTable.memory;
-			void*  address = table[it];
-			Win32FreeMemory(address); // Assumes no pointers have been freed.
+		// Free all memory blocks contained within the table
+		ui32  blocks = stringTable.size / sizeof(memory_block);
+		auto* table = (memory_block*)stringTable.memory;
+		ForAll(blocks) {
+			auto* block = table + it;
+			FreeMemory(*block);
 		}
 		
 		FreeStack(stringTable);
 	}
 }
 
+program_local void AddEntryToStringTable(memory_block block) {
+	PushInstance(block, stringTable);
+}
+
 // ******************** Local API end ******************** //
+
+// @TEST
+exported_function string Concatenate(const char* s1, const char* s2) {
+  AssertRetType(s1 != Null, string());
+  AssertRetType(s2 != Null, string());
+	
+	auto length1 = GetStringLength(s1, false);
+	auto length2 = GetStringLength(s2, true);
+	
+	auto block = AllocateMemory(length1 + length2);
+	
+	void* mem = block.memory;
+	CopyMemory((void*)s1, length1, mem);
+	CopyMemory((void*)s2, length2, (ui8*)mem + length1);
+	
+	AddEntryToStringTable(block);
+		
+	string ret;
+	ret.chars = (char*)mem;
+	ret.length = length1 + length2;
+	return ret;
+}
 
 exported_function char& string::operator[] (ui32 i) {
 	AssertRetType(i < this->length, this->chars[0]);
@@ -48,17 +73,17 @@ exported_function string::string() {
 }
 
 exported_function string::string(const char* s) : string() {
-  AssertRet(s != Null);
+	AssertRet(s != Null);
 	
 	auto length = GetStringLength(s, true);
 	AssertRet(length > 1);
 	
-	void* mem = Win32AllocateMemory(length);
-	CopyMemory((void*)s, length, mem);
+	auto block = AllocateMemory(length);
+	CopyMemory((void*)s, length, block.memory);
 	
-	PushData(&mem, sizeof(void*), stringTable);
-		
-	this->chars = (char*)mem;
+	AddEntryToStringTable(block);
+	
+	this->chars = (char*)block.memory;
 	this->length = length - 1; // Exclude EOS
 }
 
