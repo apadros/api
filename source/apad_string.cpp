@@ -86,6 +86,14 @@ exported_function void string::operator+= (const char* s) {
 	*this = Concatenate(*this, s);
 }
 
+exported_function bool string::operator== (string s) {
+	return StringsAreEqual(*this, s);
+}
+
+exported_function bool string::operator== (const char* s) {
+	return StringsAreEqual(*this, s);
+}
+
 exported_function string::string() {
   this->chars = Null;
 	this->length = Null;

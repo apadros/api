@@ -12,7 +12,7 @@ struct string {
 	ui16  length; // Without the EOS
 	
 	imported_function 			 string();
-  imported_function 			 string(const char* s); // Allows string ss = const char*
+  imported_function 			 string(const char* s);
 	imported_function 		   operator 	 char*(); // Automatic type casting to char*
 	imported_function char&  operator[] (ui32 i);
 	imported_function string operator+  (char c);
@@ -20,6 +20,8 @@ struct string {
 	imported_function string operator+  (const char* s);
 	imported_function void   operator=  (const char* s);
 	imported_function void   operator+= (const char* s);
+	imported_function bool   operator== (string s); // For some reason can't just use the == overload below
+	imported_function bool   operator== (const char* s);
 };
 
 imported_function string ToString(si8 i);
