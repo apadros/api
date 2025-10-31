@@ -61,9 +61,29 @@ exported_function string Concatenate(const char* s1, const char* s2) {
 	return ret;
 }
 
+exported_function string string::operator+ (char c) {
+	char lit[2] = { '\0' };
+	lit[0] = c;
+	return *this + lit;
+}
+
+exported_function void string::operator+= (char c) {
+	char lit[2] = { '\0' };
+	lit[0] = c;
+	*this += lit;
+}
+
 exported_function char& string::operator[] (ui32 i) {
 	AssertRetType(i < this->length, this->chars[0]);
   return this->chars[i];
+}
+
+exported_function string string::operator+ (const char* s) {
+	return Concatenate(*this, s);
+}
+
+exported_function void string::operator+= (const char* s) {
+	*this = Concatenate(*this, s);
 }
 
 exported_function string::string() {

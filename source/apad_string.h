@@ -11,11 +11,15 @@ struct string {
 	char* chars;
 	ui16  length; // Without the EOS
 	
-	imported_function 			string();
-  imported_function 			string(const char* s); // Allows string ss = const char*
-	imported_function char& operator[] (ui32 i);
-	imported_function 		  operator 	 char*(); // Automatic type casting to char*
-	imported_function void  operator=  (const char* s); // Allows ss = const char* if ss already defined
+	imported_function 			 string();
+  imported_function 			 string(const char* s); // Allows string ss = const char*
+	imported_function 		   operator 	 char*(); // Automatic type casting to char*
+	imported_function char&  operator[] (ui32 i);
+	imported_function string operator+  (char c);
+	imported_function void   operator+= (char c);
+	imported_function string operator+  (const char* s);
+	imported_function void   operator=  (const char* s);
+	imported_function void   operator+= (const char* s);
 };
 
 imported_function string ToString(si8 i);
