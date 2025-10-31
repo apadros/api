@@ -30,12 +30,16 @@ program_local void ExitStringAPI() {
 }
 
 program_local void AddEntryToStringTable(memory_block block) {
+  if(IsValid(stringTable) == false) { // Init table
+	  stringTable = AllocateStack(KiB(1));
+		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
+	}
+	
 	PushInstance(block, stringTable);
 }
 
 // ******************** Local API end ******************** //
 
-// @TEST
 exported_function string Concatenate(const char* s1, const char* s2) {
   AssertRetType(s1 != Null, string());
   AssertRetType(s2 != Null, string());
@@ -63,12 +67,7 @@ exported_function char& string::operator[] (ui32 i) {
 }
 
 exported_function string::string() {
-  if(IsValid(stringTable) == false) { // Init table
-	  stringTable = AllocateStack(KiB(1));
-		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
-	}
-		
-	this->chars = Null;
+  this->chars = Null;
 	this->length = Null;
 }
 

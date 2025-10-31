@@ -18,7 +18,7 @@ Misc
 		
 String
 	- Rounding within F32ToString()
-	- Concatenation
+	- Concatenation by overloading the + operator
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
 		
