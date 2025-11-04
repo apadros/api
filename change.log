@@ -1,3 +1,19 @@
+v0.3.1
+	- Array
+		- Added AddToArray() and ClearArray()
+		
+	- Memory
+		- Removed funcionality of max stack capacity
+		- Added PushInstance()
+	
+	- String
+		- Replaced use of Win32 API memory functions with normal memory API memory block
+		- Renamed short_string struct to string and implemented dynamic memory functionality
+			- Dynamic string memory will be allocated at its first use and will be deallocated when program exits
+		- Added ConcatenateStrings()
+		- Added overloaded operators ==, +, and +=. All of them can be used with either a const char* of a string instance
+			- Allow assignment and concatenation with chars, char pointers, char arrays and string literals
+
 v0.3.0
 	- Array
 		- Added GetArrayLength()

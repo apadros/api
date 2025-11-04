@@ -3,9 +3,7 @@ Array
 		- Initializer overloads
 		- Supporting generic functions
 		- ForArray()
-	- Add to array function
-	- Clear array function
-
+		
 Logging
   - Stack trace printing
 	
