@@ -13,11 +13,15 @@ Memory
 		
 Misc
 	- Any code marked as @EXPORT_API in calendar project
+	- Batch file to package files for GitHub release
+		- Headers, libs and dlls
 		
 String
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
+	- If generic array struct an functionality implement, inherit from it? See Arrat section above.
+		
 		
 Time
 	 - Creation of a date struct from a string

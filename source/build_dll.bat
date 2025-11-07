@@ -22,5 +22,5 @@ exit /b REM Exit batch script
 REM Help message
 :Help
 echo:
-echo Usage: build_dll.bat file.cpp exe_name
+echo Usage: build_dll.bat file.cpp dll_name
 echo:

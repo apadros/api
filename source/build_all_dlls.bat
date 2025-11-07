@@ -70,5 +70,5 @@ exit /b REM Exit batch script
 REM Help message
 :Help
 echo:
-echo Usage: build_dll.bat version(vx_y_z)
+echo Usage: build_dll.bat version(vx.y.z)
 echo:
