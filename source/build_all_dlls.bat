@@ -16,64 +16,56 @@ echo:
 echo #################### ERROR ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_error.cpp /Feapad_error_v_%1_%2_%3
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_error.cpp /Feapad_error_v%1.%2.%3.dll
 
 echo:
 echo #################### TEMP #####################
 echo:
 
 REM Make temp libs
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v_%1_%2_%3 >> temp.txt
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v_%1_%2_%3 >> temp.txt
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v%1.%2.%3.dll >> temp.txt
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v%1.%2.%3.dll >> temp.txt
 
 echo:
 echo #################### WIN32 ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_win32.cpp /Feapad_win32_v_%1_%2_%3 apad_error_v_%1_%2_%3.lib apad_memory_v_%1_%2_%3.lib apad_string_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_win32.cpp /Feapad_win32_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
 
 echo:
 echo #################### MEMORY ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v_%1_%2_%3 apad_error_v_%1_%2_%3.lib apad_win32_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_win32_v%1.%2.%3.lib
 
 echo:
 echo #################### FILE ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_file.cpp /Feapad_file_v_%1_%2_%3 apad_memory_v_%1_%2_%3.lib apad_win32_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_file.cpp /Feapad_file_v%1.%2.%3.dll apad_memory_v%1.%2.%3.lib apad_win32_v%1.%2.%3.lib
 
 echo:
 echo #################### STRING ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v_%1_%2_%3 apad_error_v_%1_%2_%3.lib apad_memory_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib
 
 echo:
 echo #################### LOGGING ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_logging.cpp /Feapad_logging_v_%1_%2_%3 apad_error_v_%1_%2_%3.lib apad_memory_v_%1_%2_%3.lib apad_string_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_log.cpp /Feapad_logging_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
 
 echo:
 echo #################### TIME ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_time.cpp /Feapad_time_v_%1_%2_%3 apad_error_v_%1_%2_%3.lib apad_string_v_%1_%2_%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_time.cpp /Feapad_time_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
 
 
 del temp.txt
 del *.obj
 del *.exp
-
-echo:
-echo RENAMING...
-echo:
-
-REM For some reason, supplying the compiler with vx.y.z instead of v_x_y_z creates errors
-ren *v_%1_%2_%3.lib *v%1.%2.%3.lib
-ren *v_%1_%2_%3.dll *v%1.%2.%3.dll
 
 popd
 exit /b REM Exit batch script

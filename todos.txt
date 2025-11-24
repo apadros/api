@@ -4,29 +4,35 @@ Array
 		- Supporting generic functions
 		- ForArray()
 		
+Debug / Error
+	- InvalidCodePath macro
+		
 Logging
   - Stack trace printing
 	
 Memory
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
+	- ResetStack()
 		
 Misc
 	- Any code marked as @EXPORT_API in calendar project
-	- Batch file to package files for GitHub release
-		- Headers, libs and dlls
 		
 String
+	- Operator != ?
+	- Operator + (integer) - return chars + integer
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
-	- If generic array struct an functionality implement, inherit from it? See Arrat section above.
+	- If generic array struct an functionality implemented, inherit from it? See Array section above.
 		
 		
 Time
-	 - Creation of a date struct from a string
-	 - Days of the week into date struct
-	 - Consideration of work days in all relevant functionality
+	- IsDate(string) function to return true for formats dd/mm, dd/mm/yy and dd/mm/yyyy
+	- Add "dd/mm/yyyy" as standard date format
+	- Creation of a date struct from a string
+	- Days of the week into date struct
+	- Consideration of work days in all relevant functionality
 		
 Win32
 	- More in-depth logging in case of error detection / failure

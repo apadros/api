@@ -10,7 +10,8 @@ struct date {
   ui8  month; 			 // 1 -> 12
   ui16 year;
 };
-
+					
+												 // Returned string format is dd/mm/yyyy
 imported_function string DateToString(date d);
 imported_function date 	 GetDate(si32 offsetDays);
 

@@ -5,7 +5,7 @@
 #include "apad_error.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
-#include "apad_logging.h"
+#include "apad_log.h"
 #include "apad_string.h"
 
 // ******************** Internal API start ******************** //
