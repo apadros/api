@@ -6,14 +6,20 @@ Array
 		
 Debug / Error
 	- InvalidCodePath macro
+	
+File
+	- @BUG - Functions don't seem to point to their Win32 counterparts
 		
 Logging
   - Stack trace printing
 	
 Memory
+	- @BUG - Recursive call of PushMemory() has initial stack memory copied into incorrect place
+		- Work out final capacity needed (previous x 2 recursively) and allocate once instead of using copying memory recursively
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
-	- ResetStack()
+	- ResetStack() - have it clear all used memory to 0 - requested memory should always be 0
+	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
 		
 Misc
 	- Any code marked as @EXPORT_API in calendar project

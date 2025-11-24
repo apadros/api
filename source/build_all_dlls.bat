@@ -51,10 +51,10 @@ echo:
 cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib
 
 echo:
-echo #################### LOGGING ####################
+echo #################### LOG ####################
 echo:
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_log.cpp /Feapad_logging_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
+cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_log.cpp /Feapad_log_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
 
 echo:
 echo #################### TIME ####################
