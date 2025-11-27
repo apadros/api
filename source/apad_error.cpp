@@ -7,11 +7,17 @@
 
 // ******************** Local API start ******************** //
 
-program_local const ui8  errorStringMaxLength = UI8Max;
-program_local 			char errorString[errorStringMaxLength] = {};
-program_local 			bool exitIfError = false;
+program_local const ui8  ErrorStringMaxLength = UI8Max;
+program_local 			char ErrorString[ErrorStringMaxLength] = {};
+program_local 			bool ExitIfError = false;
+
+program_external    bool PrintAssertions = false;
 
 // ******************** Local API end ******************** //
+
+exported_function void SetAssertionPrinting(bool b) {
+  PrintAssertions = b;
+}
 
 exported_function void SetError(const char* string) {
 	// Since this function will be called everywhere, avoid calling external code 
@@ -25,25 +31,25 @@ exported_function void SetError(const char* string) {
   ui16 	sourceLength = 0;
   do {	 	
 		c = string[sourceLength++];
-		if(sourceLength == errorStringMaxLength - 1) // Couldn't find an EOS character
+		if(sourceLength == ErrorStringMaxLength - 1) // Couldn't find an EOS character
 			return;
 	}
   while (c != '\0');
 	
 	ForAll(sourceLength)
-	  errorString[it] = string[it];
+	  ErrorString[it] = string[it];
 }
 
 exported_function bool ErrorIsSet() {
-  return errorString[0] != '\0';
+  return ErrorString[0] != '\0';
 }
 
 exported_function void ClearError() {
-  errorString[0] = '\0';
+  ErrorString[0] = '\0';
 }
 
 exported_function const char* GetError() {
-	return errorString;
+	return ErrorString;
 }
 
 #include <stdlib.h> // For exit()
@@ -55,9 +61,9 @@ exported_function void ExitProgram(bool error) {
 }
 
 exported_function void SetExitIfError(bool b) {
-  exitIfError = b;
+  ExitIfError = b;
 }
 
 exported_function bool IsExitIfErrorSet() {
-	return exitIfError;
+	return ExitIfError;
 }

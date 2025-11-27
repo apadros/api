@@ -5,11 +5,6 @@ Array
 		- ForArray()
 		
 Debug / Error
-	- Logging assertions into either command line of log file if latter being used instead of 
-		just storing the assertions and leaving outputing it to the user
-		- Use Log API, if no log file present simply call printf()
-			- Log() should go to printf automatically if no log file present / specified
-		- If log file present, automatically display contents during program exit?
 		
 File
 	- @BUG - Functions don't seem to point to their Win32 counterparts
@@ -32,8 +27,7 @@ String
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
-	- If generic array struct an functionality implemented, inherit from it? See Array section above.
-		
+	- If generic array struct an functionality implemented, inherit from it? See Array section above.	
 		
 Time
 	- IsDate(string) function to return true for formats dd/mm, dd/mm/yy and dd/mm/yyyy
