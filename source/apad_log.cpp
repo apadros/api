@@ -157,7 +157,7 @@ exported_function void Log(log_file& log, const char* formatString, ...) {
 			it -= 1; // To compensate the +1 in the loop header
 		}
 		else
-			PushData(&c, sizeof(c), log);
+			Push(&c, sizeof(c), log);
   }
 	
 	va_end(args);

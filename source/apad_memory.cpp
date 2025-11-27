@@ -84,29 +84,43 @@ exported_function void FreeStack(memory_block& stack) {
 	FreeMemory(stack);
 }
 
-exported_function void* PushMemory(ui32 size, memory_block& stack) {
+exported_function void* Push(ui32 size, memory_block& stack) {
 	AssertRetType(IsValid(stack), Null);
-  
-	if(size + stack.size <= stack.capacity) { // If allocating within stack capacity
+	AssertRetType(size > 0, Null);
+	
+	if(stack.size + size <= stack.capacity) { // If allocating within stack capacity
 		void* ret = (ui8*)stack.memory + stack.size;
 		stack.size += size;
 		return ret;
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
-		auto newStack = AllocateStack(stack.capacity * 2);
-		newStack.size = stack.size;
-		void* retMem = PushMemory(size, newStack); // Recursive call until right capacity found
+		ui32 	newCapacity = stack.capacity;
+		do 		newCapacity *= 2;
+		while(stack.size + size > newCapacity);
+	
+		auto newStack = AllocateStack(newCapacity);
 		if(ErrorIsSet() == true)
 			return Null;
-		CopyMemory(stack.memory, stack.size, retMem);
-		FreeMemory(stack);
+		
+		Push(stack.memory, stack.size, newStack);
+		if(ErrorIsSet() == true)
+			return Null;
+		
+		FreeStack(stack);
+		if(ErrorIsSet() == true)
+			return Null;
+		
 		stack = newStack;
-		return retMem;
+		
+		return Push(size, stack);
 	}
+	
+	InvalidCodePath;
+	return Null;
 }
 
-exported_function void* PushData(void* data, ui32 size, memory_block& stack) {
-  void* mem = PushMemory(size, stack);
+exported_function void* Push(void* data, ui32 size, memory_block& stack) {
+  void* mem = Push(size, stack);
 	CopyMemory(data, size, mem);
 	return mem;
 }

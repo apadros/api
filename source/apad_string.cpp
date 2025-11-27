@@ -201,7 +201,7 @@ exported_function const char* PushString(const char* string, bool includeEOS, me
   auto length = GetStringLength(string, includeEOS);
 	if(ErrorIsSet() == true)
 		return Null;
-	void* mem = PushData((void*)string, length, stack);
+	void* mem = Push((void*)string, length, stack);
 	return (const char*)mem;
 }
 

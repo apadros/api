@@ -84,4 +84,7 @@ imported_function void 				SetError(const char* string);
 
 #endif
 
+// InvalidCodePath
+#define InvalidCodePath Assert(false)
+
 #endif
