@@ -15,7 +15,6 @@ exported_function void ResetStack(memory_block& stack) {
 
 exported_function void ClearMemory(void* memory, ui32 size) {
 	AssertRet(memory != Null);
-	
   AssertRet(size > 0);
 	
   for (ui32 it = 0; it < size; it++)

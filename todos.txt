@@ -14,11 +14,9 @@ Logging
 Memory
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
-	- ResetStack() - have it clear all used memory to 0 - requested memory should always be 0
 	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
 		
 Misc
-	- Any code marked as @EXPORT_API in calendar project
 		
 String
 	- Operator != ?
@@ -29,11 +27,6 @@ String
 	- If generic array struct an functionality implemented, inherit from it? See Array section above.	
 		
 Time
-	- IsDate(string) function to return true for formats dd/mm, dd/mm/yy and dd/mm/yyyy
-	- Add "dd/mm/yyyy" as standard date format
-	- Creation of a date struct from a string
-	- Days of the week into date struct
-	- Consideration of work days in all relevant functionality
 		
 Win32
 	- More in-depth logging in case of error detection / failure

@@ -7,7 +7,7 @@
 
 program_local string DateFormatShort  = "dd/mm";
 program_local string DateFormatMedium = "dd/mm/yy";
-program_local string DateFormatLong   = "dd/mm/yyyy";
+program_local string DateFormatLong   = "dd/mm/yyyy"; // Default format
 
 // ******************** Local API end ******************** //
 
@@ -168,7 +168,7 @@ exported_function date GetDate(si32 offsetDays) {
 }
 
 exported_function string DateToString(date d) {
-	string ret = "dd/mm/yyyy";
+	string ret = DateFormatLong;
 	if(ErrorIsSet() == true)
 		return ret;
 	
