@@ -7,7 +7,6 @@ Array
 Debug / Error
 		
 File
-	- @BUG - Functions don't seem to point to their Win32 counterparts
 		
 Logging
   - Stack trace printing

@@ -7,13 +7,11 @@
 
 typedef memory_block file;
 
-imported_function bool (*FileExists)(const char* path);
-											 // Calls FileExists() first, returns if false
-imported_function file (*LoadFile)(const char* path);
-											 // Will create a new file if it doesn't exist. 
-											 // If it does it'll get replaced.
-imported_function void (*SaveFile)(void* data, ui32 dataSize, const char* path);
-imported_function void (*FreeFile)(file& f);
-imported_function bool IsValid(file f); // Defined in memory.cpp
+imported_function program_external bool (*FileExists)(const char* path);
+imported_function program_external file (*LoadFile)(const char* path); // Calls FileExists() first, returns if false
+imported_function program_external void (*SaveFile)(void* data, ui32 dataSize, const char* path); // Will create a new file if it doesn't exist. 
+																																																	// If it does it'll get replaced.
+imported_function program_external void (*FreeFile)(file& f);
+imported_function 								 bool IsValid(file f); // Defined in memory.cpp
 
 #endif

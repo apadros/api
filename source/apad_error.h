@@ -21,7 +21,7 @@ imported_function void 				SetError(const char* string);
 // ******************** Assertions ******************** //
 
 imported_function void SetAssertionPrinting(bool b); // Will enable automatic printing of failed assertions.
-																										 // False by default. 
+																										 // True by default. 
 																										 // Won't work for APAD_DEBUGGER_ASSERTIONS assertions.
 
 // Assert()
