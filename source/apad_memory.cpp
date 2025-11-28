@@ -8,6 +8,11 @@
 
 // ******************** Local API end ******************** //
 
+exported_function void ResetStack(memory_block& stack) {
+	ClearMemory(stack.memory, stack.size);
+  stack.size = 0;
+}
+
 exported_function void ClearMemory(void* memory, ui32 size) {
 	AssertRet(memory != Null);
 	

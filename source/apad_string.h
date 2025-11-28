@@ -5,8 +5,6 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 
-// ******************** Conversions ******************** //
-
 struct string {
 	char* chars;
 	ui16  length; // Without the EOS
@@ -23,6 +21,10 @@ struct string {
 	imported_function bool   operator== (string s); // For some reason can't just use the == overload below
 	imported_function bool   operator== (const char* s);
 };
+
+// ******************** Conversions ******************** //
+
+imported_function string ConvertStringToLowerCase(const char* s);
 
 imported_function string ToString(si8 i);
 imported_function string ToString(ui8 i);
@@ -43,6 +45,7 @@ imported_function si32 	 StringToInt(const char* string);
 
 imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
+imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return & newline
 
 imported_function bool 				ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
 															// Set srcLength -1 to copy entire source including the \0

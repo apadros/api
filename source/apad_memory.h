@@ -40,12 +40,14 @@ imported_function void         SetInvalid(memory_block& block);
 // ******************** Stack ******************** //
 
 imported_function memory_block AllocateStack(ui32 capacity);
-															 // Will allocate new stacks recursively if the requested size is larger 
-															 // than the original stack's capacity until the right capacity is found
+imported_function void 				 FreeStack(memory_block& stack);
+
+// All of these will allocate a new stack with minimum 2x capacity if not enough space available
 imported_function void* 			 Push(ui32 size, memory_block& stack);
-imported_function void*				 Push(void* memory, ui32 size, memory_block& stack);
+imported_function void*				 Push(void* memory, ui32 size, memory_block& stack); 
 #define                        PushInstance(_inst, _stack) \
 																	Push(&(_inst), sizeof(_inst), (_stack))
-imported_function void 				 FreeStack(memory_block& stack);
+
+imported_function void 				 ResetStack(memory_block& stack);
 
 #endif

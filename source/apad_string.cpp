@@ -40,6 +40,22 @@ program_local void AddEntryToStringTable(memory_block block) {
 
 // ******************** Local API end ******************** //
 
+exported_function bool IsWhitespace(char c) {
+	return c == ' ' || c == '\t' || c == '\v' || c == '\r' || c == '\n';
+}
+
+exported_function string ConvertStringToLowerCase(const char* s) {
+	AssertRetType(s != Null, string());
+	
+	string ret = s;
+	ForAll(ret.length) {
+    if(ret[it] >= 'A' && ret[it] <= 'Z')
+			ret[it] += 'a' - 'A';
+	}
+	
+	return ret;
+}
+
 exported_function string Concatenate(const char* s1, const char* s2) {
   AssertRetType(s1 != Null, string());
   AssertRetType(s2 != Null, string());
