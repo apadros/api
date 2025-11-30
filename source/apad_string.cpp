@@ -78,9 +78,12 @@ exported_function string Concatenate(const char* s1, const char* s2) {
 }
 
 exported_function string string::operator+ (char c) {
-	char lit[2] = { '\0' };
-	lit[0] = c;
+	char lit[1] = { c };
 	return *this + lit;
+}
+
+exported_function string string::operator+ (ui16 i) {
+	return ((const char*)(*this)) + i;
 }
 
 exported_function void string::operator+= (char c) {
@@ -102,12 +105,20 @@ exported_function void string::operator+= (const char* s) {
 	*this = Concatenate(*this, s);
 }
 
+exported_function bool string::operator== (const char* s) {
+	return StringsAreEqual(*this, s);
+}
+
 exported_function bool string::operator== (string s) {
 	return StringsAreEqual(*this, s);
 }
 
-exported_function bool string::operator== (const char* s) {
-	return StringsAreEqual(*this, s);
+exported_function bool string::operator!= (const char* s) {
+	return !(*this == s);
+}
+
+exported_function bool string::operator!= (string s) {
+	return !(*this == s);
 }
 
 exported_function string::string() {

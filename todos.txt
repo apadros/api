@@ -19,12 +19,10 @@ Memory
 Misc
 		
 String
-	- Operator != ?
-	- Operator + (integer) - return chars + integer
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
-	- If generic array struct an functionality implemented, inherit from it? See Array section above.	
+	- If generic array struct and functionality implemented, inherit from it? See Array section above.	
 		
 Time
 		

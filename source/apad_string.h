@@ -14,12 +14,15 @@ struct string {
 	imported_function 		   operator 	 char*(); // Automatic type casting to char*
 	imported_function char&  operator[] (ui32 i);
 	imported_function string operator+  (char c);
-	imported_function void   operator+= (char c);
 	imported_function string operator+  (const char* s);
+	imported_function string operator+  (ui16 i);
 	imported_function void   operator=  (const char* s);
+	imported_function void   operator+= (char c);
 	imported_function void   operator+= (const char* s);
-	imported_function bool   operator== (string s); // For some reason can't just use the == overload below
 	imported_function bool   operator== (const char* s);
+	imported_function bool   operator== (string s); // For some reason can't just use the == overload above
+	imported_function bool   operator!= (const char* s);
+	imported_function bool   operator!= (string s);
 };
 
 // ******************** Conversions ******************** //
