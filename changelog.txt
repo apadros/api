@@ -1,3 +1,35 @@
+v0.4.0
+	- Error
+		- Added InvalidCodePath macro
+		- Replaced APAD_DEBUG macro with APAD_DEBUGGER_ASSERTIONS for clarity
+		- Improved readibilty of assertion messages
+		- Added support for automatic printing of failed assertions on the command line; to be decided by user code. 
+			This feature in on by default.
+	
+	- File
+		- Fixed bug where functions pointers weren't being defined properly
+	
+	- Log
+		- Renamed all apad_logging* files to apad_log*
+	
+	- Memory
+		- Fixed bug within PushMemory() where, in case the stack needed to be reallocated, original memory wasn't being copied properly
+		- Renamed PushMemory() and PushData() to Push()
+		- Added ResetStack()
+		
+	- String
+		- Added IsWhitespace()
+		- Added ConvertStringToLowerCase()
+		- Added struct::operator+(ui16 i)
+		- Added struct::operator!=(const char*)
+		- Added struct::operator!=(string)
+		- Minor correction to struct::operator+(char)
+		
+	- Time
+		- Added officially supported time formats
+		- Added IsDate() 
+		- Added StringToDate()
+
 v0.3.1
 	- Array
 		- Added AddToArray() and ClearArray()

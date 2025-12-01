@@ -1,5 +1,5 @@
-This is a personal, generic, low-level API project for Windows applications coded in C & C++.
+This is a personal API project intended for use in small Windows applications coded in C & C++.
 
-Currently it only has very basic functionality and supports only console applications. More functionality will be added over time.
+The project aims to provide simple support for generic functionality such as file I/O, memory manipulation, string operations and others which can be used regardless of the type of application.
 
-See LICENSE.txt for permissions.
+Although intended for personal use, the code is made public for anyone who wishes to make use of it in their own codebase; see LICENSE.txt for permissions.
