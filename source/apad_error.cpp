@@ -11,9 +11,13 @@ program_local const ui8  ErrorStringMaxLength = UI8Max;
 program_local 			char ErrorString[ErrorStringMaxLength] = {};
 program_local 			bool ExitIfError = false;
 
-program_external    bool PrintAssertions = true;
+program_local 			bool PrintAssertions = true;
 
 // ******************** Local API end ******************** //
+
+exported_function bool IsAssertionPrintingSet() {
+	return PrintAssertions;
+}
 
 exported_function void SetAssertionPrinting(bool b) {
   PrintAssertions = b;

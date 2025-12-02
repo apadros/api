@@ -20,6 +20,8 @@ imported_function void 				SetError(const char* string);
 
 // ******************** Assertions ******************** //
 
+imported_function void IsAssertionPrintingSet(bool b); // Returns current state
+
 imported_function void SetAssertionPrinting(bool b); // Will enable automatic printing of failed assertions.
 																										 // True by default. 
 																										 // Won't work for APAD_DEBUGGER_ASSERTIONS assertions.
@@ -49,8 +51,7 @@ imported_function void SetAssertionPrinting(bool b); // Will enable automatic pr
 										 \n[File]      %s \
 										 \n[Line]      %lu", #_condition, __FILE__, __LINE__); \
 		SetError((const char*)buffer); \
-		program_external bool PrintAssertions; \
-		if(PrintAssertions == true) \
+		if(IsAssertionPrintingSet() == true) \
 		  printf("\n%s\n", GetError()); \
 		if(IsExitIfErrorSet() == true) \
 		  ExitProgram(true); \

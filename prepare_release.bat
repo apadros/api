@@ -5,6 +5,7 @@ if %1.==. ( goto Help )
 if %2.==. ( goto Help )
 if %3.==. ( goto Help )
 
+if not exist release ( mkdir release )
 del release\* /q
 
 pushd source\
