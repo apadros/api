@@ -12,6 +12,7 @@ pushd source\
 call build_all_dlls.bat %1 %2 %3
 popd
 
+echo:
 echo MOVING...
 echo:
 
