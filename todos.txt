@@ -11,6 +11,9 @@ Debug / Error
 
 File
 	- @BUG - Function pointers are Null when calling from the dll
+	
+GUI
+	- Basic window creation init code @CURRENT
 		
 Logging
 	- A function to return a pointer to the log contents, cast to const char* (e.g. to print)
