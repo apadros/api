@@ -5,10 +5,15 @@ Array
 		- ForArray()
 		
 Debug / Error
-		
+	- Currently assertions are printed in command line programs by default, need an equivalent for GUI programs
+		- Message box with assertions failure
+		- Need a way to differentiate between command line and GUI programs - flag set by GUI init function
+
 File
+	- @BUG - Function pointers are Null when calling from the dll
 		
 Logging
+	- A function to return a pointer to the log contents, cast to const char* (e.g. to print)
   - Stack trace printing
 	
 Memory

@@ -18,11 +18,18 @@ imported_function bool 				ErrorIsSet();
 imported_function const char* GetError();
 imported_function void 				SetError(const char* string);
 
-// ******************** Assertions ******************** //
+/******************** Assertions ******************** 
+
+#define APAD_DEBUGGER_ASSERTIONS for use in a debugger, do NOT otherwise as they will have no effect.
+If the macro is not defined, assertions set the global error and record the failed condition in a global string.
+Call SetExitIfError(true) to stop program execution, otherwise will continue by default to allow client code to handle as seen fit.
+Assertions will be printed in command line programs by default, turn off with SetAssertionPrinting(false).
+
+*****************************************************/
 
 imported_function bool IsAssertionPrintingSet(); // Returns current state
 
-imported_function void SetAssertionPrinting(bool b); // Will enable automatic printing of failed assertions.
+imported_function void SetAssertionPrinting(bool b); // Sets or clears automatic printing of failed assertions for command line programs.
 																										 // True by default. 
 																										 // Won't work for APAD_DEBUGGER_ASSERTIONS assertions.
 
