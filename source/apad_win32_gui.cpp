@@ -16,8 +16,15 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 
 // ******************** Local API end ******************** //
 
-void InitGUI(const char* windowTitle, HINSTANCE instance) {
-	SetAssertionPrinting(false);
+exported_function void Win32ErrorMessageBox(const char* string) {
+	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+}
+
+exported_function void InitGUI(const char* windowTitle, HINSTANCE instance) {
+	extern bool GUIAssertions;
+	GUIAssertions = true;
+	
+	#if 0
 	AssertRet(instance != Null);
 	
 	// @TODO - Custom program icon
@@ -86,10 +93,14 @@ void InitGUI(const char* windowTitle, HINSTANCE instance) {
 															0, 0, width, height, 
 															NULL, NULL, instance /* @TODO - Windows documentation says this is optional */, NULL);
   AssertRet(window != NULL);
+	
+	#endif
 }
 
 #include "apad_error.h"
 bool BeginGUILoop() {
+	return true;
+	#if 0
 	MSG msg;
   ClearStruct(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
@@ -99,9 +110,11 @@ bool BeginGUILoop() {
 		if(exit == true)
 			ExitProgram(false);
 	}
+	#endif
 }
 
 void EndGUILoop(HWND window) {
+	#if 0
 	auto dc = GetDC(window);
 	
 	f32 currentFrameTimeMilli = GetTimeElapsedMilli(system->framePreMarker, GetTimeMarker());
@@ -119,4 +132,5 @@ void EndGUILoop(HWND window) {
   
   
   ReleaseDC(window, dc);
+	#endif
 }

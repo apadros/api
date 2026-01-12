@@ -11,17 +11,9 @@ program_local const ui8  ErrorStringMaxLength = UI8Max;
 program_local 			char ErrorString[ErrorStringMaxLength] = {};
 program_local 			bool ExitIfError = false;
 
-program_local 			bool PrintAssertions = true;
+program_external    bool GUIAssertions = false;
 
 // ******************** Local API end ******************** //
-
-exported_function bool IsAssertionPrintingSet() {
-	return PrintAssertions;
-}
-
-exported_function void SetAssertionPrinting(bool b) {
-  PrintAssertions = b;
-}
 
 exported_function void SetError(const char* string) {
 	// Since this function will be called everywhere, avoid calling external code 
@@ -73,5 +65,6 @@ exported_function bool IsExitIfErrorSet() {
 }
 
 exported_function void DisplayErrorGUI(const char* string) {
-	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+	extern void Win32ErrorMessageBox(const char* string);
+	Win32ErrorMessageBox(string);
 }

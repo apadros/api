@@ -5,12 +5,10 @@ Array
 		- ForArray()
 		
 Debug / Error
-	- Currently assertions are printed in command line programs by default, need an equivalent for GUI programs @CURRENT
-		- Message box with assertions failure
-		- Need a way to differentiate between command line and GUI programs - flag set by GUI init function
+	- Replace DisplayErrorGUI() with a function pointer once @LINKING_BUG has been fixed
 
 File
-	- @BUG - Function pointers are Null when calling from the dll
+	- @BUG - Function pointers are Null when calling from the dll @LINKING_BUG
 	
 GUI
 	- Basic window creation init code @PRIORITY
