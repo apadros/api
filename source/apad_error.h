@@ -22,7 +22,7 @@ imported_function void 				SetError(const char* string);
 
 #define APAD_DEBUGGER_ASSERTIONS for use in a debugger, do NOT otherwise as they will have no effect.
 If the macro is not defined, assertions set the global error and record the failed condition in a global string.
-Call SetExitIfError(true) to stop program execution, otherwise will continue by default to allow client code to handle as seen fit.
+Call SetExitIfError(true) to have assertions stop program execution, otherwise will continue by default to allow client code to handle as seen fit.
 Assertions will be printed in command line programs by default, turn off with SetAssertionPrinting(false).
 
 *****************************************************/

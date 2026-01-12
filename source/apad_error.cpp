@@ -71,3 +71,7 @@ exported_function void SetExitIfError(bool b) {
 exported_function bool IsExitIfErrorSet() {
 	return ExitIfError;
 }
+
+exported_function void DisplayErrorGUI(const char* string) {
+	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+}
