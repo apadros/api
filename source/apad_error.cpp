@@ -5,15 +5,15 @@
 // ******************** Imported libs ******************** //
 
 
-// ******************** Local API start ******************** //
+// ******************** Internal API start ******************** //
 
-program_local const ui8  ErrorStringMaxLength = UI8Max;
-program_local 			char ErrorString[ErrorStringMaxLength] = {};
-program_local 			bool ExitIfError = false;
+program_local 		 const 					 ui8  ErrorStringMaxLength = UI8Max;
+program_local 										 char ErrorString[ErrorStringMaxLength] = {};
+program_local 										 bool ExitIfError = false;
 
-program_external    bool GUIAssertions = false;
+exported_function program_external bool GUIApp = false; // Checked outside this translation unit
 
-// ******************** Local API end ******************** //
+// ******************** Internal API end ******************** //
 
 exported_function void SetError(const char* string) {
 	// Since this function will be called everywhere, avoid calling external code 
@@ -50,6 +50,11 @@ exported_function const char* GetError() {
 
 #include <stdlib.h> // For exit()
 exported_function void ExitProgram(bool error) {
+	if(GUIApp == true) {
+		imported_function program_external void Win32Exit();
+		Win32Exit();
+	}
+		
 	if(error == true)
     exit(EXIT_FAILURE);
   else

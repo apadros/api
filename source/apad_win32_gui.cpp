@@ -1,67 +1,83 @@
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
 #include <windows.h>
 
 #include "apad_error.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
 
-// ******************** Local API start ******************** //
+// ******************** Internal API start ******************** //
 
+program_local HWND windowHandle = NULL;
+program_local UINT sleepPeriod = Null;
 
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
 	
 	return DefWindowProcA(window, msg, wparam, lparam);
 }
 
-// ******************** Local API end ******************** //
+exported_function program_external void Win32Exit() { // Called within ExitProgram()
+	// Don't care about assertions at this point
+	
+	if(sleepPeriod != Null); {
+		auto library = LoadLibrary("Winmm.dll");
+		if(library == NULL)
+			return;
+
+		MMRESULT (*timeEndPeriod)(UINT uPeriod) = (MMRESULT (*)(UINT))GetProcAddress(library, "timeEndPeriod");
+		if(timeEndPeriod == NULL)
+			return;
+	
+		auto ret = timeEndPeriod(sleepPeriod);
+		if(ret != TIMERR_NOERROR)
+			return;
+		
+		FreeLibrary(library);
+	}
+}
+
+// ******************** Internal API end ******************** //
 
 exported_function void Win32ErrorMessageBox(const char* string) {
 	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
 }
 
 exported_function void InitGUI(const char* windowTitle, HINSTANCE instance) {
-	extern bool GUIAssertions;
-	GUIAssertions = true;
+	extern bool GUIApp;
+	GUIApp = true;
 	
-	#if 0
 	AssertRet(instance != Null);
 	
-	// @TODO - Custom program icon
-	// @TODO - DPI awareness
-	// @TODO - Set global GUI app flag
-	// @TODO - Clock resolution for Sleep()
-	// @TODO - timeEndPeriod() call when exiting app - shutdown function / intrinsic ExitProgram() call
-	
-	// @TODO - Check all of this
 	// DPI
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		Assert(ret == TRUE);
 		if(ret == FALSE) {
 			auto error = GetLastError();
-			// LogError("Error code: %u\n", error); //@TODO - Allow recording of second error in global string?
+			DisplayErrorGUI(ToString((ui32)error));
 		}
   }
 
-  auto library = LoadLibrary("Winmm.dll");
-
-	// @TODO - Check all of this
-  // Set the minimum os clock resolution for Sleep()
+	auto library = LoadLibraryA("Winmm.dll");
+	AssertRet(library != NULL);
+	
+	// Set the minimum os clock resolution for Sleep()
   {
-    MMRESULT (*timeGetDevCaps)(LPTIMECAPS, UINT) = (MMRESULT (*)(LPTIMECAPS, UINT))GetProcAddress("timeGetDevCaps", library);
+    MMRESULT (*timeGetDevCaps)(LPTIMECAPS, UINT) = (MMRESULT (*)(LPTIMECAPS, UINT))GetProcAddress(library, "timeGetDevCaps");
+		AssertRet(timeGetDevCaps != NULL);
+		
     TIMECAPS caps = {};
-	auto ret = timeGetDevCaps(&caps, sizeof(TIMECAPS));
-	Assert(ret == MMSYSERR_NOERROR);
-	Assert(caps.wPeriodMin == 1);
+		auto ret = timeGetDevCaps(&caps, sizeof(TIMECAPS));
+		AssertRet(ret == MMSYSERR_NOERROR);
+		AssertRet(caps.wPeriodMin == 1);
       
-    MMRESULT (*timeBeginPeriod)(UINT) = (MMRESULT (*)(UINT))GetProcAddress("timeBeginPeriod", library);
+    MMRESULT (*timeBeginPeriod)(UINT) = (MMRESULT (*)(UINT))GetProcAddress(library, "timeBeginPeriod");
+		AssertRet(timeBeginPeriod != NULL);
+		
     ret = timeBeginPeriod(caps.wPeriodMin);
-	Assert(ret == TIMERR_NOERROR);
-    
-	Assert(caps.wPeriodMin <= UI8Max);
-    apiData->clockMinResolution = caps.wPeriodMin;
+		AssertRet(ret == TIMERR_NOERROR);
+		
+		sleepPeriod = caps.wPeriodMin;
   }
+	FreeLibrary(library);
 	
 	// Get the display work area first
 	ui16 width = 0;
@@ -76,31 +92,25 @@ exported_function void InitGUI(const char* windowTitle, HINSTANCE instance) {
 	AssertRet(width > 0);
 	AssertRet(height > 0);
 	
-	string windowClassID = (string)windowTitle + " class";
-	
 	WNDCLASSA wndclass = {};
   // wndclass.cbSize = sizeof(WNDCLASSEX);
   wndclass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
   wndclass.lpfnWndProc = WindowProc;
   wndclass.hInstance = instance;
   wndclass.hCursor = LoadCursorA(NULL, (LPCSTR)IDC_ARROW); // @TODO - Is this needed by default?
-  wndclass.lpszClassName = windowClassID;
+  wndclass.lpszClassName = "APAD window class";
 	
 	AssertRet(RegisterClassA(&wndclass) != 0);
 	
-	HWND window = CreateWindowA(wndclass.lpszClassName, windowTitle, // @TODO - What to do if windowTitle == Null?
-															WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
-															0, 0, width, height, 
-															NULL, NULL, instance /* @TODO - Windows documentation says this is optional */, NULL);
-  AssertRet(window != NULL);
-	
-	#endif
+	windowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
+															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
+															 0, 0, width, height, 
+															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional */, NULL);
+  AssertRet(windowHandle != NULL);
 }
 
 #include "apad_error.h"
-bool BeginGUILoop() {
-	return true;
-	#if 0
+exported_function void BeginGUILoop() {
 	MSG msg;
   ClearStruct(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
@@ -110,7 +120,6 @@ bool BeginGUILoop() {
 		if(exit == true)
 			ExitProgram(false);
 	}
-	#endif
 }
 
 void EndGUILoop(HWND window) {

@@ -54,8 +54,8 @@ Assertions will be printed in command line programs and displayed in a message b
 										 \n[File]      %s \
 										 \n[Line]      %lu", #_condition, __FILE__, __LINE__); \
 		SetError((const char*)buffer); \
-		extern bool GUIAssertions; \
-		if(GUIAssertions == false) \
+		extern bool GUIApp; \
+		if(GUIApp == false) \
 		  printf("\n%s\n", GetError()); \
 		else \
 		  DisplayErrorGUI(GetError()); \
