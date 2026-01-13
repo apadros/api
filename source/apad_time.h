@@ -2,6 +2,7 @@
 #define APAD_TIME_H
 
 #include "apad_base_types.h"
+#include "apad_intrinsics.h"
 #include "apad_string.h"
 
 struct date {

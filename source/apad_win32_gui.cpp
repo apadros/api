@@ -46,15 +46,6 @@ exported_function void Win32InitGUI(const char* windowTitle, HINSTANCE instance)
 	
 	AssertRet(instance != Null);
 	
-	// Record the CPU counter frequency for timing operations
-	{
-		program_external ui64 cpuCounterFrequencyKHz;
-		LARGE_INTEGER temp = {};
-		AssertRet(QueryPerformanceFrequency(&temp) != 0);
-		cpuCounterFrequencyKHz = temp.QuadPart;
-		AssertRet(cpuCounterFrequencyKHz != Null);
-	}
-	
 	// DPI
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);

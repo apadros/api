@@ -1,5 +1,6 @@
 #include "apad_base_types.h"
 #include "apad_error.h"
+#include "apad_intrinsics.h"
 #include "apad_string.h"
 #include "apad_time.h"
 

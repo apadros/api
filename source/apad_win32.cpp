@@ -116,6 +116,17 @@ exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path
 
 #include "apad_time.h"
 exported_function time_marker Win32GetTimeMarker() {
+	// Init cpuCounterFrequencyKHz if it hasn't already
+	{
+		program_external ui64 cpuCounterFrequencyKHz;
+		if(cpuCounterFrequencyKHz == Null) {
+			LARGE_INTEGER temp = {};
+			AssertRetType(QueryPerformanceFrequency(&temp) != 0, Null);
+			cpuCounterFrequencyKHz = temp.QuadPart;
+			AssertRetType(cpuCounterFrequencyKHz != Null, Null);
+		}
+	}
+	
   LARGE_INTEGER temp = {};
   AssertRetType(QueryPerformanceCounter(&temp) != 0, 0);
   return temp.QuadPart; // Value in kilo counts
