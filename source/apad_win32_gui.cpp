@@ -7,7 +7,11 @@
 // ******************** Internal API start ******************** //
 
 program_local HWND windowHandle = NULL;
-program_local UINT sleepPeriod = Null;
+
+#include "apad_time.h"
+program_local UINT 				sleepPeriod = Null;
+program_local time_marker lastLoopMarker = Null;
+program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
 	
@@ -109,7 +113,6 @@ exported_function void Win32InitGUI(const char* windowTitle, HINSTANCE instance)
   AssertRet(windowHandle != NULL);
 }
 
-#include "apad_error.h"
 exported_function void Win32BeginGUIUpdateLoop() {
 	MSG msg;
   ClearStruct(msg);
@@ -123,27 +126,44 @@ exported_function void Win32BeginGUIUpdateLoop() {
 }
 
 exported_function void Win32EndGUIUpdateLoop() {
+	if(lastLoopMarker == Null) {
+		lastLoopMarker = GetTimeMarker();
+		return;
+	}
+
 	Assert(windowHandle != NULL);
 	if(windowHandle == NULL)
 		ExitProgram(true);
 	
-	#if 0
-	auto dc = GetDC(window);
+	ui8 targetFPS = 60;
+	f32 targetFrameTimeMilli = 1000.0f / targetFPS;
+
+	auto dc = GetDC(windowHandle);
 	
-	f32 currentFrameTimeMilli = GetTimeElapsedMilli(system->framePreMarker, GetTimeMarker());
-  if (currentFrameTimeMilli + 1 < system->targetFrameTimeMilli) {
-    f32 sleepTimeMilli = system->targetFrameTimeMilli - currentFrameTimeMilli;
-    Sleep((DWORD)sleepTimeMilli);
+	// @TODO - Bug with Sleep? Whatever value I give it, it seems to sleep for ~15ms
+	
+	f32 currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+  if (currentFrameTimeMilli + 1 < targetFrameTimeMilli) {
+    f32 sleepTimeMilli = targetFrameTimeMilli - currentFrameTimeMilli;
+		f32 timeBefore = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+		// Sleep((DWORD)sleepTimeMilli);
+		Sleep(2);
+		f32 timeAfter1 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+		Sleep(2);
+		f32 timeAfter2 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+		Sleep(2);
+		f32 timeAfter3 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+		Sleep(2);
+		f32 timeAfter4 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+		int a  =01;
   }
   
-  do currentFrameTimeMilli = GetTimeElapsedMilli(system->framePreMarker, GetTimeMarker());
-  while (currentFrameTimeMilli < system->targetFrameTimeMilli);
+  do currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+  while (currentFrameTimeMilli < targetFrameTimeMilli);
 	
   SwapBuffers(dc);
-  system->dt = GetTimeElapsedMilli(system->framePreMarker, GetTimeMarker()) / 1000;
-  system->framePreMarker = GetTimeMarker();
+  dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
+  lastLoopMarker = GetTimeMarker();
   
-  
-  ReleaseDC(window, dc);
-	#endif
+  ReleaseDC(windowHandle, dc);
 }
