@@ -34,6 +34,7 @@ String
 	- If generic array struct and functionality implemented, inherit from it? See Array section above.	
 		
 Time
-		
+	- Replace GetTimeMarker() with a function pointer once @LINKING_BUG has been fixed
+	
 Win32
 	- More in-depth logging in case of error detection / failure

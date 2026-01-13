@@ -5,9 +5,11 @@
 
 // ******************** Local API start ******************** //
 
-program_local string DateFormatShort  = "dd/mm";
-program_local string DateFormatMedium = "dd/mm/yy";
-program_local string DateFormatLong   = "dd/mm/yyyy"; // Default format
+program_external ui64 cpuCounterFrequencyKHz = Null;
+
+program_local 	 string DateFormatShort  = "dd/mm";
+program_local 	 string DateFormatMedium = "dd/mm/yy";
+program_local 	 string DateFormatLong   = "dd/mm/yyyy"; // Default format
 
 // ******************** Local API end ******************** //
 
@@ -203,4 +205,16 @@ exported_function string DateToString(date d) {
 	ret[9] = temp[3];
 	
 	return ret;
+}
+
+exported_function time_marker GetTimeMarker() {
+	exported_function time_marker Win32GetTimeMarker();
+	return Win32GetTimeMarker();
+}
+
+exported_function f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd) {
+  AssertRetType(markerStart != Null, Null);
+  AssertRetType(markerEnd != Null, Null);
+  AssertRetType(cpuCounterFrequencyKHz != Null, Null);
+  return (((f64)(markerEnd - markerStart) / cpuCounterFrequencyKHz) * 1000);
 }

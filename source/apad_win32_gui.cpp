@@ -40,11 +40,20 @@ exported_function void Win32ErrorMessageBox(const char* string) {
 	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
 }
 
-exported_function void InitGUI(const char* windowTitle, HINSTANCE instance) {
+exported_function void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	extern bool GUIApp;
 	GUIApp = true;
 	
 	AssertRet(instance != Null);
+	
+	// Record the CPU counter frequency for timing operations
+	{
+		program_external ui64 cpuCounterFrequencyKHz;
+		LARGE_INTEGER temp = {};
+		AssertRet(QueryPerformanceFrequency(&temp) != 0);
+		cpuCounterFrequencyKHz = temp.QuadPart;
+		AssertRet(cpuCounterFrequencyKHz != Null);
+	}
 	
 	// DPI
   {
@@ -110,7 +119,7 @@ exported_function void InitGUI(const char* windowTitle, HINSTANCE instance) {
 }
 
 #include "apad_error.h"
-exported_function void BeginGUILoop() {
+exported_function void Win32BeginGUIUpdateLoop() {
 	MSG msg;
   ClearStruct(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
@@ -122,7 +131,11 @@ exported_function void BeginGUILoop() {
 	}
 }
 
-void EndGUILoop(HWND window) {
+exported_function void Win32EndGUIUpdateLoop() {
+	Assert(windowHandle != NULL);
+	if(windowHandle == NULL)
+		ExitProgram(true);
+	
 	#if 0
 	auto dc = GetDC(window);
 	

@@ -113,3 +113,10 @@ exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path
   
   CloseHandle(handle); // No need to assert, handle will be closed on program exit at the latest
 }
+
+#include "apad_time.h"
+exported_function time_marker Win32GetTimeMarker() {
+  LARGE_INTEGER temp = {};
+  AssertRetType(QueryPerformanceCounter(&temp) != 0, 0);
+  return temp.QuadPart; // Value in kilo counts
+}

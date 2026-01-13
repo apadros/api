@@ -5,9 +5,9 @@
 
 #define DesktopAppEntryPoint(_instanceID) int CALLBACK WinMain(HINSTANCE _instanceID, HINSTANCE prevInstance, LPSTR commandLine, int commandShow)
 
-imported_function void InitGUI(const char* windowTitle, // Can be set to Null
-															 HINSTANCE instance);
+imported_function void Win32InitGUI(const char* windowTitle, // Can be set to Null
+																		HINSTANCE instance);
 															 
-imported_function void BeginGUILoop();
+imported_function void Win32BeginGUIUpdateLoop();
 
 #endif

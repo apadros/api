@@ -21,4 +21,8 @@ imported_function date 	 GetDate(si32 offsetDays);
 imported_function bool 	 IsDate(const char* s);
 imported_function date 	 StringToDate(const char* s); // IsDate() should always be called before this
 
+typedef ui64 time_marker;
+imported_function time_marker GetTimeMarker();
+imported_function f32 			  GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd);
+
 #endif
