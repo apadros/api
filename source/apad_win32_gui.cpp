@@ -125,7 +125,27 @@ exported_function void Win32BeginGUIUpdateLoop() {
 	}
 }
 
+const ui8 Max = 20;
+struct { 
+	time_marker m0;
+	time_marker m1;
+	time_marker m2;
+	time_marker m3;
+	time_marker m4;
+} markers[Max];
+struct { 
+	f32 t0;
+	f32 t1;
+	f32 t2;
+	f32 t3;
+	f32 t4;
+} times[Max];
+
+ui8 index = 0;
+
 exported_function void Win32EndGUIUpdateLoop() {
+	markers[index].m0 = GetTimeMarker();
+	
 	if(lastLoopMarker == Null) {
 		lastLoopMarker = GetTimeMarker();
 		return;
@@ -140,30 +160,43 @@ exported_function void Win32EndGUIUpdateLoop() {
 
 	auto dc = GetDC(windowHandle);
 	
-	// @TODO - Bug with Sleep? Whatever value I give it, it seems to sleep for ~15ms
+	markers[index].m1 = GetTimeMarker();
 	
 	f32 currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-  if (currentFrameTimeMilli + 1 < targetFrameTimeMilli) {
+	if (currentFrameTimeMilli + 1 < targetFrameTimeMilli) {
     f32 sleepTimeMilli = targetFrameTimeMilli - currentFrameTimeMilli;
-		f32 timeBefore = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-		// Sleep((DWORD)sleepTimeMilli);
-		Sleep(2);
-		f32 timeAfter1 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-		Sleep(2);
-		f32 timeAfter2 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-		Sleep(2);
-		f32 timeAfter3 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-		Sleep(2);
-		f32 timeAfter4 = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
-		int a  =01;
+		Sleep((DWORD)sleepTimeMilli);
   }
-  
+	
+	markers[index].m2 = GetTimeMarker();
+		
   do currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
   while (currentFrameTimeMilli < targetFrameTimeMilli);
 	
-  SwapBuffers(dc);
-  dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
+	markers[index].m3 = GetTimeMarker();
+	
+  // SwapBuffers(dc); // @TODO - OpengGL needs to be set up first, otherwise will take ~50ms
+	dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
+	
   lastLoopMarker = GetTimeMarker();
-  
-  ReleaseDC(windowHandle, dc);
+	
+	ReleaseDC(windowHandle, dc);
+	
+	markers[index].m4 = GetTimeMarker();
+	index += 1;
+	
+	if(index == Max) {
+		ForAll(Max) {
+			auto& m = markers[it];
+			if(it > 0)
+				times[it].t0 = GetTimeElapsedMilli(markers[it - 1].m4, m.m0);
+			times[it].t1 = GetTimeElapsedMilli(m.m0, m.m1);
+			times[it].t2 = GetTimeElapsedMilli(m.m1, m.m2);
+			OutputDebugStringA(ToString(times[it].t2));
+			OutputDebugStringA("\n");
+			times[it].t3 = GetTimeElapsedMilli(m.m2, m.m3);
+			times[it].t4 = GetTimeElapsedMilli(m.m3, m.m4);
+		}
+		index = 0;
+	}
 }
