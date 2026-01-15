@@ -11,6 +11,6 @@ imported_function void Win32InitGUI(const char* windowTitle, // Can be set to Nu
 															 
 // These need to be encased in a while(true) loop
 imported_function void Win32BeginGUIUpdateLoop();
-imported_function void Win32EndGUIUpdateLoop();  // Requires linking with Gdi32.lib
+imported_function void Win32EndGUIUpdateLoop();  // Requires linking with gdi32.lib
 
 #endif
