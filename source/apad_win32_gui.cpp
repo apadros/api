@@ -1,8 +1,10 @@
 #include <windows.h>
+#include <gl\gl.h>
 
 #include "apad_error.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
+#include "apad_win32_gui.h"
 
 // ******************** Internal API start ******************** //
 
@@ -14,8 +16,40 @@ program_local time_marker lastLoopMarker = Null;
 program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
+	if(msg == WM_CREATE) {
+		// Init OpenGL
+		
+    PIXELFORMATDESCRIPTOR pfd = {};
+		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+		pfd.nVersion = 1;
+		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pfd.iPixelType = PFD_TYPE_RGBA;
+		pfd.cColorBits = 24;
+		
+		HDC dc = GetDC(window);
+		int format = ChoosePixelFormat(dc, &pfd);
+		Assert(format != 0);
+		if(ErrorIsSet() == true) {
+			DisplayLastWin32Error();
+			ExitProgram(true); // No point in continuing if a GUI program cannot render
+		}
+		
+		ReleaseDC(window, dc);
+  }
+	else if(msg == WM_CLOSE) {
+    // DefWindowProcA() will call DestroyWindow()
+	}
+  else if(msg == WM_DESTROY) {
+		// @TODO - OpenGL exit code
+    PostQuitMessage(0); 
+  }
 	
 	return DefWindowProcA(window, msg, wparam, lparam);
+}
+
+exported_function void DisplayLastWin32Error() {
+	auto error = GetLastError();
+	DisplayErrorGUI(ToString((ui32)error));
 }
 
 exported_function program_external void Win32Exit() { // Called within ExitProgram()
@@ -54,10 +88,8 @@ exported_function void Win32InitGUI(const char* windowTitle, HINSTANCE instance)
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		Assert(ret == TRUE);
-		if(ret == FALSE) {
-			auto error = GetLastError();
-			DisplayErrorGUI(ToString((ui32)error));
-		}
+		if(ErrorIsSet() == true)
+			DisplayLastWin32Error();
   }
 
 	auto library = LoadLibraryA("Winmm.dll");
@@ -109,7 +141,7 @@ exported_function void Win32InitGUI(const char* windowTitle, HINSTANCE instance)
 	windowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
 															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
 															 0, 0, width, height, 
-															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional */, NULL);
+															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
   AssertRet(windowHandle != NULL);
 }
 

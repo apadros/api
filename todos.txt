@@ -11,7 +11,7 @@ File
 	- @BUG - Function pointers are Null when calling from the dll @LINKING_BUG
 	
 GUI
-	- Basic window creation init code @CURRENT
+	- OpenGL code init and exit code @CURRENT
 	- Custom window icon
 	- Custom taskbar icon
 	- Fill in WindowProc()
@@ -26,6 +26,7 @@ Memory
 	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
 		
 Misc
+	- Various @TODO in code files
 		
 String
 	- Rounding within F32ToString()

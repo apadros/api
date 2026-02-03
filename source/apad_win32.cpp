@@ -35,6 +35,8 @@ exported_function bool Win32FileExists(const char* path) {
 	AssertRetType(GetStringLength(path, true) <= MAX_PATH, false);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	// @TODO - Can this be layed out better?
+	// @TODO - Logging or displaying of the error somehow
   auto error = GetLastError();
   if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND))
     return false;
@@ -49,11 +51,12 @@ exported_function memory_block Win32LoadFile(const char* path) {
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	Assert(handle != INVALID_HANDLE_VALUE);
 	if(ErrorIsSet() == true) {
+		// @TODO - Can all of this be improved / layed out better?
+		// @TODO - Logging or displaying of the error somehow
     auto error = GetLastError();
 		AssertRetType(error != ERROR_FILE_NOT_FOUND, NullMemoryBlock);
 		AssertRetType(error != ERROR_PATH_NOT_FOUND, NullMemoryBlock);
 		AssertRetType(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
-		// @TODO - More logging
 		return NullMemoryBlock;
 	}
 
@@ -97,7 +100,7 @@ exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path
 	Assert(handle != INVALID_HANDLE_VALUE);
 	if(ErrorIsSet() == true) {
 		auto error = GetLastError();
-    // @TODO - Logging
+    // @TODO - Logging / Displaying of error in GUI program
 		return;
   }
 	
@@ -106,7 +109,7 @@ exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path
 	Assert(result != FALSE);
 	if(ErrorIsSet() == true) {
     auto error = GetLastError();
-		// @TODO - Logging
+		// @TODO - Logging / Displaying of error in GUI program
 		CloseHandle(handle);
 		return;
   }

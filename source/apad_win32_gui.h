@@ -13,4 +13,6 @@ imported_function void Win32InitGUI(const char* windowTitle, // Can be set to Nu
 imported_function void Win32BeginGUIUpdateLoop();
 imported_function void Win32EndGUIUpdateLoop();  // Requires linking with gdi32.lib
 
+imported_function void DisplayLastWin32Error();
+
 #endif
