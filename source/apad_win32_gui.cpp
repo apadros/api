@@ -34,13 +34,39 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 			ExitProgram(true); // No point in continuing if a GUI program cannot render
 		}
 		
+		BOOL ret = SetPixelFormat(dc, format, &pfd);
+		Assert(ret == TRUE);
+		if(ErrorIsSet() == true) {
+			DisplayLastWin32Error();
+			ExitProgram(true); // No point in continuing if a GUI program cannot render
+		}
+		
+		HGLRC context = wglCreateContext(dc);
+		Assert(context != NULL);
+		if(ErrorIsSet() == true) {
+			DisplayLastWin32Error();
+			ExitProgram(true); // No point in continuing if a GUI program cannot render
+		}
+		
+		// @TODO - Set / enable everything that is needed
+		// glEnable(GL_TEXTURE_2D);
+		// glEnable(GL_DEPTH_TEST);
+		// glEnable(GL_ALPHA_TEST);
+		// @TODO - GL assertions if / after enabling / setting everything
+		
 		ReleaseDC(window, dc);
   }
 	else if(msg == WM_CLOSE) {
     // DefWindowProcA() will call DestroyWindow()
 	}
   else if(msg == WM_DESTROY) {
-		// @TODO - OpenGL exit code
+		HDC dc = GetDC(window);
+		HGLRC glrc = wglGetCurrentContext();
+		
+		wglMakeCurrent(NULL, NULL);
+		wglDeleteContext(glrc);
+		ReleaseDC(window, dc);
+		
     PostQuitMessage(0); 
   }
 	
