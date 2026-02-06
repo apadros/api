@@ -3,6 +3,12 @@ Array
 		- Initializer overloads
 		- Supporting generic functions
 		- ForArray()
+		- Templated?
+		
+Bitmaps / Images
+	- Integration of png support via external library 
+		- linpng? - https://www.libpng.org/pub/png/libpng.html
+			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer once @LINKING_BUG has been fixed
@@ -13,7 +19,6 @@ File
 GUI
 	- Custom window icon
 	- Custom taskbar icon
-	- Fill in WindowProc()
 		
 Logging
 	- A function to return a pointer to the log contents, cast to const char* (e.g. to print)
@@ -27,14 +32,19 @@ Memory
 Misc
 	- Various @TODO in code files
 	
-OpenGL
+OpenGL / Rendering
 	- GL-specific assertions / error logging (glGetError())
+	- Rendering of a sample pixel buffer
+		- Immediate mode / fixed-function rendering @CURRENT
 		
 String
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
 	- If generic array struct and functionality implemented, inherit from it? See Array section above.	
+	
+Text
+	- Investigate ttf file loading and usage through Windows API
 		
 Time
 	- Replace GetTimeMarker() with a function pointer once @LINKING_BUG has been fixed
