@@ -25,6 +25,7 @@ Logging
   - Stack trace printing
 	
 Memory
+	- When Push() allocates a new stack, any pointers to old memory are automatically invalid and there is currently no way to directly tell the user this has happened. Fix.
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
 	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
@@ -35,9 +36,14 @@ Misc
 OpenGL / Rendering
 	- GL-specific assertions / error logging (glGetError())
 	- Rendering of a sample pixel buffer
-		- Immediate mode / fixed-function rendering @CURRENT
+		- Immediate mode / fixed-function rendering
 		
 String
+	- Currently operator= copies the pointer to the text data into the target variable, not evident without delving into cpp file. 
+		This has lead to a bug in DateToString() where DateFormateLong is being overwritten.
+		- Debugging this took time from a separate project and would have been impossible with only dlls, had to temporarily import cpp directly.
+			Conclusion is that encapsulation in string API has obfuscated too much for easy-of-use and the same could be happening / could happen in the future in other parts of the API.
+			- Resort to more DoD approach, make data transformation more obvious and remove as much hidden state as possible while balancing ease-of-use. @CURRENT
 	- Rounding within F32ToString()
 	- Option for user to manually free dynamic strings as they wish
 		- Won't make any impact on performance until string memory implementation switched to a pool allocator
@@ -47,6 +53,7 @@ Text
 	- Investigate ttf file loading and usage through Windows API
 		
 Time
+	- Conversions between formats
 	- Replace GetTimeMarker() with a function pointer once @LINKING_BUG has been fixed
 	
 Win32

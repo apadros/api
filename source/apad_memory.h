@@ -42,7 +42,8 @@ imported_function void         SetInvalid(memory_block& block);
 imported_function memory_block AllocateStack(ui32 capacity);
 imported_function void 				 FreeStack(memory_block& stack);
 
-// All of these will allocate a new stack with minimum 2x capacity if not enough space available
+// All of these will allocate a new stack with minimum 2x capacity if not enough space is available for the push.
+// As such it is strongly discouraged to store pointers into stack memory and to treat it as a single block.
 imported_function void* 			 Push(ui32 size, memory_block& stack);
 imported_function void*				 Push(void* memory, ui32 size, memory_block& stack); 
 #define                        PushInstance(_inst, _stack) \
