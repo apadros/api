@@ -50,13 +50,15 @@ imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
 imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return & newline
 
+															// @TEST
+imported_function const char* Concatenate(ui8 count, ... /* All args must be char* */);
 imported_function bool 				ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
 															// Set srcLength -1 to copy entire source including the \0
 imported_function void 				CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
 															// Creates a copy.
-															// Set count == -1 to extract until the end of the string.
-															// Will do so automatically if count > string length.
-imported_function string 			ExtractSubstring(const char* string, si8 count);
+															// If length > string length extraction will stop after the null-character.
+															// @TEST
+imported_function const char* ExtractSubstring(const char* string, ui8 length /* Set to Null to extract until the null-character */);
 imported_function const char* FindSubstring(const char*sub, const char*string);
 imported_function ui16 				GetStringLength(const char*s, bool includeEOS);
 imported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack);

@@ -1,3 +1,4 @@
+#include <string.h>
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
@@ -17,8 +18,7 @@ exported_function void ClearMemory(void* memory, ui32 size) {
 	AssertRet(memory != Null);
   AssertRet(size > 0);
 	
-  for (ui32 it = 0; it < size; it++)
-		((ui8*)memory)[it] = 0;
+	memset(memory, 0, size);
 }
 
 exported_function void CopyMemory(void* source, ui32 size, void* destination) {
@@ -27,11 +27,7 @@ exported_function void CopyMemory(void* source, ui32 size, void* destination) {
   AssertRet(destination != Null);
 	AssertRet(source != destination);
 	
-  ui8* ps = (ui8*)source;
-  ui8* pd = (ui8*)destination;
-  
-  for (ui32 it = 0; it < size; it++)
-    pd[it] = ps[it];
+	memcpy(destination, source, size);
 }
 
 exported_function memory_block AllocateMemory(ui32 size) {
@@ -76,6 +72,8 @@ exported_function void SetInvalid(memory_block& block) {
 }
 
 exported_function memory_block AllocateStack(ui32 capacity) {
+	if(capacity == Null)
+		capacity = 1;
 	auto block = AllocateMemory(capacity);
 	block.capacity = block.size;
 	block.size = 0;

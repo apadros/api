@@ -13,7 +13,7 @@
 const ui16 MaxStringLength = UI16Max;
 
 // @TODO - Replace stack functionality with pool allocation ?
-memory_block stringTable; // Array of memory_blocks containing dynamically-allocated memory pointers
+memory_stack stringTable; // Array of memory_blocks containing dynamically-allocated memory pointers
 
 program_local void ExitStringAPI() {
 	if(IsValid(stringTable) == true) {
@@ -29,7 +29,7 @@ program_local void ExitStringAPI() {
 	}
 }
 
-program_local void AddEntryToStringTable(memory_block block) {
+program_local void AddToStringTable(memory_block& block) {
   if(IsValid(stringTable) == false) { // Init table
 	  stringTable = AllocateStack(KiB(1));
 		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
@@ -56,6 +56,7 @@ exported_function string ConvertStringToLowerCase(const char* s) {
 	return ret;
 }
 
+#if 0 // @CLEANUP
 exported_function string Concatenate(const char* s1, const char* s2) {
   AssertRetType(s1 != Null, string());
   AssertRetType(s2 != Null, string());
@@ -69,12 +70,37 @@ exported_function string Concatenate(const char* s1, const char* s2) {
 	CopyMemory((void*)s1, length1, mem);
 	CopyMemory((void*)s2, length2, (ui8*)mem + length1);
 	
-	AddEntryToStringTable(block);
+	AddToStringTable(block);
 		
 	string ret;
 	ret.chars = (char*)mem;
 	ret.length = length1 + length2;
 	return ret;
+}
+#endif
+
+#include <stdarg.h>
+// Unfortunately variadic arguments cannot intrinsically infer the number of parameters passed to them
+exported_function const char* Concatenate(ui8 count, ...) {
+	AssertRetType(count >= 2, Null);
+	
+	va_list list;
+	va_start(list, count);
+	
+	auto stack = AllocateStack(Null);
+	
+	ForAll(count) {
+		const char* string = va_arg(list, const char*);
+		Push(string, GetStringLength(string, false), stack);
+	}
+	
+	Push("\0", 1, stack);
+	
+	va_end(args);
+	
+	AddToStringTable(stack);
+	
+	return (const char*)stack.memory;
 }
 
 exported_function string string::operator+ (char c) {
@@ -135,7 +161,7 @@ exported_function string::string(const char* s) : string() {
 	auto block = AllocateMemory(length);
 	CopyMemory((void*)s, length, block.memory);
 	
-	AddEntryToStringTable(block);
+	AddToStringTable(block);
 	
 	this->chars = (char*)block.memory;
 	this->length = length - 1; // Exclude EOS
@@ -297,14 +323,22 @@ exported_function si32 StringToInt(const char* string) {
   return atoi(string);
 }
 
-exported_function string ExtractSubstring(const char* s, si8 count) {
-	AssertRetType(count != 0, string());
+exported_function const char* ExtractSubstring(const char* s, ui8 length) {
+	AssertRetType(s != Null, Null);
 	
-	string ret(s);
-	if(count != -1 && count < ret.length) {
-		ret.chars[count] = '\0';
-		ret.length = count;
-	}
+	auto sLength = GetStringLength(s, true);
+	AssertRetType(sLength > 0, Null);
 	
-	return ret;
+	ui8  copyLength = 0;
+	if(length == Null || length > sLength)
+		copyLength = sLength;
+	else
+		copyLength = length;
+	
+	auto mem = AllocateMemory(copyLength);
+	CopyMemory((void*)s, copyLength, mem.memory);
+	
+	AddToStringTable(mem);
+	
+	return (const char*)mem.memory;
 }
