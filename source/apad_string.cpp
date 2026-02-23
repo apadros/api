@@ -39,28 +39,30 @@ program_local void AddToStringTable(memory_block& block) {
 	PushInstance(block, stringTable);
 }
 
+program_local void PushNullChar(memory_stack& stack) {
+	Push("\0", 1, stack);
+}
+
 // ******************** Local API end ******************** //
 
 exported_function bool IsWhitespace(char c) {
 	return c == ' ' || c == '\t' || c == '\v' || c == '\r' || c == '\n';
 }
 
-exported_function string ConvertStringToLowerCase(const char* s) {
-	AssertRetType(s != Null, string());
+exported_function void ConvertStringToLowerCase(char* s) {
+	AssertRet(s != Null);
 	
-	string ret = s;
-	ForAll(ret.length) {
-    if(ret[it] >= 'A' && ret[it] <= 'Z')
-			ret[it] += 'a' - 'A';
+	auto length = GetStringLength(s);
+	ForAll(length) {
+    if(s[it] >= 'A' && s[it] <= 'Z')
+			s[it] += 'a' - 'A';
 	}
-	
-	return ret;
 }
 
 #if 0 // @CLEANUP
-exported_function string Concatenate(const char* s1, const char* s2) {
-  AssertRetType(s1 != Null, string());
-  AssertRetType(s2 != Null, string());
+exported_function const char* Concatenate(const char* s1, const char* s2) {
+  AssertRetType(s1 != Null, Null);
+  AssertRetType(s2 != Null, Null);
 	
 	auto length1 = GetStringLength(s1, false);
 	auto length2 = GetStringLength(s2, true);
@@ -92,88 +94,36 @@ exported_function const char* Concatenate(ui8 count, ...) {
 	
 	ForAll(count) {
 		const char* string = va_arg(list, const char*);
-		Push(string, GetStringLength(string, false), stack);
+		Push((void*)string, GetStringLength(string), stack);
 	}
 	
 	Push("\0", 1, stack);
 	
-	va_end(args);
+	va_end(list);
 	
 	AddToStringTable(stack);
 	
 	return (const char*)stack.memory;
 }
 
-exported_function string string::operator+ (char c) {
-	char lit[1] = { c };
-	return *this + lit;
-}
-
-exported_function string string::operator+ (ui16 i) {
-	return ((const char*)(*this)) + i;
-}
-
-exported_function void string::operator+= (char c) {
-	char lit[2] = { '\0' };
-	lit[0] = c;
-	*this += lit;
-}
-
-exported_function char& string::operator[] (ui32 i) {
-	AssertRetType(i < this->length, this->chars[0]);
-  return this->chars[i];
-}
-
-exported_function string string::operator+ (const char* s) {
-	return Concatenate(*this, s);
-}
-
-exported_function void string::operator+= (const char* s) {
-	*this = Concatenate(*this, s);
-}
-
-exported_function bool string::operator== (const char* s) {
-	return StringsAreEqual(*this, s);
-}
-
-exported_function bool string::operator== (string s) {
-	return StringsAreEqual(*this, s);
-}
-
-exported_function bool string::operator!= (const char* s) {
-	return !(*this == s);
-}
-
-exported_function bool string::operator!= (string s) {
-	return !(*this == s);
-}
-
-exported_function string::string() {
-  this->chars = Null;
-	this->length = Null;
-}
-
-exported_function string::string(const char* s) : string() {
-	AssertRet(s != Null);
+exported_function const char* AllocateString(const char* s, ui16 length) {
+	AssertRetType(s != Null, Null);
 	
-	auto length = GetStringLength(s, true);
-	AssertRet(length > 1);
+	auto sLength = GetStringLength(s);
 	
-	auto block = AllocateMemory(length);
-	CopyMemory((void*)s, length, block.memory);
+	ui16 copyLength = 0;
+	if(length == Null)
+		copyLength = sLength;
+	else
+		copyLength = Min(length, sLength);
 	
-	AddToStringTable(block);
+	auto stack = AllocateStack(copyLength + 1);
+	Push((void*)s, copyLength, stack);
+	PushNullChar(stack);
 	
-	this->chars = (char*)block.memory;
-	this->length = length - 1; // Exclude EOS
-}
-
-exported_function string::operator char*() {
-	return this->chars;
-};
-
-exported_function void string::operator= (const char* s) {
-	*this = string(s);
+	AddToStringTable(stack);
+	
+	return (const char*)stack.memory;
 }
 
 exported_function ui16 GetStringLength(const char* s) {
@@ -185,71 +135,73 @@ exported_function ui16 GetStringLength(const char* s) {
   return length;
 };
 
-exported_function string ToString(si8 i) {
+exported_function const char* ToString(si8 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hhi", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(ui8 i) {
+exported_function const char* ToString(ui8 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hhu", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(si16 i) {
+exported_function const char* ToString(si16 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hi", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(ui16 i) {
+exported_function const char* ToString(ui16 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hu", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(si32 i) {
+exported_function const char* ToString(si32 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%li", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(ui32 i) {
+exported_function const char* ToString(ui32 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%lu", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(si64 i) {
+exported_function const char* ToString(si64 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%lli", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(ui64 i) {
+exported_function const char* ToString(ui64 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%llu", i);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(f32 f) {
+exported_function const char* ToString(f32 f) {
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2f", f);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function string ToString(f64 f) {
+exported_function const char* ToString(f64 f) {
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2Lf", f);
-	return string((char*)buffer);
+	return AllocateString((const char*)buffer, Null);
 }
 
-exported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack) {
-  auto length = GetStringLength(string, includeEOS);
+exported_function const char* PushString(const char* string, bool addEOS, memory_block& stack) {
+  auto length = GetStringLength(string);
 	if(ErrorIsSet() == true)
 		return Null;
 	void* mem = Push((void*)string, length, stack);
+	if(addEOS == true)
+		Push("\0", 1, stack);
 	return (const char*)mem;
 }
 
@@ -305,7 +257,7 @@ exported_function si32 StringToInt(const char* string) {
 exported_function const char* ExtractSubstring(const char* s, ui8 length) {
 	AssertRetType(s != Null, Null);
 	
-	auto sLength = GetStringLength(s, true);
+	auto sLength = GetStringLength(s);
 	AssertRetType(sLength > 0, Null);
 	
 	ui8  copyLength = 0;
@@ -314,10 +266,11 @@ exported_function const char* ExtractSubstring(const char* s, ui8 length) {
 	else
 		copyLength = length;
 	
-	auto mem = AllocateMemory(copyLength);
-	CopyMemory((void*)s, copyLength, mem.memory);
+	auto stack = AllocateStack(copyLength + 1);
+	Push((void*)s, copyLength, stack);
+	Push("\0", 1, stack);
 	
-	AddToStringTable(mem);
+	AddToStringTable(stack);
 	
-	return (const char*)mem.memory;
+	return (const char*)stack.memory;
 }

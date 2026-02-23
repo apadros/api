@@ -41,9 +41,6 @@ OpenGL / Rendering
 		
 String
 	- Rewrite @CURRENT
-		- First pass to replace inner functionality with as much STL as possible
-		- Second pass to remove as much need for the string struct operators as possible, replace
-			with C-style functions instead
 		- @TEST functions
 	- Rounding within F32ToString()
 	- Add FreeString() to manually free them
