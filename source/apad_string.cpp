@@ -13,7 +13,8 @@
 const ui16 MaxStringLength = UI16Max;
 
 // @TODO - Replace stack functionality with pool allocation ?
-memory_stack stringTable; // Array of memory_blocks containing dynamically-allocated memory pointers
+// Array of memory_blocks containing dynamically-allocated memory pointers allocated on the heap.
+memory_stack stringTable; 
 
 program_local void ExitStringAPI() {
 	if(IsValid(stringTable) == true) {
@@ -175,19 +176,13 @@ exported_function void string::operator= (const char* s) {
 	*this = string(s);
 }
 
-exported_function ui16 GetStringLength(const char* s, bool includeEOS) {
+exported_function ui16 GetStringLength(const char* s) {
   AssertRetType(s != Null, Null);
   
-  char c;
-  ui64 counter = 0;
+	auto length = strlen(s);
+	AssertRetType(length <= UI16Max, Null);
   
-  do	 	c = s[counter++];
-  while (c != '\0');
-	
-	ui64 fullLength = includeEOS ? counter : counter - 1;
-	AssertRetType(fullLength<= UI16Max, Null);
-  
-  return fullLength;
+  return length;
 };
 
 exported_function string ToString(si8 i) {
@@ -262,22 +257,7 @@ exported_function bool StringsAreEqual(const char* s1, const char* s2) {
   AssertRetType(s1 != Null, false);
 	AssertRetType(s2 != Null, false);
 	
-  ui16 counter = 0;
-  do {
-    char c1 = s1[counter];
-    char c2 = s2[counter];
-		if(c1 == '\0' || c2 == '\0') {
-			if(c1 == c2)
-				return true;
-			else
-				return false;
-		}
-		else if(c1 != c2)
-			return false;
-
-		counter += 1;
-  }
-  while(true);
+	return strcmp(s1, s2) == 0;
 }
 
 exported_function const char* FindSubstring(const char*sub, const char*string) {
@@ -296,17 +276,16 @@ exported_function bool ContainsAnySubstring(const char* string, const char** sub
   return false;
 }
 
-exported_function void CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS) {
+exported_function void CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength) {
 	AssertRet(source != Null);
 	AssertRet(srcLength > 0 || srcLength == -1);
 	AssertRet(destination != Null);
 	AssertRet(destLength > 0);
 	
-	auto realSourceLength = srcLength == -1 ? GetStringLength(source, true) : srcLength;
-	AssertRet(realSourceLength <= destLength);
+	auto copyLength = srcLength == -1 ? (GetStringLength(source) + 1) : srcLength;
+	AssertRet(copyLength <= destLength);
 	
-	ForAll(realSourceLength)
-	  destination[it] = source[it];
+	CopyMemory((void*)source, copyLength, (void*)destination);
 }
 
 exported_function bool IsLetter(char c) {

@@ -14,15 +14,7 @@ Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer once @LINKING_BUG has been fixed
 
 File
-	- @BUG - Function pointers are Null when calling from the dll @LINKING_BUG
-	
-Generic
-	- Current API too obfuscated & unnecessarily complex in some places for ease of use and debugability, especially when using DLLs in a separate project.
-		- Switch to a more DoD approach to simply the codebase and eliminate as much hidden state as possible.
-			- Build around as much of the CSL as possible
-			- Start with Memory API, then String @CURRENT
-				- @TEST functions
-				- @CLEANUP
+	- @BUG - Function pointers are Null when calling from the dll @LINKING_BUG				
 		
 GUI
 	- Custom window icon
@@ -33,6 +25,7 @@ Logging
   - Stack trace printing
 	
 Memory
+	- Rewrite @CURRENT
 	- When Push() allocates a new stack, any pointers to old memory are automatically invalid and there is currently no way to directly tell the user this has happened. Fix.
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
@@ -47,6 +40,11 @@ OpenGL / Rendering
 		- Immediate mode / fixed-function rendering
 		
 String
+	- Rewrite @CURRENT
+		- First pass to replace inner functionality with as much STL as possible
+		- Second pass to remove as much need for the string struct operators as possible, replace
+			with C-style functions instead
+		- @TEST functions
 	- Rounding within F32ToString()
 	- Add FreeString() to manually free them
 	

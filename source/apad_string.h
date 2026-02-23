@@ -53,14 +53,15 @@ imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tab
 															// @TEST
 imported_function const char* Concatenate(ui8 count, ... /* All args must be char* */);
 imported_function bool 				ContainsAnySubstring(const char* string, const char** substrings, ui8 subsLength);
-															// Set srcLength -1 to copy entire source including the \0
-imported_function void 				CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength, bool copyEOS);
-															// Creates a copy.
+															// Set srcLength -1 to copy entire source including the null-character
+imported_function void 				CopyString(const char* source, si16 srcLength, char* destination, ui16 destLength);
+															// Allocates a copy on the heap.
 															// If length > string length extraction will stop after the null-character.
 															// @TEST
 imported_function const char* ExtractSubstring(const char* string, ui8 length /* Set to Null to extract until the null-character */);
 imported_function const char* FindSubstring(const char*sub, const char*string);
-imported_function ui16 				GetStringLength(const char*s, bool includeEOS);
+															// Will return the length wihtout the null-character
+imported_function ui16 				GetStringLength(const char*s);
 imported_function const char* PushString(const char* string, bool includeEOS, memory_block& stack);
 imported_function bool 				StringsAreEqual(const char* s1, const char* s2);
 
