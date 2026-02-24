@@ -10,6 +10,8 @@
 
 // ******************** Internal API start ******************** //
 
+program_external char* PushString(const char* string, bool addEOS, memory_block& stack);
+
 // ******************** Internal API end ******************** //
 
 exported_function log_file OpenLogFile() {
@@ -31,7 +33,7 @@ exported_function void Log(log_file& log, const char* formatString, ...) {
 	va_list args;
 	va_start(args, formatString);
 	
-	auto formatStringLength = GetStringLength(formatString, false);
+	auto formatStringLength = GetStringLength(formatString);
   ForAll(formatStringLength) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
