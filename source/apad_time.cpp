@@ -1,3 +1,4 @@
+#include "apad_array.h"
 #include "apad_base_types.h"
 #include "apad_error.h"
 #include "apad_intrinsics.h"
@@ -6,61 +7,52 @@
 
 // ******************** Local API start ******************** //
 
-program_external ui64 cpuCounterFrequencyKHz = Null;
+program_external 			 ui64 cpuCounterFrequencyKHz = Null;
 
-program_local 	 string DateFormatShort  = "dd/mm";
-program_local 	 string DateFormatMedium = "dd/mm/yy";
-program_local 	 string DateFormatLong   = "dd/mm/yyyy"; // Default format
+program_local 	 const char* DateFormatShort  = "dd/mm";
+program_local 	 const char* DateFormatMedium = "dd/mm/yy";
+program_local 	 const char* DateFormatLong   = "dd/mm/yyyy"; // Default format
+program_local    const char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
 
 // ******************** Local API end ******************** //
 
 exported_function bool IsDate(const char* s) {
 	AssertRetType(s != Null, false);
 	
-	string date = ConvertStringToLowerCase(s);
+	ConvertStringToLowerCase(s);
 	
-	if(date == "mon" || date == "tue" || date == "wed" || date == "thu" || 
-		 date == "fri" || date == "sat" || date == "sun")
-		 return true;
+	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true)
+		return true;
 	
-	if(date.length != DateFormatShort.length && date.length != DateFormatMedium.length && date.length != DateFormatLong.length)
+	
+	// Check against allowed formats
+	auto length = GetStringLength(s);
+	if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong))
 		return false;
+	if(s[2] != '/')
+			return false;
+	if(length >= GetStringLength(DateFormatMedium) && s[5] != '/')
+		return false;
+	
+	// @TODO - Check date viability e.g. 31st feb
 	
 	// Check day
 	{
-		if(date[2] != '/')
-			return false;
-		
-		date[2] = '\0';
-		auto day = StringToInt(date);
+		char string[] = { s[0], s[1], '\0' };
+		auto day = StringToInt(string);
 		if(day < 0 || day > 31)
 			return false;
 	}
 	
 	// Check month
 	{
-		if(date.length >= DateFormatMedium.length) {
-			if(date[5] != '/')
-				return false;
-			date[5] = '\0';
-		}
-		
-		auto month = StringToInt(date.chars + 3);
+		char string[] = { s[3], s[4], '\0' };
+		auto month = StringToInt(string);
 		if(month < 0 || month > 12)
 			return false;
 	}
 	
-	// Check year
-	if(date.length >= DateFormatMedium.length) {
-		auto year = StringToInt(date.chars + 6);
-		
-		if(date.length == DateFormatMedium.length && (year < 0 || year > 99))
-			return false;
-		if(date.length == DateFormatLong.length && (year < 0 || year > 2099))
-			return false;
-	}
-	
-	// @TODO - Check date viability e.g. 31st feb
+	// Allow whatever year is desired so long as it fits the format
 	
 	return true;
 }
@@ -68,16 +60,13 @@ exported_function bool IsDate(const char* s) {
 exported_function date StringToDate(const char* s) {
 	AssertRetType(s != Null, date());
 	
-	auto dateString = ConvertStringToLowerCase(s);
+	ConvertStringToLowerCase(s);
 	
-	if(dateString == "mon" || dateString == "tue" || dateString == "wed" || dateString == "thu" || 
-		 dateString == "fri" || dateString == "sat" || dateString == "sun")
-	{
+	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
 		ui8 argDay = 0; // 1 -> 7 to match the date struct
 		{
-			const char* days[] = { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
-			ForAll(7) {
-				if(dateString == days[it]) {
+			ForAll(GetArrayLength(Days)) {
+				if(dateString == Days[it]) {
 					argDay = it + 1;
 					break;
 				}
@@ -170,8 +159,8 @@ exported_function date GetDate(si32 offsetDays) {
 	return ret;
 }
 
-exported_function string DateToString(date d) {
-	string ret = DateFormatLong;
+exported_function char* DateToString(date d) {
+	char* ret = AllocateString(DateFormatLong, Null);
 	if(ErrorIsSet() == true)
 		return ret;
 	
@@ -186,6 +175,7 @@ exported_function string DateToString(date d) {
 		ret[0] = temp[0];
 		ret[1] = temp[1];
 	}
+	FreeString(temp);
 	
 	temp = ToString(d.month);
 	if(d.month <= 9) {
@@ -196,6 +186,7 @@ exported_function string DateToString(date d) {
 		ret[3] = temp[0];
 		ret[4] = temp[1];
 	}
+	FreeString(temp);
 	
 	temp = ToString(d.year);
 	if(ErrorIsSet() == true)
@@ -204,6 +195,7 @@ exported_function string DateToString(date d) {
 	ret[7] = temp[1];
 	ret[8] = temp[2];
 	ret[9] = temp[3];
+	FreeString(temp);
 	
 	return ret;
 }

@@ -16,11 +16,13 @@ struct date {
  * - dd/mm, dd/mm/yy and dd/mm/yyyy
  * - Day of the week: mon, tue, wed, thu, fri, sat & sun (also be written with a capital first letter (e.g. Mon))
  */
-
-imported_function string DateToString(date d); // Returned string format is dd/mm/yyyy
-imported_function date 	 GetDate(si32 offsetDays);
-imported_function bool 	 IsDate(const char* s);
-imported_function date 	 StringToDate(const char* s); // IsDate() should always be called before this
+												// @TEST
+												// Return string will be allocated on global API memory.
+imported_function char* DateToString(date d); // Returned string format is dd/mm/yyyy
+imported_function date 	GetDate(si32 offsetDays);
+												// @TEST
+imported_function bool 	IsDate(const char* s);
+imported_function date 	StringToDate(const char* s); // IsDate() should always be called before this
 
 typedef ui64 time_marker;
 imported_function time_marker GetTimeMarker();

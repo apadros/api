@@ -9,6 +9,7 @@
 
 imported_function void 	ConvertStringToLowerCase(const char* s);
 
+// All ToString() functions return a string allocated on global API memory.
 imported_function char* ToString(si8 i);
 imported_function char* ToString(ui8 i);
 imported_function char* ToString(si16 i);
@@ -22,7 +23,7 @@ imported_function char* ToString(f32 f);
 												// Return limited to 2 decimal places without rounding
 imported_function char* ToString(f64 f);
 
-imported_function si32 	 StringToInt(const char* string);
+imported_function si32 	StringToInt(const char* string);
 
 // ******************** Others ******************** //
 
@@ -42,8 +43,10 @@ imported_function 			void 	CopyString(const char* source, si16 srcLength, const 
 															// If length > string length extraction will stop after the null-character.
 imported_function 			char* ExtractSubstring(const char* string, ui8 length /* Set to Null to extract until the null-character */);
 imported_function const char* FindSubstring(const char* sub, const char* string);
+imported_function 			void  FreeString(char* string);
 															// Will return the length wihtout the null-character
 imported_function 			ui16 	GetStringLength(const char* s);
+imported_function 			bool  StringIsEqualToAny(const char* string, const char** strings, ui8 count);
 imported_function 			bool 	StringsAreEqual(const char* s1, const char* s2);
 
 #endif

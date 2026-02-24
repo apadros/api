@@ -274,3 +274,33 @@ exported_function char* ExtractSubstring(const char* s, ui8 length) {
 	
 	return (char*)stack.memory;
 }
+
+exported_function void FreeString(char* string) {
+	AssertRet(string != Null);
+	
+	ui32  blocks = stringTable.size / sizeof(memory_block);
+	auto* table = (memory_block*)stringTable.memory;
+	ForAll(blocks) {
+		auto* block = table + it;
+		if(block->memory == string) {
+			FreeMemory(*block);
+			// @TODO - Reset the block when pool allocation functionality implemented
+			break;
+		}
+	}
+}
+
+exported_function bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
+	AssertRetType(string != Null, false);
+	AssertRetType(strings != Null, false);
+	AssertRetType(count > 0, false);
+	
+	ForAll(count) {
+		auto s = strings[it];
+		AssertRetType(s != Null, false);
+		if(StringsAreEqual(string, s) == true)
+			return true;
+	}
+	
+	return false;
+}
