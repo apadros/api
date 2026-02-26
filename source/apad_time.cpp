@@ -38,16 +38,14 @@ exported_function bool IsDate(const char* s) {
 	
 	// Check day
 	{
-		char string[] = { s[0], s[1], '\0' };
-		auto day = StringToInt(string);
+		auto day = StringToInt(s, 2);
 		if(day < 0 || day > 31)
 			return false;
 	}
 	
 	// Check month
 	{
-		char string[] = { s[3], s[4], '\0' };
-		auto month = StringToInt(string);
+		auto month = StringToInt(s + 3, 2);
 		if(month < 0 || month > 12)
 			return false;
 	}
@@ -66,7 +64,7 @@ exported_function date StringToDate(const char* s) {
 		ui8 argDay = 0; // 1 -> 7 to match the date struct
 		{
 			ForAll(GetArrayLength(Days)) {
-				if(dateString == Days[it]) {
+				if(StringsAreEqual(s, Days[it]) == true) {
 					argDay = it + 1;
 					break;
 				}
@@ -80,46 +78,23 @@ exported_function date StringToDate(const char* s) {
 		return GetDate(offset);
 	}
 	else { // Date in short, medium or long format
-		ui8 day = 0;
-		ui8 month = 0;
+		ui8 day = StringToInt(s, 2);
+		ui8 month = StringToInt(s + 3, 2);
+		
 		ui16 year = 0;
-		
-		// Day
-		{
-			dateString[2] = '\0';
-			auto d = StringToInt(dateString);
-			AssertRetType(d >= 1 && d <= 31, date());
-			day = d;
-		}
-		
-		// Month
-		{
-			if(dateString.length >= DateFormatMedium.length)
-				dateString[5] = '\0';
-			
-			auto m = StringToInt(dateString.chars + 3);
-			Assert(m >= 1 && m <= 12)
-			month = m;
-		}
-		
-		// Year
-		if(dateString.length == DateFormatShort.length) { // If no year is supplied
+		if(GetStringLength(s) == GetStringLength(DateFormatShort)) { // If no year is supplied
 			auto currentDate = GetDate(0);
 			if(month < currentDate.month || month == currentDate.month && day < currentDate.day)
 				year = currentDate.year + 1;
 			else
 				year = currentDate.year;
 		}
-		else {
-			auto y = StringToInt(dateString.chars + 6);
-			
-			auto currentYear = GetDate(0).year;
-			AssertRetType(y >= (currentYear - 2000) && y <= 99 || y >= currentYear && y <= 2099, date());
-			
-			if(y < 100)
-				y += 2000;
-			year = y;
+		else if(GetStringLength(s) == GetStringLength(DateFormatMedium)) {
+			char string[] = { '2', '0', s[6], s[7] };
+			year = StringToInt(string, 4);
 		}
+		else // Long date format
+			year = StringToInt(s + 6, Null);
 		
 		// Get the offset between today and target date, then return
 		{

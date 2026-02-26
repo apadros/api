@@ -22,14 +22,15 @@ imported_function char* ToString(ui64 i);
 imported_function char* ToString(f32 f);
 												// Return limited to 2 decimal places without rounding
 imported_function char* ToString(f64 f);
-
-imported_function si32 	StringToInt(const char* string);
+												// If string has no null-char, length must be supplied
+imported_function si32 	StringToInt(const char* s, ui16 length /* Set to Null to convert up to the null-char */);
 
 // ******************** Others ******************** //
 
 imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
-imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return & newline
+											 // @TEST
+imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return, newline & feed
 
 															// Allocates string on API global memory.
 															// Will automatically add a null-char if target length does not contain one.
@@ -41,7 +42,7 @@ imported_function 			bool 	ContainsAnySubstring(const char* string, const char**
 imported_function 			void 	CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength);
 															// Allocates a copy on API global memory.
 															// If length > string length extraction will stop after the null-character.
-imported_function 			char* ExtractSubstring(const char* string, ui8 length /* Set to Null to extract until the null-character */);
+imported_function 			char* ExtractSubstring(const char* string, ui16 length /* Set to Null to extract until the null-character */);
 imported_function const char* FindSubstring(const char* sub, const char* string);
 imported_function 			void  FreeString(char* string);
 															// Will return the length wihtout the null-character

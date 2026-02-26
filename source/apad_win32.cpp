@@ -32,7 +32,7 @@ exported_function void Win32FreeMemory(void* mem) {
 
 exported_function bool Win32FileExists(const char* path) {
 	AssertRetType(path != Null, false);
-	AssertRetType(GetStringLength(path, true) <= MAX_PATH, false);
+	AssertRetType(GetStringLength(path) + 1 <= MAX_PATH, false);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	// @TODO - Can this be layed out better?

@@ -5,9 +5,9 @@
 #include "apad_memory.h"
 #include "apad_win32.h"
 
-// ******************** Local API start ******************** //
+// ******************** Internal API start ******************** //
 
-// ******************** Local API end ******************** //
+// ******************** Internal API end ******************** //
 
 exported_function void ResetStack(memory_block& stack) {
 	ClearMemory(stack.memory, stack.size);

@@ -8,7 +8,7 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
-// ******************** Local API start ******************** //
+// ******************** Internal API start ******************** //
 
 const ui16 MaxStringLength = UI16Max;
 
@@ -54,10 +54,11 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 	return (char*)mem;
 }
 
-// ******************** Local API end ******************** //
+// ******************** Internal API end ******************** //
 
+#include <ctype.h>
 exported_function bool IsWhitespace(char c) {
-	return c == ' ' || c == '\t' || c == '\v' || c == '\r' || c == '\n';
+	return isspace(c) != 0;
 }
 
 exported_function void ConvertStringToLowerCase(const char* s) {
@@ -250,12 +251,23 @@ exported_function bool IsNumber(char c) {
 }
 
 #include <stdlib.h>
-exported_function si32 StringToInt(const char* string) {
+exported_function si32 StringToInt(const char* string, ui16 length) {
   AssertRetType(string != Null, Null);
-  return atoi(string);
+	
+	si32 ret = Null;
+	
+	if(length == Null)
+		ret = atoi(string);
+	else { // Want to convert only part of the string or string is an array without a null char
+		auto copy = AllocateString(string, length);
+		ret = atoi(copy);
+		FreeString(copy);
+	}
+	
+	return ret;
 }
 
-exported_function char* ExtractSubstring(const char* s, ui8 length) {
+exported_function char* ExtractSubstring(const char* s, ui16 length) {
 	AssertRetType(s != Null, Null);
 	
 	auto sLength = GetStringLength(s);
