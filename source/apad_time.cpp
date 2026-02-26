@@ -1,3 +1,4 @@
+#include <time.h>
 #include "apad_array.h"
 #include "apad_base_types.h"
 #include "apad_error.h"
@@ -13,6 +14,15 @@ program_local 	 const char* DateFormatShort  = "dd/mm";
 program_local 	 const char* DateFormatMedium = "dd/mm/yy";
 program_local 	 const char* DateFormatLong   = "dd/mm/yyyy"; // Default format
 program_local    const char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
+
+program_local date ConvertCSLTimeToDate(struct tm* time) {
+	date ret = {};
+	ret.dayOfTheWeek = time->tm_wday == 0 ? 7 : time->tm_wday;
+	ret.year = 1900 + time->tm_year;
+	ret.month = 1 + time->tm_mon;
+	ret.day = time->tm_mday;
+	return ret;
+}
 
 // ******************** Local API end ******************** //
 
@@ -98,21 +108,19 @@ exported_function date StringToDate(const char* s) {
 		
 		// Get the offset between today and target date, then return
 		{
-			auto currentDate = GetDate(0);
+			// Setup content of tm struct, for some reason simply supplying day, month and year
+			// without doing this first yields incorrect results
+			time_t timeNowSecs = time(NULL);
+			auto*  time = localtime(&timeNowSecs); // Non-UTC time
 			
-			// Check various sizes first in case of API mods
-			AssertRetType(sizeof(currentDate.year) == sizeof(ui16), date());
-			AssertRetType(sizeof(currentDate.month) == sizeof(ui8), date());
-			AssertRetType(sizeof(currentDate.day) == sizeof(ui8), date());
+			// Set desired day, month and year
+			time->tm_mday = day;
+			time->tm_mon = month - 1;
+			time->tm_year = year - 1900;
 			
-			// Get offset between dates
-			ui32 currentDateUI32 = currentDate.year << 16 | currentDate.month << 8 | currentDate.day; // Pack into ui32
-			ui32 targetDateUI32 = year << 16 | month << 8 | day;
-			
-			if(targetDateUI32 >= currentDateUI32)
-				return GetDate(targetDateUI32 - currentDateUI32);
-			else
-				return GetDate(-(currentDateUI32 - targetDateUI32));
+			// Convert and return
+			mktime(time); // Will set w_day
+			return ConvertCSLTimeToDate(time);
 		}
 	}
 	
@@ -121,17 +129,10 @@ exported_function date StringToDate(const char* s) {
 }
 
 // @TODO - Use UTC time instead of local to avoid issues when travelling between different time zones
-#include <time.h>
 exported_function date GetDate(si32 offsetDays) {
 	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
-	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time
-	
-	date ret = {};
-	ret.dayOfTheWeek = timeNow->tm_wday == 0 ? 7 : timeNow->tm_wday;
-	ret.year = 1900 + timeNow->tm_year;
-	ret.month = 1 + timeNow->tm_mon;
-	ret.day = timeNow->tm_mday;
-	return ret;
+	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
+	return ConvertCSLTimeToDate(timeNow);
 }
 
 exported_function char* DateToString(date d) {

@@ -25,7 +25,6 @@ Logging
   - Stack trace printing
 	
 Memory
-	- Rewrite @CURRENT
 	- When Push() allocates a new stack, any pointers to old memory are automatically invalid and there is currently no way to directly tell the user this has happened. Fix.
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
@@ -35,11 +34,13 @@ Misc
 	- Various @TODO in code files
 	
 OpenGL / Rendering
+	- Currently need to link with opengl32.lib even when making a command line program. Make this optional.
 	- GL-specific assertions / error logging (glGetError())
 	- Rendering of a sample pixel buffer
 		- Immediate mode / fixed-function rendering
 		
 String
+	- @TEST functions @CURRENT
 	- Rounding within F32ToString()
 	- Add FreeString() to manually free them
 	
