@@ -18,9 +18,9 @@
 #define 							 CastMemMovePtr(_mem, _dataType) ((_dataType*)(_mem)); MovePtr(_mem, sizeof(_dataType))
 #define 							 ReadMemMovePtr(_mem, _dataType) *CastMemMovePtr(_mem, _dataType)
 
-imported_function void ClearMemory(void* memory, ui32 size); // @TEST
+imported_function void ClearMemory(void* memory, ui32 size);
 #define 							 ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
-imported_function void CopyMemory(void* source, ui32 size, void* destination); // @TEST
+imported_function void CopyMemory(void* source, ui32 size, void* destination);
 
 // ******************** Memory blocks ******************** //
 
@@ -39,7 +39,7 @@ imported_function void         FreeMemory(memory_block& block); // Clears block 
 imported_function bool         IsValid(memory_block block);
 imported_function void         SetInvalid(memory_block& block);
 
-// ******************** Stack ******************** //
+// ******************** Stack functionality ******************** //
 
 imported_function memory_stack AllocateStack(ui32 capacity /* Can set to Null */);
 imported_function void 				 FreeStack(memory_stack& stack);
