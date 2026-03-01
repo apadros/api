@@ -258,7 +258,10 @@ exported_function char* ExtractSubstring(const char* s, ui16 length) {
 		copyLength = length;
 	
 	auto stack = AllocateStack(copyLength + 1);
-	PushString(s, true, stack);
+	// Use this instead of PushString() since the latter will push the entire string
+	// instead of just a section if that is what's wanted.
+	void* mem = Push((void*)s, copyLength, stack); 
+	PushNullChar(stack);
 	
 	AddToStringTable(stack);
 	

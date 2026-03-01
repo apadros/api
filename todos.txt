@@ -40,7 +40,6 @@ OpenGL / Rendering
 		- Immediate mode / fixed-function rendering
 		
 String
-	- @TEST functions @CURRENT
 	- Rounding within F32ToString()
 	- Add FreeString() to manually free them
 	
