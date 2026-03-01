@@ -72,29 +72,6 @@ exported_function void ConvertStringToLowerCase(const char* s) {
 	}
 }
 
-#if 0 // @CLEANUP
-exported_function const char* Concatenate(const char* s1, const char* s2) {
-  AssertRetType(s1 != Null, Null);
-  AssertRetType(s2 != Null, Null);
-	
-	auto length1 = GetStringLength(s1, false);
-	auto length2 = GetStringLength(s2, true);
-	
-	auto block = AllocateMemory(length1 + length2);
-	
-	void* mem = block.memory;
-	CopyMemory((void*)s1, length1, mem);
-	CopyMemory((void*)s2, length2, (ui8*)mem + length1);
-	
-	AddToStringTable(block);
-		
-	string ret;
-	ret.chars = (char*)mem;
-	ret.length = length1 + length2;
-	return ret;
-}
-#endif
-
 #include <stdarg.h>
 // Unfortunately variadic arguments cannot intrinsically infer the number of parameters passed to them
 exported_function char* Concatenate(ui8 count, ...) {

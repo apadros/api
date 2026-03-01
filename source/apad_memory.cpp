@@ -104,9 +104,11 @@ exported_function void* Push(ui32 size, memory_block& stack) {
 		if(ErrorIsSet() == true)
 			return Null;
 		
-		Push(stack.memory, stack.size, newStack);
-		if(ErrorIsSet() == true)
-			return Null;
+		if(stack.size > 0) { // If == 0 it will trigger an error
+			Push(stack.memory, stack.size, newStack);
+			if(ErrorIsSet() == true)
+				return Null;
+		}
 		
 		FreeStack(stack);
 		if(ErrorIsSet() == true)
@@ -123,6 +125,10 @@ exported_function void* Push(ui32 size, memory_block& stack) {
 
 exported_function void* Push(void* data, ui32 size, memory_block& stack) {
   void* mem = Push(size, stack);
+	if(ErrorIsSet() == true)
+		return Null;
 	CopyMemory(data, size, mem);
+	if(ErrorIsSet() == true)
+		return Null;
 	return mem;
 }

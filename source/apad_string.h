@@ -22,7 +22,6 @@ imported_function char* ToString(ui64 i);
 imported_function char* ToString(f32 f);
 												// Return limited to 2 decimal places without rounding
 imported_function char* ToString(f64 f);
-												// @TEST
 												// If string has no null-char, length must be supplied
 imported_function si32 	StringToInt(const char* s, ui16 length /* Set to Null to convert up to the null-char */);
 
@@ -30,14 +29,12 @@ imported_function si32 	StringToInt(const char* s, ui16 length /* Set to Null to
 
 imported_function bool IsLetter(char c);
 imported_function bool IsNumber(char c);
-											 // @TEST
+
 imported_function bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return, newline & feed
 
-															// @TEST
 															// Allocates string on API global memory
 															// Will automatically add a null-char if target length does not contain one
 imported_function 			char* AllocateString(const char* s, ui16 length /* Set to Null to copy until and including the null-char */ );
-															// @TEST
 															// Allocates string on API global memory
 imported_function 			char* Concatenate(ui8 count, ... /* All args must be char* */);
 															// @TEST
