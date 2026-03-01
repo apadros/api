@@ -14,7 +14,7 @@ struct date {
 
 /* Supported date argument formats are:
  * - dd/mm, dd/mm/yy and dd/mm/yyyy
- * - Day of the week: mon, tue, wed, thu, fri, sat & sun (also be written with a capital first letter (e.g. Mon))
+ * - Day of the week: mon, tue, wed, thu, fri, sat & sun
  */
 												// Return string will be allocated on global API memory.
 imported_function char* DateToString(date d); // Returned string format is dd/mm/yyyy

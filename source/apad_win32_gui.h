@@ -6,8 +6,7 @@
 
 #define GUIAppEntryPoint(_instanceID) int CALLBACK WinMain(HINSTANCE _instanceID, HINSTANCE prevInstance, LPSTR commandLine, int commandShow)
 
-imported_function void Win32InitGUI(const char* windowTitle, // Can be set to Null
-																		HINSTANCE instance);
+imported_function void Win32InitGUI(const char* windowTitle /* Can be set to Null */, HINSTANCE instance);
 															 
 // These need to be encased in a while(true) loop
 imported_function void Win32BeginGUIUpdateLoop();
