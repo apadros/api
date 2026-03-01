@@ -23,7 +23,8 @@ program_local void ExitStringAPI() {
 		auto* table = (memory_block*)stringTable.memory;
 		ForAll(blocks) {
 			auto* block = table + it;
-			FreeMemory(*block);
+			if(IsValid(*block) == true)
+				FreeMemory(*block);
 		}
 		
 		FreeStack(stringTable);
