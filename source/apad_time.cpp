@@ -8,12 +8,12 @@
 
 // ******************** Local API start ******************** //
 
-program_external 			 ui64 cpuCounterFrequencyKHz = Null;
+dll_export program_external ui64 				cpuCounterFrequencyKHz = Null;
 
-program_local 	 const char* DateFormatShort  = "dd/mm";
-program_local 	 const char* DateFormatMedium = "dd/mm/yy";
-program_local 	 const char* DateFormatLong   = "dd/mm/yyyy"; // Default format
-program_local    const char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
+					 program_local 	  const char* DateFormatShort  = "dd/mm";
+					 program_local 	  const char* DateFormatMedium = "dd/mm/yy";
+					 program_local 	  const char* DateFormatLong   = "dd/mm/yyyy"; // Default format
+					 program_local    const char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
 
 program_local date ConvertCSLTimeToDate(struct tm* time) {
 	date ret = {};
@@ -26,7 +26,7 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 
 // ******************** Local API end ******************** //
 
-exported_function bool IsDate(const char* s) {
+dll_export bool IsDate(const char* s) {
 	AssertRetType(s != Null, false);
 	
 	ConvertStringToLowerCase(s);
@@ -65,7 +65,7 @@ exported_function bool IsDate(const char* s) {
 	return true;
 }
 
-exported_function date StringToDate(const char* s) {
+dll_export date StringToDate(const char* s) {
 	AssertRetType(s != Null, date());
 	
 	ConvertStringToLowerCase(s);
@@ -129,13 +129,13 @@ exported_function date StringToDate(const char* s) {
 }
 
 // @TODO - Use UTC time instead of local to avoid issues when travelling between different time zones
-exported_function date GetDate(si32 offsetDays) {
+dll_export date GetDate(si32 offsetDays) {
 	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
 	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
 	return ConvertCSLTimeToDate(timeNow);
 }
 
-exported_function char* DateToString(date d) {
+dll_export char* DateToString(date d) {
 	char* ret = AllocateString(DateFormatLong, Null);
 	if(ErrorIsSet() == true)
 		return ret;
@@ -176,12 +176,12 @@ exported_function char* DateToString(date d) {
 	return ret;
 }
 
-exported_function time_marker GetTimeMarker() {
-	exported_function time_marker Win32GetTimeMarker();
+dll_export time_marker GetTimeMarker() {
+	dll_import time_marker Win32GetTimeMarker();
 	return Win32GetTimeMarker();
 }
 
-exported_function f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd) {
+dll_export f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd) {
   AssertRetType(markerStart != Null, Null);
   AssertRetType(markerEnd != Null, Null);
   AssertRetType(cpuCounterFrequencyKHz != Null, Null);

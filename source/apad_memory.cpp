@@ -9,19 +9,19 @@
 
 // ******************** Internal API end ******************** //
 
-exported_function void ResetStack(memory_block& stack) {
+dll_export void ResetStack(memory_block& stack) {
 	ClearMemory(stack.memory, stack.size);
   stack.size = 0;
 }
 
-exported_function void ClearMemory(void* memory, ui32 size) {
+dll_export void ClearMemory(void* memory, ui32 size) {
 	AssertRet(memory != Null);
   AssertRet(size > 0);
 	
 	memset(memory, 0, size);
 }
 
-exported_function void CopyMemory(void* source, ui32 size, void* destination) {
+dll_export void CopyMemory(void* source, ui32 size, void* destination) {
   AssertRet(source != Null);
   AssertRet(size > 0);
   AssertRet(destination != Null);
@@ -30,7 +30,7 @@ exported_function void CopyMemory(void* source, ui32 size, void* destination) {
 	memcpy(destination, source, size);
 }
 
-exported_function memory_block AllocateMemory(ui32 size) {
+dll_export memory_block AllocateMemory(ui32 size) {
 	void* memory = Win32AllocateMemory(size);
 	if(ErrorIsSet() == true)
 		return NullMemoryBlock;
@@ -43,17 +43,17 @@ exported_function memory_block AllocateMemory(ui32 size) {
 	return ret;
 }
 
-exported_function void FreeMemory(memory_block& block) {
+dll_export void FreeMemory(memory_block& block) {
 	Win32FreeMemory(block.memory);
 	ClearStruct(block);
 }
 
-exported_function void* GetMemory(memory_block block) {
+dll_export void* GetMemory(memory_block block) {
 	AssertRetType(block.memory != Null, Null);
 	return block.memory;
 }
 
-exported_function bool IsValid(memory_block block) {
+dll_export bool IsValid(memory_block block) {
 	if(block.memory == Null)
 		return false;
 	
@@ -65,13 +65,13 @@ exported_function bool IsValid(memory_block block) {
 	return true;
 }
 
-exported_function void SetInvalid(memory_block& block) {
+dll_export void SetInvalid(memory_block& block) {
 	block.memory = Null;
 	block.size = 0;
 	block.capacity = 0;
 }
 
-exported_function memory_block AllocateStack(ui32 capacity) {
+dll_export memory_block AllocateStack(ui32 capacity) {
 	if(capacity == Null)
 		capacity = 1;
 	auto block = AllocateMemory(capacity);
@@ -80,13 +80,13 @@ exported_function memory_block AllocateStack(ui32 capacity) {
 	return block;
 }
 
-exported_function void FreeStack(memory_block& stack) {
+dll_export void FreeStack(memory_block& stack) {
 	AssertRet(IsValid(stack));
 	
 	FreeMemory(stack);
 }
 
-exported_function void* Push(ui32 size, memory_block& stack) {
+dll_export void* Push(ui32 size, memory_block& stack) {
 	AssertRetType(IsValid(stack), Null);
 	AssertRetType(size > 0, Null);
 	
@@ -123,7 +123,7 @@ exported_function void* Push(ui32 size, memory_block& stack) {
 	return Null;
 }
 
-exported_function void* Push(void* data, ui32 size, memory_block& stack) {
+dll_export void* Push(void* data, ui32 size, memory_block& stack) {
   void* mem = Push(size, stack);
 	if(ErrorIsSet() == true)
 		return Null;

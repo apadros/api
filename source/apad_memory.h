@@ -18,9 +18,9 @@
 #define 							 CastMemMovePtr(_mem, _dataType) ((_dataType*)(_mem)); MovePtr(_mem, sizeof(_dataType))
 #define 							 ReadMemMovePtr(_mem, _dataType) *CastMemMovePtr(_mem, _dataType)
 
-imported_function void ClearMemory(void* memory, ui32 size);
+dll_import void ClearMemory(void* memory, ui32 size);
 #define 							 ClearStruct(_s) ClearMemory(&(_s), sizeof(_s))
-imported_function void CopyMemory(void* source, ui32 size, void* destination);
+dll_import void CopyMemory(void* source, ui32 size, void* destination);
 
 // ******************** Memory blocks ******************** //
 
@@ -33,24 +33,24 @@ struct memory_block {
 
 typedef memory_block memory_stack;
 
-imported_function memory_block AllocateMemory(ui32 size);
-imported_function void*        GetMemory(memory_block block);
-imported_function void         FreeMemory(memory_block& block); // Clears block afterwards
-imported_function bool         IsValid(memory_block block);
-imported_function void         SetInvalid(memory_block& block);
+dll_import memory_block AllocateMemory(ui32 size);
+dll_import void*        GetMemory(memory_block block);
+dll_import void         FreeMemory(memory_block& block); // Clears block afterwards
+dll_import bool         IsValid(memory_block block);
+dll_import void         SetInvalid(memory_block& block);
 
 // ******************** Stack functionality ******************** //
 
-imported_function memory_stack AllocateStack(ui32 capacity /* Can set to Null */);
-imported_function void 				 FreeStack(memory_stack& stack);
+dll_import memory_stack AllocateStack(ui32 capacity /* Can set to Null */);
+dll_import void 				 FreeStack(memory_stack& stack);
 
 // All of these will allocate a new stack with a minimum of 2x capacity if not enough space is available for the push.
 // As such it is strongly discouraged to store pointers into stack memory and to treat it as a single block.
-imported_function void* 			 Push(ui32 size, memory_stack& stack);
-imported_function void*				 Push(void* memory, ui32 size, memory_stack& stack); 
+dll_import void* 			 Push(ui32 size, memory_stack& stack);
+dll_import void*				 Push(void* memory, ui32 size, memory_stack& stack); 
 #define                        PushInstance(_inst, _stack) \
 																	Push(&(_inst), sizeof(_inst), (_stack))
 
-imported_function void 				 ResetStack(memory_stack& stack);
+dll_import void 				 ResetStack(memory_stack& stack);
 
 #endif

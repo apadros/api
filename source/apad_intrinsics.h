@@ -54,11 +54,11 @@
 
 // DLLs
 #ifdef APAD_DLL
-#define imported_function __declspec( dllimport )
-#define exported_function __declspec( dllexport )
+#define dll_import __declspec( dllimport )
+#define dll_export __declspec( dllexport )
 #else
-#define imported_function 
-#define exported_function 
+#define dll_import 
+#define dll_export
 #endif
 	
 

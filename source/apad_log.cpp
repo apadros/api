@@ -14,20 +14,20 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 
 // ******************** Internal API end ******************** //
 
-exported_function log_file OpenLogFile() {
+dll_export log_file OpenLogFile() {
   auto file = AllocateStack(KiB(10));
   if(ErrorIsSet() == true)
 		return NullMemoryBlock;
 	return file;
 }
 
-exported_function void CloseLogFile(log_file& log) {
+dll_export void CloseLogFile(log_file& log) {
 	FreeStack(log);
 }
 
 // @TODO - Can the log file be set after the ... ?
 // Format strings - s, si8, ui8, si16, ui16, si32, ui32, si64, ui64, f32, f64
-exported_function void Log(log_file& log, const char* formatString, ...) {
+dll_export void Log(log_file& log, const char* formatString, ...) {
   AssertRet(formatString != Null);
 	
 	va_list args;

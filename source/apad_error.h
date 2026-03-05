@@ -5,20 +5,20 @@
 
 // ******************** Generic ******************** //
 
-imported_function void ExitProgram(bool error); // This will not work within DLL functions
+dll_import void ExitProgram(bool error); // This will not work within DLL functions
 
 // ******************** Error checking, setting and displaying ******************** //
 
 // Use these to create an error message which is then logged by outside code (e.g. error within a function, need it available when returning)
-imported_function bool 				IsExitIfErrorSet();
-imported_function void 				SetExitIfError(bool b); // False by default
+dll_import bool 				IsExitIfErrorSet();
+dll_import void 				SetExitIfError(bool b); // False by default
 
-imported_function void 				ClearError();
-imported_function bool 				ErrorIsSet();
-imported_function const char* GetError();
-imported_function void 				SetError(const char* string);
+dll_import void 				ClearError();
+dll_import bool 				ErrorIsSet();
+dll_import const char* GetError();
+dll_import void 				SetError(const char* string);
 
-imported_function void 				DisplayErrorGUI(const char* string);
+dll_import void 				DisplayErrorGUI(const char* string);
 
 /******************** Assertions ******************** 
 
@@ -54,7 +54,7 @@ Assertions will be printed in command line programs and displayed in a message b
 										 \n[File]      %s \
 										 \n[Line]      %lu", #_condition, __FILE__, __LINE__); \
 		SetError((const char*)buffer); \
-		extern bool GUIApp; \
+		dll_import program_external bool GUIApp; \
 		if(GUIApp == false) \
 		  printf("\n%s\n", GetError()); \
 		else \

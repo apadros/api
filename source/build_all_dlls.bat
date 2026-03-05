@@ -12,56 +12,13 @@ if not exist build ( mkdir build )
 del build\* /q
 pushd build
 
-echo:
-echo #################### ERROR ####################
-echo:
+REM Compile all translation units into object files first
+cl /w /nologo /O2 /c /DAPAD_DLL ..\*.cpp
 
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_error.cpp /Feapad_error_v%1.%2.%3.dll
+del test.obj
 
-echo:
-echo #################### TEMP #####################
-echo:
-
-REM Make temp libs
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v%1.%2.%3.dll >> temp.txt
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v%1.%2.%3.dll >> temp.txt
-
-echo:
-echo #################### WIN32 ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_win32.cpp /Feapad_win32_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
-
-echo:
-echo #################### MEMORY ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_memory.cpp /Feapad_memory_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_win32_v%1.%2.%3.lib
-
-echo:
-echo #################### FILE ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_file.cpp /Feapad_file_v%1.%2.%3.dll apad_memory_v%1.%2.%3.lib apad_win32_v%1.%2.%3.lib
-
-echo:
-echo #################### STRING ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_string.cpp /Feapad_string_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib
-
-echo:
-echo #################### LOG ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_log.cpp /Feapad_log_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_memory_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
-
-echo:
-echo #################### TIME ####################
-echo:
-
-cl /nologo /DAPAD_DLL /O2 /LD /w ..\apad_time.cpp /Feapad_time_v%1.%2.%3.dll apad_error_v%1.%2.%3.lib apad_string_v%1.%2.%3.lib
-
+REM Link all into single library
+cl /nologo /w /LD /Fe: apad_api_v%1.%2.%3.dll *.obj /link user32.lib gdi32.lib opengl32.lib >> temp.txt
 
 del temp.txt
 del *.obj
@@ -73,5 +30,5 @@ exit /b REM Exit batch script
 REM Help message
 :Help
 echo:
-echo Usage: build_dll.bat [version_major_number] [version_minor_number] [version_patch_number]
+echo Usage: build_all_dlls.bat [version_major_number] [version_minor_number] [version_patch_number]
 echo:

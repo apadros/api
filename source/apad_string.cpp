@@ -58,11 +58,11 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 // ******************** Internal API end ******************** //
 
 #include <ctype.h>
-exported_function bool IsWhitespace(char c) {
+dll_export bool IsWhitespace(char c) {
 	return isspace(c) != 0;
 }
 
-exported_function void ConvertStringToLowerCase(const char* s) {
+dll_export void ConvertStringToLowerCase(const char* s) {
 	AssertRet(s != Null);
 	
 	auto length = GetStringLength(s);
@@ -74,7 +74,7 @@ exported_function void ConvertStringToLowerCase(const char* s) {
 
 #include <stdarg.h>
 // Unfortunately variadic arguments cannot intrinsically infer the number of parameters passed to them
-exported_function char* Concatenate(ui8 count, ...) {
+dll_export char* Concatenate(ui8 count, ...) {
 	AssertRetType(count >= 2, Null);
 	
 	va_list list;
@@ -96,7 +96,7 @@ exported_function char* Concatenate(ui8 count, ...) {
 	return (char*)stack.memory;
 }
 
-exported_function char* AllocateString(const char* s, ui16 length) {
+dll_export char* AllocateString(const char* s, ui16 length) {
 	AssertRetType(s != Null, Null);
 	
 	auto sLength = GetStringLength(s);
@@ -116,7 +116,7 @@ exported_function char* AllocateString(const char* s, ui16 length) {
 	return (char*)stack.memory;
 }
 
-exported_function ui16 GetStringLength(const char* s) {
+dll_export ui16 GetStringLength(const char* s) {
   AssertRetType(s != Null, Null);
   
 	auto length = strlen(s);
@@ -125,80 +125,80 @@ exported_function ui16 GetStringLength(const char* s) {
   return length;
 };
 
-exported_function char* ToString(si8 i) {
+dll_export char* ToString(si8 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hhi", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(ui8 i) {
+dll_export char* ToString(ui8 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hhu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(si16 i) {
+dll_export char* ToString(si16 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hi", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(ui16 i) {
+dll_export char* ToString(ui16 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%hu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(si32 i) {
+dll_export char* ToString(si32 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%li", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(ui32 i) {
+dll_export char* ToString(ui32 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%lu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(si64 i) {
+dll_export char* ToString(si64 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%lli", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(ui64 i) {
+dll_export char* ToString(ui64 i) {
   char buffer[32] = { '\0' };
   sprintf(buffer, "%llu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(f32 f) {
+dll_export char* ToString(f32 f) {
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2f", f);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function char* ToString(f64 f) {
+dll_export char* ToString(f64 f) {
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2Lf", f);
 	return AllocateString((char*)buffer, Null);
 }
 
-exported_function bool StringsAreEqual(const char* s1, const char* s2) {
+dll_export bool StringsAreEqual(const char* s1, const char* s2) {
   AssertRetType(s1 != Null, false);
 	AssertRetType(s2 != Null, false);
 	
 	return strcmp(s1, s2) == 0;
 }
 
-exported_function const char* FindSubstring(const char* sub, const char* string) {
+dll_export const char* FindSubstring(const char* sub, const char* string) {
   AssertRetType(string != Null, Null);
   AssertRetType(sub != Null, Null);
   return strstr(string, sub);
 }
 
-exported_function bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
+dll_export bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
   ForAll(length) {
     auto* sub = substrings[it];
 		AssertRetType(sub != Null, false);
@@ -208,7 +208,7 @@ exported_function bool ContainsAnySubstring(const char* string, const char** sub
   return false;
 }
 
-exported_function void CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
+dll_export void CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
 	AssertRet(source != Null);
 	AssertRet(srcLength > 0 || srcLength == -1);
 	AssertRet(destination != Null);
@@ -220,16 +220,16 @@ exported_function void CopyString(const char* source, si16 srcLength, const char
 	CopyMemory((void*)source, copyLength, (void*)destination);
 }
 
-exported_function bool IsLetter(char c) {
+dll_export bool IsLetter(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
 
-exported_function bool IsNumber(char c) {
+dll_export bool IsNumber(char c) {
 	return c >= '0' && c <= '9';
 }
 
 #include <stdlib.h>
-exported_function si32 StringToInt(const char* string, ui16 length) {
+dll_export si32 StringToInt(const char* string, ui16 length) {
   AssertRetType(string != Null, Null);
 	
 	si32 ret = Null;
@@ -245,7 +245,7 @@ exported_function si32 StringToInt(const char* string, ui16 length) {
 	return ret;
 }
 
-exported_function char* ExtractSubstring(const char* s, ui16 length) {
+dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	AssertRetType(s != Null, Null);
 	
 	auto sLength = GetStringLength(s);
@@ -268,7 +268,7 @@ exported_function char* ExtractSubstring(const char* s, ui16 length) {
 	return (char*)stack.memory;
 }
 
-exported_function void FreeString(char* string) {
+dll_export void FreeString(char* string) {
 	AssertRet(string != Null);
 	
 	ui32  blocks = stringTable.size / sizeof(memory_block);
@@ -283,7 +283,7 @@ exported_function void FreeString(char* string) {
 	}
 }
 
-exported_function bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
+dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
 	AssertRetType(string != Null, false);
 	AssertRetType(strings != Null, false);
 	AssertRetType(count > 0, false);

@@ -14,7 +14,7 @@
 
 // ******************** Local API end ******************** //
 
-exported_function void* Win32AllocateMemory(ui32 size) {
+dll_export void* Win32AllocateMemory(ui32 size) {
 	AssertRetType(size > 0, Null);
 	
   void* mem = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
@@ -23,14 +23,14 @@ exported_function void* Win32AllocateMemory(ui32 size) {
   return mem;
 }
 
-exported_function void Win32FreeMemory(void* mem) {
+dll_export void Win32FreeMemory(void* mem) {
 	AssertRet(mem != Null);
 	
   auto ret = VirtualFree(mem, 0, MEM_RELEASE);
 	Assert(ret != 0);
 }
 
-exported_function bool Win32FileExists(const char* path) {
+dll_export bool Win32FileExists(const char* path) {
 	AssertRetType(path != Null, false);
 	AssertRetType(GetStringLength(path) + 1 <= MAX_PATH, false);
 	
@@ -45,7 +45,7 @@ exported_function bool Win32FileExists(const char* path) {
   return true;
 }
 
-exported_function memory_block Win32LoadFile(const char* path) {
+dll_export memory_block Win32LoadFile(const char* path) {
 	AssertRetType(Win32FileExists(path), NullMemoryBlock);
 	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -92,7 +92,7 @@ exported_function memory_block Win32LoadFile(const char* path) {
   return allocatedMemory;
 }
 
-exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
+dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
   AssertRet(data != Null);
 	AssertRet(dataSize > 0);
 	
@@ -118,10 +118,10 @@ exported_function void Win32SaveFile(void* data, ui32 dataSize, const char* path
 }
 
 #include "apad_time.h"
-exported_function time_marker Win32GetTimeMarker() {
+dll_export time_marker Win32GetTimeMarker() {
 	// Init cpuCounterFrequencyKHz if it hasn't already
 	{
-		program_external ui64 cpuCounterFrequencyKHz;
+		dll_import program_external ui64 cpuCounterFrequencyKHz;
 		if(cpuCounterFrequencyKHz == Null) {
 			LARGE_INTEGER temp = {};
 			AssertRetType(QueryPerformanceFrequency(&temp) != 0, Null);

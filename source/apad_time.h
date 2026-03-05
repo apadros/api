@@ -17,13 +17,13 @@ struct date {
  * - Day of the week: mon, tue, wed, thu, fri, sat & sun
  */
 												// Return string will be allocated on global API memory.
-imported_function char* DateToString(date d); // Returned string format is dd/mm/yyyy
-imported_function date 	GetDate(si32 offsetDays);
-imported_function bool 	IsDate(const char* s);
-imported_function date 	StringToDate(const char* s); // IsDate() should always be called before this
+dll_import char* DateToString(date d); // Returned string format is dd/mm/yyyy
+dll_import date 	GetDate(si32 offsetDays);
+dll_import bool 	IsDate(const char* s);
+dll_import date 	StringToDate(const char* s); // IsDate() should always be called before this
 
 typedef ui64 time_marker;
-imported_function time_marker GetTimeMarker();
-imported_function f32 			  GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd);
+dll_import time_marker GetTimeMarker();
+dll_import f32 			  GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd);
 
 #endif
