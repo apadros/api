@@ -11,16 +11,15 @@ Bitmaps / Images
 			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
-	- Replace DisplayErrorGUI() with a function pointer once @LINKING_BUG has been fixed
-
-File
-	- @BUG - Function pointers are Null when calling from the dll @LINKING_BUG				
+	- Replace DisplayErrorGUI() with a function pointer				
 		
 GUI
 	- Custom window icon
 	- Custom taskbar icon
+	- Separate from core API when linking into library (have apad_core.lib / dll & optional libs / dlls)
+	- Load any required libraries dynamically
 		
-Logging
+Log
 	- A function to return a pointer to the log contents, cast to const char* (e.g. to print)
   - Stack trace printing
 	
@@ -41,14 +40,13 @@ OpenGL / Rendering
 		
 String
 	- Rounding within F32ToString()
-	- Add FreeString() to manually free them
 	
 Text
 	- Investigate ttf file loading and usage through Windows API
 		
 Time
 	- Conversions between formats
-	- Replace GetTimeMarker() with a function pointer once @LINKING_BUG has been fixed
+	- Replace GetTimeMarker() with a function pointer
 	
 Win32
 	- More in-depth logging in case of error detection / failure

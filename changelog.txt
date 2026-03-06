@@ -1,3 +1,36 @@
+v0.4.1
+	[Background]
+		- Packed all libraries into 1 for convenience since they all link with several others
+		- Replaced the imported_function and exported_function macros with dll_import and dll_export respectively
+		- Minor bug fixes
+		- Minor updates and tidying up of some header files
+		- Updated build_all_dlls.bat to build all files into a single library
+		- Removed build_dll.bat as they are all now combined into 1
+		
+	[File]
+		- Fixed apad_file.h function pointers
+		- Removed apad_time.cpp
+	
+	[GUI]
+		- Added initial code and files for GUI-based Apps. This code is still WIP and so is usage is currently not recommended.
+			- OpenGL initialisation and exit
+			- Basic program loop with a target FPS of 60
+		- Added GUI-based assertions as message boxes
+		
+	[Memory]
+		- Updated the API to make more use of the CSL
+		
+	[String]
+		- Redesigned the API into a more c-style code base, removed string struct and inherent functionality
+		- Removed PushString()
+		- Added functions FreeString() & StringsIsEqualToAny()
+		- Modifed StringToInt() to take the string length as a second parameter
+		- Removal of the const modifier from some functions returns
+	
+	[Time]
+		- Added time markers and timing functionality
+		- Fixed bug within DateToString()
+	
 v0.4.0
 	- Error
 		- Added InvalidCodePath macro
