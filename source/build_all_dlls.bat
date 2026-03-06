@@ -13,7 +13,7 @@ del build\* /q
 pushd build
 
 REM Compile all translation units into object files first
-cl /w /nologo /O2 /c /DAPAD_DLL ..\*.cpp
+cl /w /nologo /O2 /c /DAPAD_DLL /std:c++17 ..\*.cpp
 
 del test.obj
 
