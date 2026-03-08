@@ -58,13 +58,13 @@
 #define ClearBit(_bit, _field) (_field = decltype(_field)((ui32)(_field) & (~(ui32)(_bit))))
 #define SetBit(_bit, _field) (_field = decltype(_field)((ui32)(_field) | (ui32)(_bit)))
 
-// DLLs
-#ifdef APAD_DLL
-#define dll_import __declspec( dllimport )
-#define dll_export __declspec( dllexport )
-#else
+// Linking
+#ifdef APAD_INTERNAL
 #define dll_import 
 #define dll_export
+#else
+#define dll_import __declspec( dllimport )
+#define dll_export __declspec( dllexport )
 #endif
 	
 
