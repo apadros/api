@@ -11,6 +11,7 @@ Bitmaps / Images
 			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
+	- Stack trace printing and inclusion in assertions @CURRENT
 	- Replace DisplayErrorGUI() with a function pointer				
 		
 GUI

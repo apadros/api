@@ -7,15 +7,25 @@
 
 // ******************** Internal API start ******************** //
 
-program_local 		 const 					 ui8  ErrorStringMaxLength = UI8Max;
-program_local 										 char ErrorString[ErrorStringMaxLength] = {};
-program_local 										 bool ExitIfError = false;
-
-dll_export program_external bool GUIApp = false; // Checked outside this translation unit
+program_local 	 const ui8  ErrorStringMaxLength = UI8Max;
+program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
+program_local 	 			 bool ExitIfError = false;
+								 
+program_external  		 bool GUIApp = false; // Checked outside this translation unit
 
 // ******************** Internal API end ******************** //
 
-dll_export void SetError(const char* string) {
+#include <stdio.h>
+dll_export void DisplayGlobalError() {
+	if(GUIApp == false)
+		printf("\n%s\n", GetError());
+	else {
+		program_external void Win32ErrorMessageBox(const char* string);
+		Win32ErrorMessageBox(string);
+	}
+}
+
+dll_export void SetGlobalError(const char* string) {
 	// Since this function will be called everywhere, avoid calling external code 
 	// within it to avoid potential infinite loops
 
@@ -36,15 +46,15 @@ dll_export void SetError(const char* string) {
 	  ErrorString[it] = string[it];
 }
 
-dll_export bool ErrorIsSet() {
+dll_export bool GlobalErrorIsSet() {
   return ErrorString[0] != '\0';
 }
 
-dll_export void ClearError() {
+dll_export void ClearGlobalError() {
   ErrorString[0] = '\0';
 }
 
-dll_export const char* GetError() {
+dll_export const char* GetGlobalError() {
 	return ErrorString;
 }
 
@@ -61,15 +71,10 @@ dll_export void ExitProgram(bool error) {
     exit(EXIT_SUCCESS);
 }
 
-dll_export void SetExitIfError(bool b) {
+dll_export void SetExitIfGlobalError(bool b) {
   ExitIfError = b;
 }
 
-dll_export bool IsExitIfErrorSet() {
+dll_export bool IsExitIfGlobalErrorSet() {
 	return ExitIfError;
-}
-
-dll_export void DisplayErrorGUI(const char* string) {
-	extern void Win32ErrorMessageBox(const char* string);
-	Win32ErrorMessageBox(string);
 }

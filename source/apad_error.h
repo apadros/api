@@ -10,15 +10,14 @@ dll_import void ExitProgram(bool error); // This will not work within DLL functi
 // ******************** Error checking, setting and displaying ******************** //
 
 // Use these to create an error message which is then logged by outside code (e.g. error within a function, need it available when returning)
-dll_import bool 				IsExitIfErrorSet();
-dll_import void 				SetExitIfError(bool b); // False by default
+dll_import bool 			 IsExitIfGlobalErrorSet();
+dll_import void 			 SetExitIfGlobalError(bool b); // False by default
 
-dll_import void 				ClearError();
-dll_import bool 				ErrorIsSet();
-dll_import const char* GetError();
-dll_import void 				SetError(const char* string);
-
-dll_import void 				DisplayErrorGUI(const char* string);
+dll_import void 			 ClearGlobalError();
+dll_import bool 			 GlobalErrorIsSet();
+dll_import const char* GetGlobalError();
+dll_import void 			 SetGlobalError(const char* string);
+dll_imxport void 			 DisplayGlobalError();
 
 /******************** Assertions ******************** 
 
@@ -54,11 +53,7 @@ Assertions will be printed in command line programs and displayed in a message b
 										 \n[File]      %s \
 										 \n[Line]      %lu", #_condition, __FILE__, __LINE__); \
 		SetError((const char*)buffer); \
-		dll_import program_external bool GUIApp; \
-		if(GUIApp == false) \
-		  printf("\n%s\n", GetError()); \
-		else \
-		  DisplayErrorGUI(GetError()); \
+		DisplayGlobalError(); \
 		if(IsExitIfErrorSet() == true) \
 		  ExitProgram(true); \
 	} \

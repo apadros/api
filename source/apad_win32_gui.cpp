@@ -100,7 +100,8 @@ dll_export program_external void Win32Exit() { // Called within ExitProgram()
 
 // ******************** Internal API end ******************** //
 
-dll_export void Win32ErrorMessageBox(const char* string) {
+// No need to export this, only used in apad_error.cpp
+void Win32ErrorMessageBox(const char* string) {
 	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
 }
 
