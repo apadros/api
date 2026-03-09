@@ -10,7 +10,7 @@
 
 // ******************** Local API start ******************** //
 
-// Avoid any calls to API to avoid potentially triggering more assertions since this function is called within assertion macros
+// Minimise calls to API to avoid other potential bugs since this is called from within debugging code
 program_local void DisplayGlobalErrorLocal(const char* string, DWORD error /* Set to Null if none supplied / required */) { \
 	char buffer[256] = {};
 	if(error == Null)
@@ -26,6 +26,7 @@ program_local void DisplayGlobalErrorLocal(const char* string, DWORD error /* Se
 #include <dbghelp.h>
 #include <stdio.h> // For sprintf()
 #include "apad_array.h"
+#include "apad_file.h"
 #include "apad_string.h"
 // No assertions calls in this function since it is a part of the Assert() macros
 void Win32PrintStackBackTrace() {
@@ -33,7 +34,8 @@ void Win32PrintStackBackTrace() {
   PVOID stacktrace[32] = {}; // We assume we won't need more than 32 stack frames
   USHORT depth = CaptureStackBackTrace(1 /* Skip the call to Win32PrintStackBackTrace() */, GetArrayLength(stacktrace), stacktrace, NULL);
   if(depth == 0) {
-		DisplayGlobalErrorLocal("CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", GetLastError());
+		SetGlobalError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString(GetLastError()));
+		DisplayGlobalError();
 		return;
   }
   
@@ -43,13 +45,15 @@ void Win32PrintStackBackTrace() {
     HANDLE pseudoHandle = GetCurrentProcess();
     BOOL   ret = DuplicateHandle(pseudoHandle, pseudoHandle, pseudoHandle, &process, 0, FALSE, DUPLICATE_SAME_ACCESS);
     if(ret == 0) { // DuplicateHandle failed
-			DisplayGlobalErrorLocal("DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", GetLastError());
+			SetGlobalError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString(GetLastError()));
+			DisplayGlobalError();
 			return;
     }
     
     ret = SymInitialize(process, NULL, TRUE);
     if(ret == FALSE) {
-      DisplayGlobalErrorLocal("SymInitialize() failed in Win32PrintStackBackTrace().", Null);
+      SetGlobalError("SymInitialize() failed in Win32PrintStackBackTrace().");
+			DisplayGlobalError();
       return;
     }
   }
@@ -70,61 +74,65 @@ void Win32PrintStackBackTrace() {
 				DisplayGlobalError();
 			}
 			
+			SymCleanup(process);
 			return;
 		}
   }
 
   // Print log
-  const ui8 bufferSize = 128;
+  const ui8 bufferSize = UI8Max;
   char previousSymbolName[bufferSize] = {};
   ForAll(depth) {
-    if(depth >= GetSarLength(stacktrace))
-	  goto cleanup;
+    if(depth >= GetArrayLength(stacktrace)) {
+			SymCleanup(process);
+			return;
+		}
 
     DWORD64 address = (DWORD64)(stacktrace[it]);
 	
     // Function name
-    char buffer[sizeof(SYMBOL_INFO) + bufferSize * sizeof(TCHAR)];
-    ClearSar(buffer);
+    char buffer[sizeof(SYMBOL_INFO) + bufferSize * sizeof(TCHAR)] = {};
     PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
     pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
     pSymbol->MaxNameLen = bufferSize;
     DWORD64 displacement64 = Null;
     BOOL ret = SymFromAddr(process, address, (PDWORD64)(&displacement64), pSymbol);
-	if(ret == FALSE) {
-      LogError("SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", GetLastError());
-			goto cleanup;
+		if(ret == FALSE) {
+			SetGlobalError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString(GetLastError()));
+			DisplayGlobalError();
+      SymCleanup(process);
+			return;
     }
 
     // File name and line
     IMAGEHLP_LINE64 fileLine = {};
     fileLine.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
     DWORD displacement = Null;
-    ret = SymGetLineFromAddr64(process, address, &displacement /* Contrary to msdn documentation, Null/0 doesn't work here. */, &fileLine);
+    ret = SymGetLineFromAddr64(process, address, &displacement /* Contrary to msdn documentation, Null / 0 doesn't work here. */, &fileLine);
     if(ret == FALSE) {
-      LogError("SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", GetLastError());
-	  continue; // Could be windows stuff in between functions for some reason, like during window proc calls
+      SetGlobalError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString(GetLastError()));
+			DisplayGlobalError();
+      continue; // Could be windows stuff in between functions for some reason, like during window proc calls
     }
 
     // Log all
-	if(it == 0)
-      Log("  %s %i\n", GetFileNameAndExtension(fileLine.FileName), fileLine.LineNumber);
-	else
-	  Log("  %s %i -> %s()\n", GetFileNameAndExtension(fileLine.FileName), fileLine.LineNumber, previousSymbolName);
-	ClearSar(previousSymbolName);
-	CopyMemory(pSymbol->Name, bufferSize, previousSymbolName);
+		const char* finalString = Null;
+		if(it == 0)
+			finalString = Concatenate(3, "  %s %i\n", GetFileNameAndExtension(fileLine.FileName), ToString(fileLine.LineNumber));
+		else
+			finalString = Concatenate(5, finalString, "  %s %i -> %s()\n", GetFileNameAndExtension(fileLine.FileName), fileLine.LineNumber, previousSymbolName);
+		ClearArray(previousSymbolName);
+		CopyMemory(pSymbol->Name, bufferSize, previousSymbolName);
 
     // Stop after WinMain
-    if(StringsAreEqual(pSymbol->Name, "WinMain") == true || StringsAreEqual(pSymbol->Name, "main"))
+    if(StringsAreEqual(pSymbol->Name, "WinMain") == true || StringsAreEqual(pSymbol->Name, "main")) {
+			SetGlobalError(finalString);
+			DisplayGlobalError();
       break;
+		}
   }
-
-  cleanup:
-
-  Log("\n");
-
-  SymCleanup(process);
-  FreeLibrary(dbghelpdll);
+	
+	SymCleanup(process);
 }
 
 dll_export void* Win32AllocateMemory(ui32 size) {

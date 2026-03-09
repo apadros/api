@@ -45,17 +45,23 @@ Assertions will be printed in command line programs and displayed in a message b
 // IsExitIfErrorSet() == false by default.
 #include <stdio.h> // For sprintf
 #define Assert(_condition) { \
-  ClearError(); \
-  if(!(_condition)) { \
-	  char buffer[256] = {}; \
-		sprintf(buffer, "Assertion failed \
-										 \n[Condition] %s \
-										 \n[File]      %s \
-										 \n[Line]      %lu", #_condition, __FILE__, __LINE__); \
-		SetError((const char*)buffer); \
-		DisplayGlobalError(); \
-		if(IsExitIfErrorSet() == true) \
-		  ExitProgram(true); \
+	program_external bool AssertionsEnabled; \
+	if(AssertionsEnabled == true) { \
+		AssertionsEnabled = false; \
+    ClearError(); \
+    if(!(_condition)) { \
+	  	char buffer[256] = {}; \
+	  	sprintf(buffer, "Assertion failed \
+	  									 \n[Condition] %s \
+	  									 \n[File]      %s \
+	  									 \n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
+	  	SetError((const char*)buffer); \
+	  	DisplayGlobalError(); \
+	  	AssertionsEnabled = true; \
+	  	if(IsExitIfErrorSet() == true) \
+	  	  ExitProgram(true); \
+	  } \
+		AssertionsEnabled = true; \
 	} \
 }
 

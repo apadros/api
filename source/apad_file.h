@@ -18,6 +18,8 @@ program_unique file (*LoadFile)(const char* path) = Win32LoadFile;
 program_unique void (*SaveFile)(void* data, ui32 dataSize, const char* path) = Win32SaveFile;
 program_unique void (*FreeFile)(file& f) = FreeMemory;
 							 		  // Defined in apad_memory.cpp
-							 bool IsValid(file f);
+dll_import 		 bool IsValid(file f);
+							 
+dll_import 		 const char* GetFileNameAndExtension(const char* path);
 
 #endif

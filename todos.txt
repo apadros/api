@@ -13,6 +13,7 @@ Bitmaps / Images
 Debug / Error
 	- Stack trace printing and inclusion in assertions @CURRENT
 	- Replace DisplayErrorGUI() with a function pointer				
+	- Setting and displaying the global error and usually called together. Merge?
 		
 GUI
 	- Custom window icon

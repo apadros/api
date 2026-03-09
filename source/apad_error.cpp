@@ -12,6 +12,7 @@ program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
 program_local 	 			 bool ExitIfError = false;
 								 
 program_external  		 bool GUIApp = false; // Checked outside this translation unit
+program_external       bool AssertionsEnabled = true; // Used to disable assertions when called from functions which are in turn called from within an assertion
 
 // ******************** Internal API end ******************** //
 
@@ -32,18 +33,11 @@ dll_export void SetGlobalError(const char* string) {
   if(string == Null)
 		return;
 	
-  // Code copied from GetStringLength() in  apad_string.cpp
-	char c;
-  ui16 	sourceLength = 0;
-  do {	 	
-		c = string[sourceLength++];
-		if(sourceLength == ErrorStringMaxLength - 1) // Couldn't find an EOS character
-			return;
-	}
-  while (c != '\0');
-	
-	ForAll(sourceLength)
-	  ErrorString[it] = string[it];
+	ui32 it = 0;
+	do { 
+		ErrorString[it] = string[it];
+		it += 1;
+	} while(ErrorString[it - 1] != '\0');
 }
 
 dll_export bool GlobalErrorIsSet() {
