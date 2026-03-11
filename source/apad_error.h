@@ -58,6 +58,7 @@ Assertions will be printed in command line programs and displayed in a message b
 	  									 \n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
 	  	SetGlobalError((const char*)buffer); \
 	  	DisplayGlobalError(); \
+			ClearGlobalError(); /* To avoid triggering checks within Win32PrintStackBackTrace() */ \
 			program_external void Win32PrintStackBackTrace(); \
 			Win32PrintStackBackTrace(); \
 	  	AssertionsEnabled = true; \
@@ -80,7 +81,8 @@ Assertions will be printed in command line programs and displayed in a message b
 	
 #define AssertRet(_condition) { \
 	Assert(_condition); \
-	if(GlobalErrorIsSet() == true) \
+	program_external bool AssertionsEnabled; \
+	if(AssertionsEnabled == true && GlobalErrorIsSet() == true) \
 	  return; \
 }
 
@@ -96,7 +98,8 @@ Assertions will be printed in command line programs and displayed in a message b
 	
 #define AssertRetType(_condition, _retValue) { \
 	Assert(_condition); \
-	if(GlobalErrorIsSet() == true) \
+	program_external bool AssertionsEnabled; \
+	if(AssertionsEnabled == true && GlobalErrorIsSet() == true) \
 	  return (_retValue); \
 }
 

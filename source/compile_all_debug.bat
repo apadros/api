@@ -2,10 +2,11 @@
 
 REM Setup build directory
 if not exist build ( mkdir build )
-cd build
+pushd build
 
 cl ..\*.cpp /w /nologo /Od /Zi /DAPAD_INTERNAL /Fetest /std:c++17 /link user32.lib opengl32.lib dbghelp.lib gdi32.lib
 
+popd
 exit /b REM Exit batch script
 
 :Help

@@ -12,6 +12,8 @@ Bitmaps / Images
 		
 Debug / Error
 	- Stack trace printing and inclusion in assertions @CURRENT
+		- @BUG - Symbol lines are not accurately printed when there is a return in the function.
+	
 	- Replace DisplayErrorGUI() with a function pointer				
 	- Setting and displaying the global error and usually called together. Merge?
 		- In fact, there may be no read need to store an error string since it is always printed / displayed when it happens

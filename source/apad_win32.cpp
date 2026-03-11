@@ -28,9 +28,7 @@ dll_export void Win32PrintStackBackTrace() {
 		return;
   }
 	
-	InvalidCodePath; // Actually log / display back trace
-  
-  // Get an initialised handle for the current process
+	// Get an initialised handle for the current process
   HANDLE process = {};
   {
     HANDLE pseudoHandle = GetCurrentProcess();
@@ -73,6 +71,7 @@ dll_export void Win32PrintStackBackTrace() {
   // Print log
   const ui8 bufferSize = UI8Max;
   char previousSymbolName[bufferSize] = {};
+	const char* finalString = Null;
   ForAll(depth) {
     if(depth >= GetArrayLength(stacktrace)) {
 			SymCleanup(process);
@@ -99,7 +98,7 @@ dll_export void Win32PrintStackBackTrace() {
     IMAGEHLP_LINE64 fileLine = {};
     fileLine.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
     DWORD displacement = Null;
-    ret = SymGetLineFromAddr64(process, address, &displacement /* Contrary to msdn documentation, Null / 0 doesn't work here. */, &fileLine);
+    ret = SymGetLineFromAddr64(process, address, &displacement, &fileLine);
     if(ret == FALSE) {
       SetGlobalError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
@@ -107,11 +106,10 @@ dll_export void Win32PrintStackBackTrace() {
     }
 
     // Log all
-		const char* finalString = Null;
 		if(it == 0)
-			finalString = Concatenate(3, "  %s %i\n", GetFileNameAndExtension(fileLine.FileName), ToString((ui32)fileLine.LineNumber));
+			finalString = Concatenate(8, "Stack back trace\n", "  [", GetFileNameAndExtension(fileLine.FileName), "], [", pSymbol->Name, "()], line [", ToString((ui32)fileLine.LineNumber), "]\n");
 		else
-			finalString = Concatenate(5, finalString, "  %s %i -> %s()\n", GetFileNameAndExtension(fileLine.FileName), fileLine.LineNumber, previousSymbolName);
+			finalString = Concatenate(8, finalString, "  [", GetFileNameAndExtension(fileLine.FileName), "] line [", ToString((ui32)fileLine.LineNumber), "] calling [", previousSymbolName, "()]\n");
 		ClearArray(previousSymbolName);
 		CopyMemory(pSymbol->Name, bufferSize, previousSymbolName);
 
