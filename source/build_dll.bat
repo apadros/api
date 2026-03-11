@@ -18,7 +18,7 @@ cl /w /nologo /O2 /c /std:c++17 ..\*.cpp
 del test.obj
 
 REM Link all into single library
-cl /nologo /w /LD /Fe: apad_api_v%1.%2.%3.dll *.obj /link user32.lib gdi32.lib opengl32.lib >> temp.txt
+cl /nologo /w /LD /Fe: apad_api_v%1.%2.%3.dll *.obj /link user32.lib gdi32.lib opengl32.lib dbghelp.lib >> temp.txt
 
 del temp.txt
 del *.obj
@@ -30,5 +30,5 @@ exit /b REM Exit batch script
 REM Help message
 :Help
 echo:
-echo Usage: build_all_dlls.bat [version_major_number] [version_minor_number] [version_patch_number]
+echo Usage: build_dll.bat [version_major_number] [version_minor_number] [version_patch_number]
 echo:

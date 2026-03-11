@@ -15,6 +15,11 @@ program_local UINT 				sleepPeriod = Null;
 program_local time_marker lastLoopMarker = Null;
 program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 
+// No need to export this, only used in apad_error.cpp
+void Win32ErrorMessageBox(const char* string) {
+	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+}
+
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if(msg == WM_CREATE) {
 		// Init OpenGL
@@ -29,21 +34,21 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		HDC dc = GetDC(window);
 		int format = ChoosePixelFormat(dc, &pfd);
 		Assert(format != 0);
-		if(ErrorIsSet() == true) {
+		if(GlobalErrorIsSet() == true) {
 			DisplayLastWin32Error();
 			ExitProgram(true); // No point in continuing if a GUI program cannot render
 		}
 		
 		BOOL ret = SetPixelFormat(dc, format, &pfd);
 		Assert(ret == TRUE);
-		if(ErrorIsSet() == true) {
+		if(GlobalErrorIsSet() == true) {
 			DisplayLastWin32Error();
 			ExitProgram(true); // No point in continuing if a GUI program cannot render
 		}
 		
 		HGLRC context = wglCreateContext(dc);
 		Assert(context != NULL);
-		if(ErrorIsSet() == true) {
+		if(GlobalErrorIsSet() == true) {
 			DisplayLastWin32Error();
 			ExitProgram(true); // No point in continuing if a GUI program cannot render
 		}
@@ -75,7 +80,7 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 
 dll_export void DisplayLastWin32Error() {
 	auto error = GetLastError();
-	DisplayErrorGUI(ToString((ui32)error));
+	Win32ErrorMessageBox(ToString((ui32)error));
 }
 
 dll_export program_external void Win32Exit() { // Called within ExitProgram()
@@ -100,11 +105,6 @@ dll_export program_external void Win32Exit() { // Called within ExitProgram()
 
 // ******************** Internal API end ******************** //
 
-// No need to export this, only used in apad_error.cpp
-void Win32ErrorMessageBox(const char* string) {
-	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
-}
-
 dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	extern bool GUIApp;
 	GUIApp = true;
@@ -115,7 +115,7 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		Assert(ret == TRUE);
-		if(ErrorIsSet() == true)
+		if(GlobalErrorIsSet() == true)
 			DisplayLastWin32Error();
   }
 

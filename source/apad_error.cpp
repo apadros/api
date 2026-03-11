@@ -19,10 +19,10 @@ program_external       bool AssertionsEnabled = true; // Used to disable asserti
 #include <stdio.h>
 dll_export void DisplayGlobalError() {
 	if(GUIApp == false)
-		printf("\n%s\n", GetError());
+		printf("\n%s\n", GetGlobalError());
 	else {
 		program_external void Win32ErrorMessageBox(const char* string);
-		Win32ErrorMessageBox(string);
+		Win32ErrorMessageBox(GetGlobalError());
 	}
 }
 

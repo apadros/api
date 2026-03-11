@@ -10,17 +10,6 @@
 
 // ******************** Local API start ******************** //
 
-// Minimise calls to API to avoid other potential bugs since this is called from within debugging code
-program_local void DisplayGlobalErrorLocal(const char* string, DWORD error /* Set to Null if none supplied / required */) { \
-	char buffer[256] = {};
-	if(error == Null)
-		sprintf(buffer, string);
-	else
-		sprintf(buffer, string, error);
-	SetError((const char*)buffer);
-	DisplayGlobalError();
-}
-
 // ******************** Local API end ******************** //
 
 #include <dbghelp.h>
@@ -29,15 +18,17 @@ program_local void DisplayGlobalErrorLocal(const char* string, DWORD error /* Se
 #include "apad_file.h"
 #include "apad_string.h"
 // No assertions calls in this function since it is a part of the Assert() macros
-void Win32PrintStackBackTrace() {
+dll_export void Win32PrintStackBackTrace() {
   // Capture stack back trace
   PVOID stacktrace[32] = {}; // We assume we won't need more than 32 stack frames
   USHORT depth = CaptureStackBackTrace(1 /* Skip the call to Win32PrintStackBackTrace() */, GetArrayLength(stacktrace), stacktrace, NULL);
   if(depth == 0) {
-		SetGlobalError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString(GetLastError()));
+		SetGlobalError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 		DisplayGlobalError();
 		return;
   }
+	
+	InvalidCodePath; // Actually log / display back trace
   
   // Get an initialised handle for the current process
   HANDLE process = {};
@@ -45,7 +36,7 @@ void Win32PrintStackBackTrace() {
     HANDLE pseudoHandle = GetCurrentProcess();
     BOOL   ret = DuplicateHandle(pseudoHandle, pseudoHandle, pseudoHandle, &process, 0, FALSE, DUPLICATE_SAME_ACCESS);
     if(ret == 0) { // DuplicateHandle failed
-			SetGlobalError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString(GetLastError()));
+			SetGlobalError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
 			return;
     }
@@ -98,7 +89,7 @@ void Win32PrintStackBackTrace() {
     DWORD64 displacement64 = Null;
     BOOL ret = SymFromAddr(process, address, (PDWORD64)(&displacement64), pSymbol);
 		if(ret == FALSE) {
-			SetGlobalError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString(GetLastError()));
+			SetGlobalError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
       SymCleanup(process);
 			return;
@@ -110,7 +101,7 @@ void Win32PrintStackBackTrace() {
     DWORD displacement = Null;
     ret = SymGetLineFromAddr64(process, address, &displacement /* Contrary to msdn documentation, Null / 0 doesn't work here. */, &fileLine);
     if(ret == FALSE) {
-      SetGlobalError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString(GetLastError()));
+      SetGlobalError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
       continue; // Could be windows stuff in between functions for some reason, like during window proc calls
     }
@@ -118,7 +109,7 @@ void Win32PrintStackBackTrace() {
     // Log all
 		const char* finalString = Null;
 		if(it == 0)
-			finalString = Concatenate(3, "  %s %i\n", GetFileNameAndExtension(fileLine.FileName), ToString(fileLine.LineNumber));
+			finalString = Concatenate(3, "  %s %i\n", GetFileNameAndExtension(fileLine.FileName), ToString((ui32)fileLine.LineNumber));
 		else
 			finalString = Concatenate(5, finalString, "  %s %i -> %s()\n", GetFileNameAndExtension(fileLine.FileName), fileLine.LineNumber, previousSymbolName);
 		ClearArray(previousSymbolName);
@@ -171,7 +162,7 @@ dll_export memory_block Win32LoadFile(const char* path) {
 	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	Assert(handle != INVALID_HANDLE_VALUE);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
 		// @TODO - Can all of this be improved / layed out better?
 		// @TODO - Logging or displaying of the error somehow
     auto error = GetLastError();
@@ -184,12 +175,12 @@ dll_export memory_block Win32LoadFile(const char* path) {
   LARGE_INTEGER li = {};
   BOOL b = GetFileSizeEx(handle, &li);
   Assert(b != 0);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
 		CloseHandle(handle);
 		return NullMemoryBlock;
 	}
   Assert(li.QuadPart <= 0xFFFFFFFF);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
 		CloseHandle(handle);
 		return NullMemoryBlock;
 	}
@@ -199,12 +190,12 @@ dll_export memory_block Win32LoadFile(const char* path) {
   DWORD bytesRead = 0;
   b = ReadFile(handle, allocatedMemory.memory, fileSize, &bytesRead, NULL); // If it fails, returns FALSE
   Assert(b == TRUE);
-  if(ErrorIsSet() == true) {
+  if(GlobalErrorIsSet() == true) {
 		CloseHandle(handle);
 		return NullMemoryBlock;
 	}
   Assert(bytesRead == fileSize);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
 		CloseHandle(handle);
 		return NullMemoryBlock;
 	}
@@ -219,7 +210,7 @@ dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
 	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	Assert(handle != INVALID_HANDLE_VALUE);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
 		auto error = GetLastError();
     // @TODO - Logging / Displaying of error in GUI program
 		return;
@@ -228,7 +219,7 @@ dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
   DWORD written = 0;
   BOOL result = WriteFile(handle, data, dataSize, &written, NULL);
 	Assert(result != FALSE);
-	if(ErrorIsSet() == true) {
+	if(GlobalErrorIsSet() == true) {
     auto error = GetLastError();
 		// @TODO - Logging / Displaying of error in GUI program
 		CloseHandle(handle);

@@ -8,6 +8,8 @@
 // The first argument corresponds to the program name
 #define ConsoleAppEntryPoint(_argumentsID, _argumentCountID) int main(int _argumentCountID, char** _argumentsID)
 
+dll_import void Win32PrintStackBackTrace();
+
 // ******************** Memory ********************  //
 
 								 // Will automatically clear allocated memory

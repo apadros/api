@@ -14,6 +14,7 @@ Debug / Error
 	- Stack trace printing and inclusion in assertions @CURRENT
 	- Replace DisplayErrorGUI() with a function pointer				
 	- Setting and displaying the global error and usually called together. Merge?
+		- In fact, there may be no read need to store an error string since it is always printed / displayed when it happens
 		
 GUI
 	- Custom window icon

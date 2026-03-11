@@ -16,7 +16,7 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 
 dll_export log_file OpenLogFile() {
   auto file = AllocateStack(KiB(10));
-  if(ErrorIsSet() == true)
+  if(GlobalErrorIsSet() == true)
 		return NullMemoryBlock;
 	return file;
 }

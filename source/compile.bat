@@ -6,14 +6,14 @@ REM Setup build directory
 if not exist build ( mkdir build )
 pushd build
 
-cl ..\%1 /c /w /nologo
+cl ..\%1 /c /w /nologo /DAPAD_INTERNAL /std:c++17
 
 popd
 exit /b REM Exit batch script
 
 :Help
 echo:
-echo Function: Only checks compilation for target file.
+echo Function: Only checks compilation of target translation unit.
 echo:
-echo Usage: compile file_with_extension
+echo Usage: compile file.cpp
 echo:

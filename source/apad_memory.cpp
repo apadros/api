@@ -32,7 +32,7 @@ dll_export void CopyMemory(void* source, ui32 size, void* destination) {
 
 dll_export memory_block AllocateMemory(ui32 size) {
 	void* memory = Win32AllocateMemory(size);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return NullMemoryBlock;
 		
 	memory_block ret;
@@ -101,17 +101,17 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 		while(stack.size + size > newCapacity);
 	
 		auto newStack = AllocateStack(newCapacity);
-		if(ErrorIsSet() == true)
+		if(GlobalErrorIsSet() == true)
 			return Null;
 		
 		if(stack.size > 0) { // If == 0 it will trigger an error
 			Push(stack.memory, stack.size, newStack);
-			if(ErrorIsSet() == true)
+			if(GlobalErrorIsSet() == true)
 				return Null;
 		}
 		
 		FreeStack(stack);
-		if(ErrorIsSet() == true)
+		if(GlobalErrorIsSet() == true)
 			return Null;
 		
 		stack = newStack;
@@ -125,10 +125,10 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 
 dll_export void* Push(void* data, ui32 size, memory_block& stack) {
   void* mem = Push(size, stack);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return Null;
 	CopyMemory(data, size, mem);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return Null;
 	return mem;
 }

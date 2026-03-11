@@ -47,7 +47,7 @@ program_local void PushNullChar(memory_stack& stack) {
 // Also used in log.cpp
 program_external char* PushString(const char* string, bool addEOS, memory_block& stack) {
   auto length = GetStringLength(string);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return Null;
 	void* mem = Push((void*)string, length, stack);
 	if(addEOS == true)

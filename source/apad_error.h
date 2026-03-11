@@ -17,7 +17,7 @@ dll_import void 			 ClearGlobalError();
 dll_import bool 			 GlobalErrorIsSet();
 dll_import const char* GetGlobalError();
 dll_import void 			 SetGlobalError(const char* string);
-dll_imxport void 			 DisplayGlobalError();
+dll_import void 			 DisplayGlobalError();
 
 /******************** Assertions ******************** 
 
@@ -48,17 +48,20 @@ Assertions will be printed in command line programs and displayed in a message b
 	program_external bool AssertionsEnabled; \
 	if(AssertionsEnabled == true) { \
 		AssertionsEnabled = false; \
-    ClearError(); \
+    ClearGlobalError(); \
     if(!(_condition)) { \
 	  	char buffer[256] = {}; \
+			program_external const char* GetFileNameAndExtension(const char*); \
 	  	sprintf(buffer, "Assertion failed \
 	  									 \n[Condition] %s \
 	  									 \n[File]      %s \
 	  									 \n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
-	  	SetError((const char*)buffer); \
+	  	SetGlobalError((const char*)buffer); \
 	  	DisplayGlobalError(); \
+			program_external void Win32PrintStackBackTrace(); \
+			Win32PrintStackBackTrace(); \
 	  	AssertionsEnabled = true; \
-	  	if(IsExitIfErrorSet() == true) \
+	  	if(IsExitIfGlobalErrorSet() == true) \
 	  	  ExitProgram(true); \
 	  } \
 		AssertionsEnabled = true; \
@@ -77,7 +80,7 @@ Assertions will be printed in command line programs and displayed in a message b
 	
 #define AssertRet(_condition) { \
 	Assert(_condition); \
-	if(ErrorIsSet() == true) \
+	if(GlobalErrorIsSet() == true) \
 	  return; \
 }
 
@@ -93,7 +96,7 @@ Assertions will be printed in command line programs and displayed in a message b
 	
 #define AssertRetType(_condition, _retValue) { \
 	Assert(_condition); \
-	if(ErrorIsSet() == true) \
+	if(GlobalErrorIsSet() == true) \
 	  return (_retValue); \
 }
 

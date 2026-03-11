@@ -137,11 +137,11 @@ dll_export date GetDate(si32 offsetDays) {
 
 dll_export char* DateToString(date d) {
 	char* ret = AllocateString(DateFormatLong, Null);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return ret;
 	
 	auto temp = ToString(d.day);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return ret;
 	if(d.day <= 9) {
 		ret[0] = '0';
@@ -165,7 +165,7 @@ dll_export char* DateToString(date d) {
 	FreeString(temp);
 	
 	temp = ToString(d.year);
-	if(ErrorIsSet() == true)
+	if(GlobalErrorIsSet() == true)
 		return ret;
 	ret[6] = temp[0];
 	ret[7] = temp[1];
