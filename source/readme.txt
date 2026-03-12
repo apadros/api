@@ -1,5 +1,5 @@
 Compilation macros:
-	APAD_DEBUGGER_ASSERTIONS - Enable __debugbreak() assertions in a debugger
+	APAD_DEBUGGER_ASSERTIONS - Enable assertions breaking in a debugger
 	APAD_INTERNAL 					 - Use to test internally without declaring imported & exported symbols
 	
 Linkage

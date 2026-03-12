@@ -6,7 +6,9 @@ if %2.==. ( goto Help )
 if %3.==. ( goto Help )
 
 if not exist release ( mkdir release )
-del release\* /q
+del release\*.h /q
+del release\*.lib /q
+del release\*.dll /q
 
 pushd source\
 call build_all_dlls.bat %1 %2 %3

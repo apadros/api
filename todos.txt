@@ -1,3 +1,7 @@
+Key
+	@CURRENT - What is currently being worked on
+	@PRIORITY
+
 Array
 	- A structure to encapsulate both static and dynamic arrays into a single type
 		- Initializer overloads
@@ -12,12 +16,14 @@ Bitmaps / Images
 		
 Debug / Error
 	- Stack trace printing and inclusion in assertions @CURRENT
-		- @BUG - Symbol lines are not accurately printed when there is a return in the function.
-	
+		- Finish testing Win32PrintStackBackTrace(), need to test for Desktop GUI apps as well
 	- Replace DisplayErrorGUI() with a function pointer				
-	- Setting and displaying the global error and usually called together. Merge?
+	- Setting and displaying the global error and usually called together. Merge? @PRIORITY
 		- In fact, there may be no read need to store an error string since it is always printed / displayed when it happens
-		
+	- Since Win32PrintStackBackTrace() won't work properly when compiling with optimisations, need a more Windows API / OpenGL error getting / setting system. Need to bake this into assertions. @PRIORITY
+		- Separate assertions into 2 types - 1 used internally which stores an error code, one for user code which records and displays an assertion and potentially the stack back trace
+			- Internal header file
+			
 GUI
 	- Custom window icon
 	- Custom taskbar icon
@@ -52,6 +58,3 @@ Text
 Time
 	- Conversions between formats
 	- Replace GetTimeMarker() with a function pointer
-	
-Win32
-	- More in-depth logging in case of error detection / failure

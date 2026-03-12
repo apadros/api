@@ -1,0 +1,2 @@
+Define APAD_DEBUGGER_ASSERTIONS to enable __debugbreak() assertions in a debugger.
+Need to disable optimisations and generate debug data (/Od and /Zi respectively when using the Microsoft C/C++ compiler) if intending to use Win32PrintStackBackTrace().
