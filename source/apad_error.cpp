@@ -7,12 +7,12 @@
 
 // ******************** Internal API start ******************** //
 
-program_local 	 const ui8  ErrorStringMaxLength = UI8Max;
-program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
-program_local 	 			 bool ExitIfError = false;
+					 program_local 	  const ui8  ErrorStringMaxLength = UI8Max;
+					 program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
+					 program_local 	 			 bool ExitIfError = false;
 								 
-program_external  		 bool GUIApp = false; // Checked outside this translation unit
-program_external       bool AssertionsEnabled = true; // Used to disable assertions when called from functions which are in turn called from within an assertion
+					 program_external 		 bool GUIApp = false; // Checked outside this translation unit
+dll_export program_external      bool AssertionsEnabled = true; // Used to disable assertions when called from functions which are in turn called from within an assertion
 
 // ******************** Internal API end ******************** //
 

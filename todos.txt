@@ -15,8 +15,6 @@ Bitmaps / Images
 			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
-	- Stack trace printing and inclusion in assertions @CURRENT
-		- Finish testing Win32PrintStackBackTrace(), need to test for Desktop GUI apps as well
 	- Replace DisplayErrorGUI() with a function pointer				
 	- Setting and displaying the global error and usually called together. Merge? @PRIORITY
 		- In fact, there may be no read need to store an error string since it is always printed / displayed when it happens

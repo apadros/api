@@ -45,7 +45,7 @@ Assertions will be printed in command line programs and displayed in a message b
 // IsExitIfErrorSet() == false by default.
 #include <stdio.h> // For sprintf
 #define Assert(_condition) { \
-	program_external bool AssertionsEnabled; \
+	dll_import program_external bool AssertionsEnabled; \
 	if(AssertionsEnabled == true) { \
 		AssertionsEnabled = false; \
     ClearGlobalError(); \
