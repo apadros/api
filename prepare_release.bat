@@ -20,6 +20,7 @@ echo:
 
 move source\build\* release\
 copy source\*.h release\
+del  release\apad_error_internal.h
 
 exit /b REM Exit batch script
 

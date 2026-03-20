@@ -11,13 +11,16 @@ dll_import void ExitProgram(bool error); // This will not work within DLL functi
 
 // Use these to create an error message which is then logged by outside code (e.g. error within a function, need it available when returning)
 dll_import bool 			 IsExitIfGlobalErrorSet();
-dll_import void 			 SetExitIfGlobalError(bool b); // False by default
+											 // False by default
+dll_import void 			 SetExitIfGlobalError(bool b);
 
 dll_import void 			 ClearGlobalError();
 dll_import bool 			 GlobalErrorIsSet();
 dll_import const char* GetGlobalError();
 dll_import void 			 SetGlobalError(const char* string);
 dll_import void 			 DisplayGlobalError();
+											 // Does not set the global error
+dll_import void 			 DisplayError(const char* string);
 
 /******************** Assertions ******************** 
 
@@ -72,13 +75,6 @@ Assertions will be printed in command line programs and displayed in a message b
 #endif
 
 // AssertRet()
-#ifdef APAD_DEBUGGER_ASSERTIONS
-
-#define AssertRet(_condition) \
-	Assert(_condition)
-
-#else
-	
 #define AssertRet(_condition) { \
 	Assert(_condition); \
 	program_external bool AssertionsEnabled; \
@@ -86,24 +82,13 @@ Assertions will be printed in command line programs and displayed in a message b
 	  return; \
 }
 
-#endif
-
 // AssertRetType()
-#ifdef APAD_DEBUGGER_ASSERTIONS
-
-#define AssertRetType(_condition, _retValue) \
-	Assert(_condition)
-
-#else
-	
 #define AssertRetType(_condition, _retValue) { \
 	Assert(_condition); \
 	program_external bool AssertionsEnabled; \
 	if(AssertionsEnabled == true && GlobalErrorIsSet() == true) \
 	  return (_retValue); \
 }
-
-#endif
 
 // InvalidCodePath
 #define InvalidCodePath Assert(false)

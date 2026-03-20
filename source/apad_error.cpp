@@ -1,5 +1,6 @@
 #include "apad_base_types.h"
 #include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 
 // ******************** Imported libs ******************** //
@@ -7,7 +8,7 @@
 
 // ******************** Internal API start ******************** //
 
-					 program_local 	  const ui8  ErrorStringMaxLength = UI8Max;
+					 program_local 	  const ui8 ErrorStringMaxLength = UI8Max;
 					 program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
 					 program_local 	 			 bool ExitIfError = false;
 								 
@@ -18,17 +19,11 @@ dll_export program_external      bool AssertionsEnabled = true; // Used to disab
 
 #include <stdio.h>
 dll_export void DisplayGlobalError() {
-	if(GUIApp == false)
-		printf("\n%s\n", GetGlobalError());
-	else {
-		program_external void Win32ErrorMessageBox(const char* string);
-		Win32ErrorMessageBox(GetGlobalError());
-	}
+	DisplayError(GetGlobalError());
 }
 
 dll_export void SetGlobalError(const char* string) {
-	// Since this function will be called everywhere, avoid calling external code 
-	// within it to avoid potential infinite loops
+	// Avoid assertions here since they call into this function
 
   if(string == Null)
 		return;
@@ -55,7 +50,7 @@ dll_export const char* GetGlobalError() {
 #include <stdlib.h> // For exit()
 dll_export void ExitProgram(bool error) {
 	if(GUIApp == true) {
-		dll_import program_external void Win32Exit();
+		program_external void Win32Exit();
 		Win32Exit();
 	}
 		
@@ -71,4 +66,15 @@ dll_export void SetExitIfGlobalError(bool b) {
 
 dll_export bool IsExitIfGlobalErrorSet() {
 	return ExitIfError;
+}
+
+dll_export void DisplayError(const char* string) {
+	AssertRetInternal(string != Null, AssertionErrorNullString, "DisplayError");
+	
+	if(GUIApp == false)
+		printf("\n%s\n", string);
+	else {
+		program_external void Win32ErrorMessageBox(const char* string);
+		Win32ErrorMessageBox(string);
+	}
 }

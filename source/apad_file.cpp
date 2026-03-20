@@ -1,10 +1,10 @@
 #include "apad_base_types.h"
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
 
 dll_export const char* GetFileNameAndExtension(const char* path) {
-	AssertRetType(path != Null, Null);
+	AssertRetTypeInternal(path != Null, AssertionErrorNullString);
   
   const char* fileName = path + GetStringLength(path);
   do 		 fileName -= 1;

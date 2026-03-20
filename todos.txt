@@ -1,5 +1,5 @@
 Key
-	@CURRENT - What is currently being worked on
+	@WIP
 	@PRIORITY
 
 Array
@@ -15,13 +15,14 @@ Bitmaps / Images
 			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
-	- Replace DisplayErrorGUI() with a function pointer				
-	- Setting and displaying the global error and usually called together. Merge? @PRIORITY
-		- In fact, there may be no read need to store an error string since it is always printed / displayed when it happens
-	- Since Win32PrintStackBackTrace() won't work properly when compiling with optimisations, need a more Windows API / OpenGL error getting / setting system. Need to bake this into assertions. @PRIORITY
-		- Separate assertions into 2 types - 1 used internally which stores an error code, one for user code which records and displays an assertion and potentially the stack back trace
-			- Internal header file
-			
+	- Replace DisplayErrorGUI() with a function pointer
+	- Separate assertions into internal & external, add error codes @WIP
+		- Replace all API assertions with internal version @WIP
+		- For external / user code assertions - remove the setting of an error string, display it on the fly when hitting an assertion
+			- Include stack back trace printing if compiling without optimisation - macro definition - APAD_ASSERTIONS_BACKTRACE
+		- Add macro APAD_DEBUGGER_ASSERTIONS to build_dll_debug.bat for internal assertions ?
+	- Creation of a custom stack backtrace for release? Need to keep track of functions and call sites
+		
 GUI
 	- Custom window icon
 	- Custom taskbar icon

@@ -83,7 +83,7 @@ dll_export void DisplayLastWin32Error() {
 	Win32ErrorMessageBox(ToString((ui32)error));
 }
 
-dll_export program_external void Win32Exit() { // Called within ExitProgram()
+program_external void Win32Exit() { // Called within ExitProgram()
 	// Don't care about assertions at this point
 	
 	if(sleepPeriod != Null); {
