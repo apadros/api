@@ -16,10 +16,13 @@
 #else
 	
 #include <stdio.h> // For sprintf
-#define AssertInternal(_condition, _errorString, _functionIDString) { \
+#define AssertInternal(_condition) { \
 	if(!(_condition)) { \
 	 	char buffer[256] = {}; \
-		sprintf(buffer, "Assertion failed, %s in function %s(), line %lu", _errorString, _functionIDString); \
+		sprintf(buffer, "[APAD_API] Internal assertion failed. \
+	  								  \n[Condition] %s \
+	  									\n[File]      %s \
+	  									\n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
 	 	SetGlobalError((const char*)buffer); \
 	} \
 }
