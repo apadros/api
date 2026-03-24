@@ -4,7 +4,9 @@
 #include "apad_string.h"
 
 dll_export const char* GetFileNameAndExtension(const char* path) {
-	AssertRetTypeInternal(path != Null, AssertionErrorNullString);
+	FunctionStart();
+	
+	AssertInternal(path != Null, Null;);
   
   const char* fileName = path + GetStringLength(path);
   do 		 fileName -= 1;

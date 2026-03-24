@@ -19,6 +19,8 @@ dll_export program_external      bool AssertionsEnabled = true; // Used to disab
 
 #include <stdio.h>
 dll_export void DisplayGlobalError() {
+	FunctionStart();
+	
 	DisplayError(GetGlobalError());
 }
 
@@ -49,6 +51,8 @@ dll_export const char* GetGlobalError() {
 
 #include <stdlib.h> // For exit()
 dll_export void ExitProgram(bool error) {
+	FunctionStart();
+	
 	if(GUIApp == true) {
 		program_external void Win32Exit();
 		Win32Exit();
@@ -69,7 +73,8 @@ dll_export bool IsExitIfGlobalErrorSet() {
 }
 
 dll_export void DisplayError(const char* string) {
-	AssertRetInternal(string != Null, AssertionErrorNullString, "DisplayError");
+	FunctionStart();
+	AssertInternal(string != Null, ;);
 	
 	if(GUIApp == false)
 		printf("\n%s\n", string);

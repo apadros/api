@@ -19,7 +19,9 @@ Debug / Error
 	- Assertions rework @WIP
 		- Internal assertions - replace all calls within API @WIP
 			- Do we want to unconditionally jump to a label / original call into the API rather than checking and returning a thousand times within the function stack?
-				- Have a label at the start of every function, store the entrance point into the API and jump there when an assertions is hit to exit quicker
+				- Labels not possible, but can use setjmp & longjmp - sets the current program environment & jumps to in from any point
+					- Can set the environment at the start of every function if not already set, have internal assertions jump there directly
+						- Avoids the need to check for the global error after every assertions / function call
 			- If we remove the need to store assertion strings global for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions
 			- Remove the setting of a global error string, display it on the fly when hitting an assertion?

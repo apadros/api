@@ -10,30 +10,31 @@
 // ******************** Internal API end ******************** //
 
 dll_export void ResetStack(memory_block& stack) {
+	FunctionStart();
 	ClearMemory(stack.memory, stack.size);
   stack.size = 0;
 }
 
 dll_export void ClearMemory(void* memory, ui32 size) {
-	AssertRet(memory != Null);
-  AssertRet(size > 0);
+	AssertInternal(memory != Null, ;);
+  AssertInternal(size > 0, ;);
 	
 	memset(memory, 0, size);
 }
 
 dll_export void CopyMemory(void* source, ui32 size, void* destination) {
-  AssertRet(source != Null);
-  AssertRet(size > 0);
-  AssertRet(destination != Null);
-	AssertRet(source != destination);
+  Assert(source != Null, ;);
+  Assert(size > 0, ;);
+  Assert(destination != Null, ;);
+	Assert(source != destination, ;);
 	
 	memcpy(destination, source, size);
 }
 
 dll_export memory_block AllocateMemory(ui32 size) {
+	FunctionStart();
+	
 	void* memory = Win32AllocateMemory(size);
-	if(GlobalErrorIsSet() == true)
-		return NullMemoryBlock;
 		
 	memory_block ret;
 	ClearStruct(ret);
