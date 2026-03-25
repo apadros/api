@@ -2,7 +2,7 @@
 #include <stdlib.h> // For atexit()
 #include <string.h>
 #include "apad_base_types.h"
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 #include "apad_memory.h"
@@ -17,6 +17,8 @@ const ui16 MaxStringLength = UI16Max;
 memory_stack stringTable; 
 
 program_local void ExitStringAPI() {
+	FunctionStart(;);
+	
 	if(IsValid(stringTable) == true) {
 		// Free all memory blocks contained within the table
 		ui32  blocks = stringTable.size / sizeof(memory_block);
@@ -32,6 +34,8 @@ program_local void ExitStringAPI() {
 }
 
 program_local void AddToStringTable(memory_block& block) {
+	FunctionStart(;);
+	
   if(IsValid(stringTable) == false) { // Init table
 	  stringTable = AllocateStack(KiB(1));
 		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
@@ -41,17 +45,20 @@ program_local void AddToStringTable(memory_block& block) {
 }
 
 program_local void PushNullChar(memory_stack& stack) {
+	FunctionStart(;);
+	
 	Push("\0", 1, stack);
 }
 
 // Also used in log.cpp
 program_external char* PushString(const char* string, bool addEOS, memory_block& stack) {
-  auto length = GetStringLength(string);
-	if(GlobalErrorIsSet() == true)
-		return Null;
+  FunctionStart(Null);
+	
+	auto length = GetStringLength(string);
 	void* mem = Push((void*)string, length, stack);
 	if(addEOS == true)
 		PushNullChar(stack);
+	
 	return (char*)mem;
 }
 
@@ -63,7 +70,8 @@ dll_export bool IsWhitespace(char c) {
 }
 
 dll_export void ConvertStringToLowerCase(const char* s) {
-	AssertRet(s != Null);
+	FunctionStart(;);
+	AssertInternal(s != Null);
 	
 	auto length = GetStringLength(s);
 	ForAll(length) {
@@ -75,7 +83,8 @@ dll_export void ConvertStringToLowerCase(const char* s) {
 #include <stdarg.h>
 // Unfortunately variadic arguments cannot intrinsically infer the number of parameters passed to them
 dll_export char* Concatenate(ui8 count, ...) {
-	AssertRetType(count >= 2, Null);
+	FunctionStart(Null);
+	AssertInternal(count >= 2);
 	
 	va_list list;
 	va_start(list, count);
@@ -97,7 +106,8 @@ dll_export char* Concatenate(ui8 count, ...) {
 }
 
 dll_export char* AllocateString(const char* s, ui16 length) {
-	AssertRetType(s != Null, Null);
+	FunctionStart(Null);
+	AssertInternal(s != Null);
 	
 	auto sLength = GetStringLength(s);
 	
@@ -117,91 +127,105 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 }
 
 dll_export ui16 GetStringLength(const char* s) {
-  AssertRetType(s != Null, Null);
+  FunctionStart(0);
+	AssertInternal(s != Null);
   
 	auto length = strlen(s);
-	AssertRetType(length <= UI16Max, Null);
+	AssertInternal(length <= UI16Max);
   
   return length;
 };
 
 dll_export char* ToString(si8 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%hhi", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(ui8 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%hhu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(si16 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%hi", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(ui16 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%hu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(si32 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%li", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(ui32 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%lu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(si64 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%lli", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(ui64 i) {
-  char buffer[32] = { '\0' };
+  FunctionStart(Null);
+	char buffer[32] = { '\0' };
   sprintf(buffer, "%llu", i);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(f32 f) {
+	FunctionStart(Null);
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2f", f);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export char* ToString(f64 f) {
+	FunctionStart(Null);
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2Lf", f);
 	return AllocateString((char*)buffer, Null);
 }
 
 dll_export bool StringsAreEqual(const char* s1, const char* s2) {
-  AssertRetType(s1 != Null, false);
-	AssertRetType(s2 != Null, false);
+  FunctionStart(false);
+	AssertInternal(s1 != Null);
+	AssertInternal(s2 != Null);
 	
 	return strcmp(s1, s2) == 0;
 }
 
 dll_export const char* FindSubstring(const char* sub, const char* string) {
-  AssertRetType(string != Null, Null);
-  AssertRetType(sub != Null, Null);
+  FunctionStart(Null);
+	AssertInternal(string != Null);
+  AssertInternal(sub != Null);
   return strstr(string, sub);
 }
 
 dll_export bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
-  ForAll(length) {
+  FunctionStart(false);
+	ForAll(length) {
     auto* sub = substrings[it];
-		AssertRetType(sub != Null, false);
+		AssertInternal(sub != Null);
 		if(FindSubstring(sub, string) != Null)
 			return true;
 	}
@@ -209,13 +233,14 @@ dll_export bool ContainsAnySubstring(const char* string, const char** substrings
 }
 
 dll_export void CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
-	AssertRet(source != Null);
-	AssertRet(srcLength > 0 || srcLength == -1);
-	AssertRet(destination != Null);
-	AssertRet(destLength > 0);
+	FunctionStart(;);
+	AssertInternal(source != Null);
+	AssertInternal(srcLength > 0 || srcLength == -1);
+	AssertInternal(destination != Null);
+	AssertInternal(destLength > 0);
 	
 	auto copyLength = srcLength == -1 ? (GetStringLength(source) + 1) : srcLength;
-	AssertRet(copyLength <= destLength);
+	AssertInternal(copyLength <= destLength);
 	
 	CopyMemory((void*)source, copyLength, (void*)destination);
 }
@@ -230,7 +255,8 @@ dll_export bool IsNumber(char c) {
 
 #include <stdlib.h>
 dll_export si32 StringToInt(const char* string, ui16 length) {
-  AssertRetType(string != Null, Null);
+  FunctionStart(0);
+	AssertInternal(string != Null);
 	
 	si32 ret = Null;
 	
@@ -246,10 +272,11 @@ dll_export si32 StringToInt(const char* string, ui16 length) {
 }
 
 dll_export char* ExtractSubstring(const char* s, ui16 length) {
-	AssertRetType(s != Null, Null);
+	FunctionStart(Null);
+	AssertInternal(s != Null);
 	
 	auto sLength = GetStringLength(s);
-	AssertRetType(sLength > 0, Null);
+	AssertInternal(sLength > 0);
 	
 	ui8  copyLength = 0;
 	if(length == Null || length > sLength)
@@ -269,7 +296,8 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 }
 
 dll_export void FreeString(char* string) {
-	AssertRet(string != Null);
+	FunctionStart(;);
+	AssertInternal(string != Null);
 	
 	ui32  blocks = stringTable.size / sizeof(memory_block);
 	auto* table = (memory_block*)stringTable.memory;
@@ -284,13 +312,14 @@ dll_export void FreeString(char* string) {
 }
 
 dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
-	AssertRetType(string != Null, false);
-	AssertRetType(strings != Null, false);
-	AssertRetType(count > 0, false);
+	FunctionStart(false);
+	AssertInternal(string != Null);
+	AssertInternal(strings != Null);
+	AssertInternal(count > 0);
 	
 	ForAll(count) {
 		auto s = strings[it];
-		AssertRetType(s != Null, false);
+		AssertInternal(s != Null);
 		if(StringsAreEqual(string, s) == true)
 			return true;
 	}

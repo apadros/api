@@ -6,7 +6,9 @@
 
 #ifdef APAD_DEBUGGER_ASSERTIONS
 
-#define AssertInternal(_condition, _functionID, _errorString) \
+#define FunctionStart(_return) ;
+
+#define AssertInternal(_condition) \
 	Assert(_condition)
 
 #else
@@ -14,15 +16,15 @@
 // Stack unwinding mechanics
 #include <setjmp.h> // For jmp_buf, setjmp() & longjmp()
 #include "apad_base_types.h"
-program_external jmp_buf JumpEnv;
+program_external jmp_buf JumpBuffer;
 program_external si8 		 ReturnFromAPI;
 
-// This MUST be called at the start of every internal function which calls another API function, before any assertions
+// This MUST be called at the start of every internal function which calls another API function or user internal assertions before any such calls
 #define FunctionStart(_return /* Must contain a ; at least */) { \
 	if(ReturnFromAPI == -1) /* Unset */ \
-		ReturnFromAPI = setjmp(JumpEnv); /* Function will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
+		ReturnFromAPI = setjmp(JumpBuffer); /* Function will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
 	if(ReturnFromAPI == 1) \
-			return _return /* Exit API */ \
+			return _return; /* Exit API */ \
 }
 
 #include <stdio.h> // For sprintf
@@ -35,7 +37,7 @@ program_external si8 		 ReturnFromAPI;
 	  									\n[File]      %s \
 	  									\n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
 	 	SetGlobalError((const char*)buffer); \
-		longjmp(JumpEnv, 1); /* Unwind the call stack to the initial setjmp() call */ \
+		longjmp(JumpBuffer, 1); /* Unwind the call stack to the initial setjmp() call */ \
 	} \
 }
 	

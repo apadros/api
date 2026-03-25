@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include "apad_base_types.h"
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
@@ -19,7 +19,9 @@
 #include "apad_string.h"
 // No assertions calls in this function since it is a part of the Assert() macros
 dll_export void Win32PrintStackBackTrace() {
-  // Capture stack back trace
+	FunctionStart(;);
+  
+	// Capture stack back trace
   PVOID stacktrace[32] = {}; // We assume we won't need more than 32 stack frames
   USHORT depth = CaptureStackBackTrace(1 /* Skip the call to Win32PrintStackBackTrace() */, GetArrayLength(stacktrace), stacktrace, NULL);
   if(depth == 0) {
@@ -125,29 +127,31 @@ dll_export void Win32PrintStackBackTrace() {
 }
 
 dll_export void* Win32AllocateMemory(ui32 size) {
-	AssertRetType(size > 0, Null);
+	FunctionStart(Null);
+  AssertInternal(size > 0);
 	
   void* mem = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-  AssertRetType(mem != NULL, Null);
+  AssertInternal(mem != NULL);
 	
   return mem;
 }
 
 dll_export void Win32FreeMemory(void* mem) {
-	AssertRet(mem != Null);
+	FunctionStart(;);
+  AssertInternal(mem != Null);
 	
   auto ret = VirtualFree(mem, 0, MEM_RELEASE);
-	Assert(ret != 0);
+	AssertInternal(ret != 0);
 }
 
 dll_export bool Win32FileExists(const char* path) {
-	AssertRetType(path != Null, false);
-	AssertRetType(GetStringLength(path) + 1 <= MAX_PATH, false);
+	FunctionStart(false);
+  AssertInternal(path != Null);
+	AssertInternal(GetStringLength(path) + 1 <= MAX_PATH);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	// @TODO - Can this be layed out better?
-	// @TODO - Logging or displaying of the error somehow
-  auto error = GetLastError();
+	auto error = GetLastError();
   if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND))
     return false;
 
@@ -156,11 +160,14 @@ dll_export bool Win32FileExists(const char* path) {
 }
 
 dll_export memory_block Win32LoadFile(const char* path) {
-	AssertRetType(Win32FileExists(path), NullMemoryBlock);
+	FunctionStart(memory_block());
+  AssertInternal(Win32FileExists(path));
 	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	Assert(handle != INVALID_HANDLE_VALUE);
-	if(GlobalErrorIsSet() == true) {
+	AssertInternal(handle != INVALID_HANDLE_VALUE);
+	
+	#if 0
+	if(handle == INVALID_HANDLE_VALUE) {
 		// @TODO - Can all of this be improved / layed out better?
 		// @TODO - Logging or displaying of the error somehow
     auto error = GetLastError();
@@ -169,18 +176,18 @@ dll_export memory_block Win32LoadFile(const char* path) {
 		AssertRetType(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
 		return NullMemoryBlock;
 	}
-
+	#endif
+	
   LARGE_INTEGER li = {};
   BOOL b = GetFileSizeEx(handle, &li);
-  Assert(b != 0);
-	if(GlobalErrorIsSet() == true) {
+  AssertInternal(b != 0);
+	if(b == 0) {
 		CloseHandle(handle);
-		return NullMemoryBlock;
+		AssertInternal(false);
 	}
-  Assert(li.QuadPart <= 0xFFFFFFFF);
-	if(GlobalErrorIsSet() == true) {
+  if(li.QuadPart > 0xFFFFFFFF) {
 		CloseHandle(handle);
-		return NullMemoryBlock;
+		AssertInternal(false);
 	}
   
   DWORD fileSize = (DWORD)li.QuadPart;
@@ -188,14 +195,13 @@ dll_export memory_block Win32LoadFile(const char* path) {
   DWORD bytesRead = 0;
   b = ReadFile(handle, allocatedMemory.memory, fileSize, &bytesRead, NULL); // If it fails, returns FALSE
   Assert(b == TRUE);
-  if(GlobalErrorIsSet() == true) {
+  if(b != TRUE) {
 		CloseHandle(handle);
-		return NullMemoryBlock;
+		AssertInternal(false);
 	}
-  Assert(bytesRead == fileSize);
-	if(GlobalErrorIsSet() == true) {
+  if(bytesRead != fileSize) {
 		CloseHandle(handle);
-		return NullMemoryBlock;
+		AssertInternal(false);
 	}
 
 	CloseHandle(handle);
@@ -203,25 +209,19 @@ dll_export memory_block Win32LoadFile(const char* path) {
 }
 
 dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
-  AssertRet(data != Null);
-	AssertRet(dataSize > 0);
+  FunctionStart(;);
+  AssertInternal(data != Null);
+	AssertInternal(dataSize > 0);
 	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	Assert(handle != INVALID_HANDLE_VALUE);
-	if(GlobalErrorIsSet() == true) {
-		auto error = GetLastError();
-    // @TODO - Logging / Displaying of error in GUI program
-		return;
-  }
+	AssertInternal(handle != INVALID_HANDLE_VALUE);
+	// @TODO - Handle this better, possibly return without an assertion to allow calling code to handle failure to save
 	
   DWORD written = 0;
   BOOL result = WriteFile(handle, data, dataSize, &written, NULL);
-	Assert(result != FALSE);
-	if(GlobalErrorIsSet() == true) {
-    auto error = GetLastError();
+	if(result == FALSE) {
+	  auto error = GetLastError();
 		// @TODO - Logging / Displaying of error in GUI program
-		CloseHandle(handle);
-		return;
   }
   
   CloseHandle(handle); // No need to assert, handle will be closed on program exit at the latest
@@ -229,18 +229,20 @@ dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
 
 #include "apad_time.h"
 dll_export time_marker Win32GetTimeMarker() {
-	// Init cpuCounterFrequencyKHz if it hasn't already
+	FunctionStart(0);
+	
+  // Init cpuCounterFrequencyKHz if it hasn't already
 	{
 		dll_import program_external ui64 cpuCounterFrequencyKHz;
 		if(cpuCounterFrequencyKHz == Null) {
 			LARGE_INTEGER temp = {};
-			AssertRetType(QueryPerformanceFrequency(&temp) != 0, Null);
+			AssertInternal(QueryPerformanceFrequency(&temp) != 0);
 			cpuCounterFrequencyKHz = temp.QuadPart;
-			AssertRetType(cpuCounterFrequencyKHz != Null, Null);
+			AssertInternal(cpuCounterFrequencyKHz != Null);
 		}
 	}
 	
   LARGE_INTEGER temp = {};
-  AssertRetType(QueryPerformanceCounter(&temp) != 0, 0);
+  AssertInternal(QueryPerformanceCounter(&temp) != 0);
   return temp.QuadPart; // Value in kilo counts
 }

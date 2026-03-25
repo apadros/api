@@ -17,11 +17,10 @@ Bitmaps / Images
 Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer
 	- Assertions rework @WIP
-		- Internal assertions - replace all calls within API @WIP
-			- Do we want to unconditionally jump to a label / original call into the API rather than checking and returning a thousand times within the function stack?
-				- Labels not possible, but can use setjmp & longjmp - sets the current program environment & jumps to in from any point
-					- Can set the environment at the start of every function if not already set, have internal assertions jump there directly
-						- Avoids the need to check for the global error after every assertions / function call
+		- Repleace all use of assertions in API with AssertInternal() & add FunctionStart() where needed @WIP
+			- Check if any call to GlobalErrorIsSet() return
+			- Double check apad_win32.cpp functions' uses of assertions especially when creating handle through Win API
+			- Add cleanup code when exiting through FunctionStart() - memory deallocation etc
 			- If we remove the need to store assertion strings global for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions
 			- Remove the setting of a global error string, display it on the fly when hitting an assertion?

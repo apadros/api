@@ -1,7 +1,7 @@
 #include <time.h>
 #include "apad_array.h"
 #include "apad_base_types.h"
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
 #include "apad_time.h"
@@ -27,7 +27,8 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 // ******************** Local API end ******************** //
 
 dll_export bool IsDate(const char* s) {
-	AssertRetType(s != Null, false);
+	FunctionStart(false);
+	AssertInternal(s != Null);
 	
 	ConvertStringToLowerCase(s);
 	
@@ -66,7 +67,8 @@ dll_export bool IsDate(const char* s) {
 }
 
 dll_export date StringToDate(const char* s) {
-	AssertRetType(s != Null, date());
+	FunctionStart(date());
+	AssertInternal(s != Null);
 	
 	ConvertStringToLowerCase(s);
 	
@@ -130,19 +132,19 @@ dll_export date StringToDate(const char* s) {
 
 // @TODO - Use UTC time instead of local to avoid issues when travelling between different time zones
 dll_export date GetDate(si32 offsetDays) {
+	FunctionStart(date());
+	
 	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
 	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
 	return ConvertCSLTimeToDate(timeNow);
 }
 
 dll_export char* DateToString(date d) {
+	FunctionStart(Null);
+	
 	char* ret = AllocateString(DateFormatLong, Null);
-	if(GlobalErrorIsSet() == true)
-		return ret;
 	
 	auto temp = ToString(d.day);
-	if(GlobalErrorIsSet() == true)
-		return ret;
 	if(d.day <= 9) {
 		ret[0] = '0';
 		ret[1] = temp[0];
@@ -165,8 +167,6 @@ dll_export char* DateToString(date d) {
 	FreeString(temp);
 	
 	temp = ToString(d.year);
-	if(GlobalErrorIsSet() == true)
-		return ret;
 	ret[6] = temp[0];
 	ret[7] = temp[1];
 	ret[8] = temp[2];
@@ -177,13 +177,15 @@ dll_export char* DateToString(date d) {
 }
 
 dll_export time_marker GetTimeMarker() {
+	FunctionStart(0);
 	dll_import time_marker Win32GetTimeMarker();
 	return Win32GetTimeMarker();
 }
 
 dll_export f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd) {
-  AssertRetType(markerStart != Null, Null);
-  AssertRetType(markerEnd != Null, Null);
-  AssertRetType(cpuCounterFrequencyKHz != Null, Null);
+  FunctionStart(0);
+	AssertInternal(markerStart != Null);
+  AssertInternal(markerEnd != Null);
+  AssertInternal(cpuCounterFrequencyKHz != Null);
   return (((f64)(markerEnd - markerStart) / cpuCounterFrequencyKHz) * 1000);
 }

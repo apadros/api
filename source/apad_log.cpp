@@ -2,7 +2,7 @@
 #include <stdarg.h> // For varargs
 #include "apad_array.h"
 #include "apad_base_types.h"
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_log.h"
@@ -15,7 +15,7 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 // ******************** Internal API end ******************** //
 
 dll_export log_file OpenLogFile() {
-	FunctionStart();
+	FunctionStart(log_file());
 	
   auto file = AllocateStack(KiB(10));
   if(GlobalErrorIsSet() == true)
@@ -24,7 +24,7 @@ dll_export log_file OpenLogFile() {
 }
 
 dll_export void CloseLogFile(log_file& log) {
-	FunctionStart();
+	FunctionStart(;);
 	
 	FreeStack(log);
 }
@@ -32,9 +32,9 @@ dll_export void CloseLogFile(log_file& log) {
 // @TODO - Can the log file be set after the ... ?
 // Format strings - s, si8, ui8, si16, ui16, si32, ui32, si64, ui64, f32, f64
 dll_export void Log(log_file& log, const char* formatString, ...) {
-	FunctionStart();
+	FunctionStart(;);
 	
-  AssertInternal(formatString != Null, ;);
+  AssertInternal(formatString != Null);
 	
 	va_list args;
 	va_start(args, formatString);
@@ -79,7 +79,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 					}
 				}
 			}
-			AssertInteral(formatIndex != -1, ;); // @TODO - Do we want to exit more gracefully or continue execution for the rest of the format string?
+			AssertInternal(formatIndex != -1); // @TODO - Do we want to exit more gracefully or continue execution for the rest of the format string?
 			
 			// Process argument
 			switch(formatIndex) {

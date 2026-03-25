@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <gl\gl.h>
 
-#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
 #include "apad_win32_gui.h"
@@ -17,10 +17,14 @@ program_local f32         dt = Null; //Delta time since last frame, used for any
 
 // No need to export this, only used in apad_error.cpp
 void Win32ErrorMessageBox(const char* string) {
+	FunctionStart(;);
+	
 	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
 }
 
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
+	FunctionStart(Null);
+	
 	if(msg == WM_CREATE) {
 		// Init OpenGL
 		
@@ -33,26 +37,14 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		HDC dc = GetDC(window);
 		int format = ChoosePixelFormat(dc, &pfd);
-		Assert(format != 0);
-		if(GlobalErrorIsSet() == true) {
-			DisplayLastWin32Error();
-			ExitProgram(true); // No point in continuing if a GUI program cannot render
-		}
+		AssertInternal(format != 0);
 		
 		BOOL ret = SetPixelFormat(dc, format, &pfd);
-		Assert(ret == TRUE);
-		if(GlobalErrorIsSet() == true) {
-			DisplayLastWin32Error();
-			ExitProgram(true); // No point in continuing if a GUI program cannot render
-		}
+		AssertInternal(ret == TRUE);
 		
 		HGLRC context = wglCreateContext(dc);
-		Assert(context != NULL);
-		if(GlobalErrorIsSet() == true) {
-			DisplayLastWin32Error();
-			ExitProgram(true); // No point in continuing if a GUI program cannot render
-		}
-		
+		AssertInternal(context != NULL);
+				
 		// @TODO - Set / enable everything that is needed
 		// glEnable(GL_TEXTURE_2D);
 		// glEnable(GL_DEPTH_TEST);
@@ -79,11 +71,15 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 }
 
 dll_export void DisplayLastWin32Error() {
+	FunctionStart(;);
+	
 	auto error = GetLastError();
 	Win32ErrorMessageBox(ToString((ui32)error));
 }
 
 program_external void Win32Exit() { // Called within ExitProgram()
+	FunctionStart(;);
+	
 	// Don't care about assertions at this point
 	
 	if(sleepPeriod != Null); {
@@ -106,37 +102,39 @@ program_external void Win32Exit() { // Called within ExitProgram()
 // ******************** Internal API end ******************** //
 
 dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
+	FunctionStart(;);
+	
 	extern bool GUIApp;
 	GUIApp = true;
 	
-	AssertRet(instance != Null);
+	AssertInternal(instance != Null);
 	
 	// DPI
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-		Assert(ret == TRUE);
+		AssertInternal(ret == TRUE);
 		if(GlobalErrorIsSet() == true)
 			DisplayLastWin32Error();
   }
 
 	auto library = LoadLibraryA("Winmm.dll");
-	AssertRet(library != NULL);
+	AssertInternal(library != NULL);
 	
 	// Set the minimum os clock resolution for Sleep()
   {
     MMRESULT (*timeGetDevCaps)(LPTIMECAPS, UINT) = (MMRESULT (*)(LPTIMECAPS, UINT))GetProcAddress(library, "timeGetDevCaps");
-		AssertRet(timeGetDevCaps != NULL);
+		AssertInternal(timeGetDevCaps != NULL);
 		
     TIMECAPS caps = {};
 		auto ret = timeGetDevCaps(&caps, sizeof(TIMECAPS));
-		AssertRet(ret == MMSYSERR_NOERROR);
-		AssertRet(caps.wPeriodMin == 1);
+		AssertInternal(ret == MMSYSERR_NOERROR);
+		AssertInternal(caps.wPeriodMin == 1);
       
     MMRESULT (*timeBeginPeriod)(UINT) = (MMRESULT (*)(UINT))GetProcAddress(library, "timeBeginPeriod");
-		AssertRet(timeBeginPeriod != NULL);
+		AssertInternal(timeBeginPeriod != NULL);
 		
     ret = timeBeginPeriod(caps.wPeriodMin);
-		AssertRet(ret == TIMERR_NOERROR);
+		AssertInternal(ret == TIMERR_NOERROR);
 		
 		sleepPeriod = caps.wPeriodMin;
   }
@@ -147,13 +145,13 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	ui16 height = 0;
 	{
 		RECT workArea = {};
-		AssertRet(SystemParametersInfoA(SPI_GETWORKAREA, 0, &workArea, 0) != 0);
+		AssertInternal(SystemParametersInfoA(SPI_GETWORKAREA, 0, &workArea, 0) != 0);
 		
 		width = workArea.right - workArea.left;
 		height = workArea.bottom;
 	}
-	AssertRet(width > 0);
-	AssertRet(height > 0);
+	AssertInternal(width > 0);
+	AssertInternal(height > 0);
 	
 	WNDCLASSA wndclass = {};
   // wndclass.cbSize = sizeof(WNDCLASSEX);
@@ -163,16 +161,18 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
   wndclass.hCursor = LoadCursorA(NULL, (LPCSTR)IDC_ARROW); // @TODO - Is this needed by default?
   wndclass.lpszClassName = "APAD window class";
 	
-	AssertRet(RegisterClassA(&wndclass) != 0);
+	AssertInternal(RegisterClassA(&wndclass) != 0);
 	
 	windowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
 															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
 															 0, 0, width, height, 
 															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
-  AssertRet(windowHandle != NULL);
+  AssertInternal(windowHandle != NULL);
 }
 
 dll_export void Win32BeginGUIUpdateLoop() {
+	FunctionStart(;);
+	
 	MSG msg;
   ClearStruct(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
@@ -185,12 +185,14 @@ dll_export void Win32BeginGUIUpdateLoop() {
 }
 
 dll_export void Win32EndGUIUpdateLoop() {
+	FunctionStart(;);
+	
 	if(lastLoopMarker == Null) {
 		lastLoopMarker = GetTimeMarker();
 		return;
 	}
 
-	Assert(windowHandle != NULL);
+	AssertInternal(windowHandle != NULL);
 	if(windowHandle == NULL)
 		ExitProgram(true);
 	
