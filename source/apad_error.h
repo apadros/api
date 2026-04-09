@@ -22,6 +22,8 @@ dll_import void 			 DisplayGlobalError();
 											 // Does not set the global error
 dll_import void 			 DisplayError(const char* string);
 
+dll_import void 			 DisplayInternalAssertions(bool b) // True by default
+
 /******************** Assertions ******************** 
 
 #define APAD_DEBUGGER_ASSERTIONS for use in a debugger, do NOT otherwise as they will have no effect.

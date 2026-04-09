@@ -150,10 +150,14 @@ dll_export bool Win32FileExists(const char* path) {
 	AssertInternal(GetStringLength(path) + 1 <= MAX_PATH);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	// @TODO - Can this be layed out better?
+	
 	auto error = GetLastError();
-  if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND))
-    return false;
+  if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND)) {
+		// Store the assertion string
+		AssertInternal(handle != INVALID_HANDLE_VALUE);
+		AssertInternal(error != ERROR_FILE_NOT_FOUND);
+		AssertInternal(error != ERROR_PATH_NOT_FOUND);
+	}
 
   CloseHandle(handle);
   return true;

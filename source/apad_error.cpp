@@ -14,8 +14,13 @@
 								 
 					 program_external 		 bool GUIApp = false; // Checked outside this translation unit
 dll_export program_external      bool AssertionsEnabled = true; // Used to disable assertions when called from functions which are in turn called from within an assertion
+					 program_external      bool DisplayInternalAssertions = true;
 
 // ******************** Internal API end ******************** //
+
+dll_export void DisplayInternalAssertions(bool b) {
+	DisplayInternalAssertions = b;
+}
 
 #include <stdio.h>
 dll_export void DisplayGlobalError() {
