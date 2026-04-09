@@ -11,17 +11,17 @@ Array
 		
 Bitmaps / Images
 	- Integration of png support via external library 
-		- linpng? - https://www.libpng.org/pub/png/libpng.html
+		- libpng? - https://www.libpng.org/pub/png/libpng.html
 			- Include copyright / licensing info in LICENSE.txt
 		
 Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer
 	- Assertions rework @WIP
-		- Repleace all use of assertions in API with AssertInternal() & add FunctionStart() where needed @WIP
-			- Check if any call to GlobalErrorIsSet() return
+		- Internal @WIP
+			- When calling the Win32 API, might get a Windows error, how to report it?
+			- Check and remove any calls to GlobalErrorIsSet() return @COMMIT
 			- Double check apad_win32.cpp functions' uses of assertions especially when creating handle through Win API
-			- Add cleanup code when exiting through FunctionStart() - memory deallocation etc
-			- If we remove the need to store assertion strings global for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
+			- If we remove the need to store assertion strings for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions
 			- Remove the setting of a global error string, display it on the fly when hitting an assertion?
 			- Include stack back trace printing if compiling without optimisations - macro definition - APAD_ASSERTIONS_BACKTRACE

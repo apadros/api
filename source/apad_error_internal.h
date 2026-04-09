@@ -22,7 +22,7 @@ program_external si8 		 ReturnFromAPI;
 // This MUST be called at the start of every internal function which calls another API function or user internal assertions before any such calls
 #define FunctionStart(_return /* Must contain a ; at least */) { \
 	if(ReturnFromAPI == -1) /* Unset */ \
-		ReturnFromAPI = setjmp(JumpBuffer); /* Function will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
+		ReturnFromAPI = setjmp(JumpBuffer); /* setjmp() will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
 	if(ReturnFromAPI == 1) \
 			return _return; /* Exit API */ \
 }

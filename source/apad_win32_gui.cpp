@@ -113,8 +113,6 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 		AssertInternal(ret == TRUE);
-		if(GlobalErrorIsSet() == true)
-			DisplayLastWin32Error();
   }
 
 	auto library = LoadLibraryA("Winmm.dll");
