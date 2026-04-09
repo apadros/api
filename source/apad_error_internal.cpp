@@ -1,5 +1,6 @@
 #include <setjmp.h>
 #include "apad_base_types.h"
+#include "apad_intrinsics.h"
 
-jmp_buf JumpBuffer;
-si8     ReturnFromAPI = -1; // Unset
+program_external jmp_buf JumpBuffer = {};
+program_external si8     ReturnFromAPI = -1; // Unset

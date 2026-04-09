@@ -24,18 +24,20 @@ program_external si8 		 ReturnFromAPI;
 	if(ReturnFromAPI == -1) /* Unset */ \
 		ReturnFromAPI = setjmp(JumpBuffer); /* setjmp() will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
 	if(ReturnFromAPI == 1) \
-			return _return; /* Exit API */ \
+		return _return; /* Exit API */ \
 }
 
+#include <Windows.h> // For GetLastError(), including just the relative header leads to a "No Target Architecture" compilation error
 #include <stdio.h> // For sprintf
 #include "apad_file.h"
 #define AssertInternal(_condition) { \
 	if(!(_condition)) { \
 	 	char buffer[256] = {}; \
 		sprintf(buffer, "[APAD_API] Internal assertion failed. \
-	  								  \n[Condition] %s \
-	  									\n[File]      %s \
-	  									\n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
+	  								  \n[Condition]          %s \
+	  									\n[File]               %s \
+	  									\n[Line]               %lu \
+											\n[Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
 	 	SetGlobalError((const char*)buffer); \
 		program_external bool DisplayInternalAssertions; \
 		if(DisplayInternalAssertions == true) \

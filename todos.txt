@@ -18,7 +18,6 @@ Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer
 	- Assertions rework @WIP
 		- Internal @WIP
-			- When calling the Win32 API, might get a Windows error, how to report it?
 			- Double check apad_win32.cpp functions' uses of assertions especially when creating handle through Win API
 			- If we remove the need to store assertion strings for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions

@@ -6,7 +6,7 @@ REM Setup build directory
 if not exist build ( mkdir build )
 pushd build
 
-cl ..\%1 /c /w /nologo /DAPAD_INTERNAL /std:c++17
+cl ..\%1 /c /w /nologo /std:c++17
 
 popd
 exit /b REM Exit batch script

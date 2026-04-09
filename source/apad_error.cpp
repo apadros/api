@@ -18,7 +18,7 @@ dll_export program_external      bool AssertionsEnabled = true; // Used to disab
 
 // ******************** Internal API end ******************** //
 
-dll_export void DisplayInternalAssertions(bool b) {
+dll_export void SetDisplayInternalAssertions(bool b) {
 	DisplayInternalAssertions = b;
 }
 

@@ -22,7 +22,7 @@ dll_import void 			 DisplayGlobalError();
 											 // Does not set the global error
 dll_import void 			 DisplayError(const char* string);
 
-dll_import void 			 DisplayInternalAssertions(bool b) // True by default
+dll_import void 			 SetDisplayInternalAssertions(bool b); // True by default
 
 /******************** Assertions ******************** 
 
