@@ -13,7 +13,7 @@ cl /w /nologo /Od /Zi /c /std:c++17 ..\*.cpp
 del test.obj
 
 REM Link all into single library
-cl /nologo /w /Od /Zi /LD /Fe: test.dll *.obj /link user32.lib gdi32.lib opengl32.lib dbghelp.lib >> temp.txt
+cl /nologo /w /Od /Zi /LD /Fe: dll_debug.dll *.obj /link user32.lib gdi32.lib opengl32.lib dbghelp.lib >> temp.txt
 
 del temp.txt
 del *.obj

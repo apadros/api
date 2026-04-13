@@ -34,10 +34,10 @@ program_external si8 		 ReturnFromAPI;
 	if(!(_condition)) { \
 	 	char buffer[256] = {}; \
 		sprintf(buffer, "[APAD_API] Internal assertion failed. \
-	  								  \n[Condition]          %s \
-	  									\n[File]               %s \
-	  									\n[Line]               %lu \
-											\n[Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
+	  								 \n  [Condition]          %s \
+	  								 \n  [File]               %s \
+	  								 \n  [Line]               %lu \
+										 \n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
 	 	SetGlobalError((const char*)buffer); \
 		program_external bool DisplayInternalAssertions; \
 		if(DisplayInternalAssertions == true) \
