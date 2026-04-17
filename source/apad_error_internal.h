@@ -17,15 +17,22 @@
 #include <setjmp.h> // For jmp_buf, setjmp() & longjmp()
 #include "apad_base_types.h"
 program_external jmp_buf JumpBuffer;
-program_external si8 		 ReturnFromAPI;
+program_external si8 		 JumpBufferRefCounter;
 
 // This MUST be called at the start of every internal function which calls another API function or uses internal assertions before any such calls
 #define FunctionStart(_return /* Must contain a ; at least */) { \
-	if(ReturnFromAPI == -1) /* Unset */ \
-		ReturnFromAPI = setjmp(JumpBuffer); /* setjmp() will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return 1 */ \
-	if(ReturnFromAPI == 1) \
+	if(JumpBufferRefCounter == 0) \
+		JumpBufferRefCounter = setjmp(JumpBuffer); /* setjmp() will return 0 when called. When longjmp() is called, stack will be rewinded to this point and setjmp() will return -1 */ \
+	\
+	JumpBufferRefCounter += 1; \
+	if(JumpBufferRefCounter == 0) { \
+		JumpBufferRefCounter = 0; \
 		return _return; /* Exit API */ \
+	} \
 }
+
+#define FunctionEnd() \
+	JumpBufferRefCounter -= 1
 
 #include <Windows.h> // For GetLastError(), including just the relative header leads to a "No Target Architecture" compilation error
 #include <stdio.h> // For sprintf
@@ -42,7 +49,7 @@ program_external si8 		 ReturnFromAPI;
 		program_external bool DisplayInternalAssertions; \
 		if(DisplayInternalAssertions == true) \
 			DisplayGlobalError(); \
-		longjmp(JumpBuffer, 1); /* Unwind the call stack to the initial setjmp() call */ \
+		longjmp(JumpBuffer, -1); /* Unwind the call stack to the initial setjmp() call */ \
 	} \
 }
 	

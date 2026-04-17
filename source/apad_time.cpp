@@ -32,37 +32,49 @@ dll_export bool IsDate(const char* s) {
 	
 	ConvertStringToLowerCase(s);
 	
-	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true)
+	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
+		FunctionEnd();
 		return true;
-	
+	}
 	
 	// Check against allowed formats
 	auto length = GetStringLength(s);
-	if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong))
+	if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong)) {
+		FunctionEnd();
 		return false;
-	if(s[2] != '/')
-			return false;
-	if(length >= GetStringLength(DateFormatMedium) && s[5] != '/')
+	}
+	if(s[2] != '/') {
+		FunctionEnd();
 		return false;
+	}
+	if(length >= GetStringLength(DateFormatMedium) && s[5] != '/') {
+		FunctionEnd();
+		return false;
+	}
 	
 	// @TODO - Check date viability e.g. 31st feb
 	
 	// Check day
 	{
 		auto day = StringToInt(s, 2);
-		if(day < 0 || day > 31)
+		if(day < 0 || day > 31) {
+			FunctionEnd();
 			return false;
+		}
 	}
 	
 	// Check month
 	{
 		auto month = StringToInt(s + 3, 2);
-		if(month < 0 || month > 12)
+		if(month < 0 || month > 12) {
+			FunctionEnd();
 			return false;
+		}
 	}
 	
 	// Allow whatever year is desired so long as it fits the format
 	
+	FunctionEnd();
 	return true;
 }
 
@@ -87,6 +99,7 @@ dll_export date StringToDate(const char* s) {
 		if(offset < 0)
 			offset += 7;
 		
+		FunctionEnd();
 		return GetDate(offset);
 	}
 	else { // Date in short, medium or long format
@@ -122,11 +135,15 @@ dll_export date StringToDate(const char* s) {
 			
 			// Convert and return
 			mktime(time); // Will set w_day
+			
+			FunctionEnd();
 			return ConvertCSLTimeToDate(time);
 		}
 	}
 	
 	InvalidCodePath;
+	
+	FunctionEnd();
 	return date();
 }
 
@@ -136,7 +153,10 @@ dll_export date GetDate(si32 offsetDays) {
 	
 	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
 	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
-	return ConvertCSLTimeToDate(timeNow);
+	auto ret = ConvertCSLTimeToDate(timeNow);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* DateToString(date d) {
@@ -173,19 +193,28 @@ dll_export char* DateToString(date d) {
 	ret[9] = temp[3];
 	FreeString(temp);
 	
+	FunctionEnd();
 	return ret;
 }
 
 dll_export time_marker GetTimeMarker() {
 	FunctionStart(0);
+	
 	dll_import time_marker Win32GetTimeMarker();
-	return Win32GetTimeMarker();
+	auto ret = Win32GetTimeMarker();
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEnd) {
   FunctionStart(0);
+	
 	AssertInternal(markerStart != Null);
   AssertInternal(markerEnd != Null);
   AssertInternal(cpuCounterFrequencyKHz != Null);
-  return (((f64)(markerEnd - markerStart) / cpuCounterFrequencyKHz) * 1000);
+  auto ret = (((f64)(markerEnd - markerStart) / cpuCounterFrequencyKHz) * 1000);
+	
+	FunctionEnd();
+	return ret;
 }

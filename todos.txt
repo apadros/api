@@ -16,8 +16,10 @@ Bitmaps / Images
 		
 Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer
-	- Assertions rework @WIP
-		- Internal @WIP
+	- Assertions rework
+		- Internal
+			- Give the user the choice whether to display their failed conditions immediately or leave it up to user code
+			- Give the user a choice between them stopping program execution or exiting from the API back into user code
 			- Double check apad_win32.cpp functions' uses of assertions especially when creating handle through Win API
 			- If we remove the need to store assertion strings for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions

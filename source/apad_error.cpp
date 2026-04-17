@@ -27,6 +27,8 @@ dll_export void DisplayGlobalError() {
 	FunctionStart(;);
 	
 	DisplayError(GetGlobalError());
+	
+	FunctionEnd();
 }
 
 dll_export void SetGlobalError(const char* string) {
@@ -56,8 +58,6 @@ dll_export const char* GetGlobalError() {
 
 #include <stdlib.h> // For exit()
 dll_export void ExitProgram(bool error) {
-	FunctionStart(;);
-	
 	if(GUIApp == true) {
 		program_external void Win32Exit();
 		Win32Exit();
@@ -87,4 +87,6 @@ dll_export void DisplayError(const char* string) {
 		program_external void Win32ErrorMessageBox(const char* string);
 		Win32ErrorMessageBox(string);
 	}
+	
+	FunctionEnd();
 }

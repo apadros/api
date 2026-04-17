@@ -27,6 +27,7 @@ dll_export void Win32PrintStackBackTrace() {
   if(depth == 0) {
 		SetGlobalError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 		DisplayGlobalError();
+		FunctionEnd();
 		return;
   }
 	
@@ -38,6 +39,7 @@ dll_export void Win32PrintStackBackTrace() {
     if(ret == 0) { // DuplicateHandle failed
 			SetGlobalError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
+			FunctionEnd();
 			return;
     }
     
@@ -45,6 +47,7 @@ dll_export void Win32PrintStackBackTrace() {
     if(ret == FALSE) {
       SetGlobalError("SymInitialize() failed in Win32PrintStackBackTrace().");
 			DisplayGlobalError();
+			FunctionEnd();
       return;
     }
   }
@@ -66,6 +69,7 @@ dll_export void Win32PrintStackBackTrace() {
 			}
 			
 			SymCleanup(process);
+			FunctionEnd();
 			return;
 		}
   }
@@ -77,6 +81,7 @@ dll_export void Win32PrintStackBackTrace() {
   ForAll(depth) {
     if(depth >= GetArrayLength(stacktrace)) {
 			SymCleanup(process);
+			FunctionEnd();
 			return;
 		}
 
@@ -93,6 +98,7 @@ dll_export void Win32PrintStackBackTrace() {
 			SetGlobalError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
 			DisplayGlobalError();
       SymCleanup(process);
+			FunctionEnd();
 			return;
     }
 
@@ -124,6 +130,8 @@ dll_export void Win32PrintStackBackTrace() {
   }
 	
 	SymCleanup(process);
+	
+	FunctionEnd();
 }
 
 dll_export void* Win32AllocateMemory(ui32 size) {
@@ -133,6 +141,7 @@ dll_export void* Win32AllocateMemory(ui32 size) {
   void* mem = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   AssertInternal(mem != NULL);
 	
+	FunctionEnd();
   return mem;
 }
 
@@ -142,6 +151,8 @@ dll_export void Win32FreeMemory(void* mem) {
 	
   auto ret = VirtualFree(mem, 0, MEM_RELEASE);
 	AssertInternal(ret != 0);
+	
+	FunctionEnd();
 }
 
 dll_export bool Win32FileExists(const char* path) {
@@ -150,8 +161,10 @@ dll_export bool Win32FileExists(const char* path) {
 	AssertInternal(GetStringLength(path) + 1 <= MAX_PATH);
 	
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (handle == INVALID_HANDLE_VALUE)
+	if (handle == INVALID_HANDLE_VALUE) {
+		FunctionEnd();
 		return false;
+	}
 	
 	// Leave this here for now if more info wanted
 	#if 0
@@ -165,6 +178,8 @@ dll_export bool Win32FileExists(const char* path) {
 	#endif
 
   CloseHandle(handle);
+	
+	FunctionEnd();
   return true;
 }
 
@@ -183,6 +198,7 @@ dll_export memory_block Win32LoadFile(const char* path) {
 		AssertRetType(error != ERROR_FILE_NOT_FOUND, NullMemoryBlock);
 		AssertRetType(error != ERROR_PATH_NOT_FOUND, NullMemoryBlock);
 		AssertRetType(error != ERROR_SHARING_VIOLATION, NullMemoryBlock);
+		FunctionEnd();
 		return NullMemoryBlock;
 	}
 	#endif
@@ -214,6 +230,8 @@ dll_export memory_block Win32LoadFile(const char* path) {
 	}
 
 	CloseHandle(handle);
+	
+	FunctionEnd();
   return allocatedMemory;
 }
 
@@ -234,6 +252,8 @@ dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
   }
   
   CloseHandle(handle); // No need to assert, handle will be closed on program exit at the latest
+	
+	FunctionEnd();
 }
 
 #include "apad_time.h"
@@ -253,5 +273,8 @@ dll_export time_marker Win32GetTimeMarker() {
 	
   LARGE_INTEGER temp = {};
   AssertInternal(QueryPerformanceCounter(&temp) != 0);
-  return temp.QuadPart; // Value in kilo counts
+  auto ret = temp.QuadPart; // Value in kilo counts
+	
+	FunctionEnd();
+	return ret;
 }

@@ -20,6 +20,8 @@ void Win32ErrorMessageBox(const char* string) {
 	FunctionStart(;);
 	
 	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+	
+	FunctionEnd();
 }
 
 program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -67,7 +69,10 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
     PostQuitMessage(0); 
   }
 	
-	return DefWindowProcA(window, msg, wparam, lparam);
+	auto ret = DefWindowProcA(window, msg, wparam, lparam);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export void DisplayLastWin32Error() {
@@ -75,11 +80,11 @@ dll_export void DisplayLastWin32Error() {
 	
 	auto error = GetLastError();
 	Win32ErrorMessageBox(ToString((ui32)error));
+	
+	FunctionEnd();
 }
 
 program_external void Win32Exit() { // Called within ExitProgram()
-	FunctionStart(;);
-	
 	// Don't care about assertions at this point
 	
 	if(sleepPeriod != Null); {
@@ -166,6 +171,8 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 															 0, 0, width, height, 
 															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
   AssertInternal(windowHandle != NULL);
+	
+	FunctionEnd();
 }
 
 dll_export void Win32BeginGUIUpdateLoop() {
@@ -180,6 +187,8 @@ dll_export void Win32BeginGUIUpdateLoop() {
 		if(exit == true)
 			ExitProgram(false);
 	}
+	
+	FunctionEnd();
 }
 
 dll_export void Win32EndGUIUpdateLoop() {
@@ -187,6 +196,7 @@ dll_export void Win32EndGUIUpdateLoop() {
 	
 	if(lastLoopMarker == Null) {
 		lastLoopMarker = GetTimeMarker();
+		FunctionEnd();
 		return;
 	}
 
@@ -214,4 +224,6 @@ dll_export void Win32EndGUIUpdateLoop() {
 	lastLoopMarker = GetTimeMarker();
 		
 	ReleaseDC(windowHandle, dc);
+	
+	FunctionEnd();
 }

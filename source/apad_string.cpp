@@ -31,6 +31,8 @@ program_local void ExitStringAPI() {
 		
 		FreeStack(stringTable);
 	}
+	
+	FunctionEnd();
 }
 
 program_local void AddToStringTable(memory_block& block) {
@@ -42,12 +44,16 @@ program_local void AddToStringTable(memory_block& block) {
 	}
 	
 	PushInstance(block, stringTable);
+	
+	FunctionEnd();
 }
 
 program_local void PushNullChar(memory_stack& stack) {
 	FunctionStart(;);
 	
 	Push("\0", 1, stack);
+	
+	FunctionEnd();
 }
 
 // Also used in log.cpp
@@ -59,6 +65,7 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 	if(addEOS == true)
 		PushNullChar(stack);
 	
+	FunctionEnd();
 	return (char*)mem;
 }
 
@@ -78,6 +85,8 @@ dll_export void ConvertStringToLowerCase(const char* s) {
     if(s[it] >= 'A' && s[it] <= 'Z')
 			((char*)s)[it] += 'a' - 'A';
 	}
+	
+	FunctionEnd();
 }
 
 #include <stdarg.h>
@@ -102,6 +111,7 @@ dll_export char* Concatenate(ui8 count, ...) {
 	
 	AddToStringTable(stack);
 	
+	FunctionEnd();
 	return (char*)stack.memory;
 }
 
@@ -123,6 +133,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	
 	AddToStringTable(stack);
 	
+	FunctionEnd();
 	return (char*)stack.memory;
 }
 
@@ -133,107 +144,160 @@ dll_export ui16 GetStringLength(const char* s) {
 	auto length = strlen(s);
 	AssertInternal(length <= UI16Max);
   
+	FunctionEnd();
   return length;
 };
 
 dll_export char* ToString(si8 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%hhi", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(ui8 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%hhu", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(si16 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%hi", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(ui16 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%hu", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(si32 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%li", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(ui32 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%lu", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(si64 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%lli", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(ui64 i) {
   FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%llu", i);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(f32 f) {
 	FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2f", f);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export char* ToString(f64 f) {
 	FunctionStart(Null);
+	
 	char buffer[32] = { '\0' };
   sprintf(buffer, "%.2Lf", f);
-	return AllocateString((char*)buffer, Null);
+	auto ret = AllocateString((char*)buffer, Null);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export bool StringsAreEqual(const char* s1, const char* s2) {
   FunctionStart(false);
+	
 	AssertInternal(s1 != Null);
 	AssertInternal(s2 != Null);
 	
+	FunctionEnd();
 	return strcmp(s1, s2) == 0;
 }
 
 dll_export const char* FindSubstring(const char* sub, const char* string) {
   FunctionStart(Null);
+	
 	AssertInternal(string != Null);
   AssertInternal(sub != Null);
-  return strstr(string, sub);
+  auto ret = strstr(string, sub);
+	
+	FunctionEnd();
+	return ret;
 }
 
 dll_export bool ContainsAnySubstring(const char* string, const char** substrings, ui8 length) {
   FunctionStart(false);
+	
 	ForAll(length) {
     auto* sub = substrings[it];
 		AssertInternal(sub != Null);
-		if(FindSubstring(sub, string) != Null)
+		if(FindSubstring(sub, string) != Null) {
+			FunctionEnd();
 			return true;
+		}
 	}
+	
+	FunctionEnd();
   return false;
 }
 
 dll_export void CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
 	FunctionStart(;);
+	
 	AssertInternal(source != Null);
 	AssertInternal(srcLength > 0 || srcLength == -1);
 	AssertInternal(destination != Null);
@@ -243,6 +307,8 @@ dll_export void CopyString(const char* source, si16 srcLength, const char* desti
 	AssertInternal(copyLength <= destLength);
 	
 	CopyMemory((void*)source, copyLength, (void*)destination);
+	
+	FunctionEnd();
 }
 
 dll_export bool IsLetter(char c) {
@@ -268,6 +334,7 @@ dll_export si32 StringToInt(const char* string, ui16 length) {
 		FreeString(copy);
 	}
 	
+	FunctionEnd();
 	return ret;
 }
 
@@ -292,6 +359,7 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	
 	AddToStringTable(stack);
 	
+	FunctionEnd();
 	return (char*)stack.memory;
 }
 
@@ -309,6 +377,8 @@ dll_export void FreeString(char* string) {
 			break;
 		}
 	}
+	
+	FunctionEnd();
 }
 
 dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
@@ -320,9 +390,12 @@ dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8
 	ForAll(count) {
 		auto s = strings[it];
 		AssertInternal(s != Null);
-		if(StringsAreEqual(string, s) == true)
+		if(StringsAreEqual(string, s) == true) {
+			FunctionEnd();
 			return true;
+		}
 	}
 	
+	FunctionEnd();
 	return false;
 }

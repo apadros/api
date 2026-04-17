@@ -3,4 +3,4 @@
 #include "apad_intrinsics.h"
 
 program_external jmp_buf JumpBuffer = {};
-program_external si8     ReturnFromAPI = -1; // Unset
+program_external si8     JumpBufferRefCounter = 0;

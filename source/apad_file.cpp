@@ -11,4 +11,6 @@ dll_export const char* GetFileNameAndExtension(const char* path) {
   do 		 fileName -= 1;
   while (fileName[0] != '\\' && fileName[0] != '/');
   return fileName + 1;
+	
+	FunctionEnd();
 }

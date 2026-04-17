@@ -17,13 +17,18 @@ program_external char* PushString(const char* string, bool addEOS, memory_block&
 dll_export log_file OpenLogFile() {
 	FunctionStart(log_file());
 	
-  return AllocateStack(KiB(10));
+	auto ret = AllocateStack(KiB(10));
+	
+	FunctionEnd();
+  return ret;
 }
 
 dll_export void CloseLogFile(log_file& log) {
 	FunctionStart(;);
 	
 	FreeStack(log);
+	
+	FunctionEnd();
 }
 
 // @TODO - Can the log file be set after the ... ?
@@ -41,8 +46,10 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
 		  it += 1;
-			if(formatString[it] == '\0')
+			if(formatString[it] == '\0') {
+				FunctionEnd();
 				return;
+			}
 				
 			const char* formats[] = { "s", "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
 			
@@ -166,4 +173,6 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
   }
 	
 	va_end(args);
+	
+	FunctionEnd();
 }
