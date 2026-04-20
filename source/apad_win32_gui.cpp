@@ -84,7 +84,7 @@ dll_export void DisplayLastWin32Error() {
 	FunctionEnd();
 }
 
-program_external void Win32Exit() { // Called within ExitProgram()
+program_local void Win32Exit() { // Called within ExitProgram()
 	// Don't care about assertions at this point
 	
 	if(sleepPeriod != Null); {
@@ -140,6 +140,8 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 		AssertInternal(ret == TIMERR_NOERROR);
 		
 		sleepPeriod = caps.wPeriodMin;
+		
+		atexit(Win32Exit); // @TODO - Returns 0 for no error. What to do if it doesn't?
   }
 	FreeLibrary(library);
 	

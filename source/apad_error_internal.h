@@ -46,9 +46,12 @@ program_external si8 		 JumpBufferRefCounter;
 	  								 \n  [Line]               %lu \
 										 \n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
 	 	SetGlobalError((const char*)buffer); \
-		program_external bool DisplayInternalAssertions; \
-		if(DisplayInternalAssertions == true) \
+		program_external bool DisplayAPIAssertions; \
+		if(DisplayAPIAssertions == true) \
 			DisplayGlobalError(); \
+		program_external bool CallExitInAPIAssertions; \
+		if(CallExitInAPIAssertions == true) \
+			ExitProgram(true); \
 		longjmp(JumpBuffer, -1); /* Unwind the call stack to the initial setjmp() call */ \
 	} \
 }

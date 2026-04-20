@@ -10,16 +10,21 @@
 
 					 program_local 	  const ui8 ErrorStringMaxLength = UI8Max;
 					 program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
-					 program_local 	 			 bool ExitIfError = false;
+					 program_local 	 			 bool ExitIfError = true;
 								 
 					 program_external 		 bool GUIApp = false; // Checked outside this translation unit
-dll_export program_external      bool AssertionsEnabled = true; // Used to disable assertions when called from functions which are in turn called from within an assertion
-					 program_external      bool DisplayInternalAssertions = true;
+					 program_external      bool DisplayAPIAssertions = true;
+					 program_external      bool CallExitInAPIAssertions = true;
 
 // ******************** Internal API end ******************** //
 
-dll_export void SetDisplayInternalAssertions(bool b) {
-	DisplayInternalAssertions = b;
+#include <stdlib.h>
+dll_export void RegisterExitFunction(void (*function)()) {
+	atexit(function); // @TODO - Returns 0 for no error. What to do if it doesn't?
+}
+
+dll_export void SetDisplayAPIAssertions(bool b) {
+	DisplayAPIAssertions = b;
 }
 
 #include <stdio.h>
@@ -58,22 +63,17 @@ dll_export const char* GetGlobalError() {
 
 #include <stdlib.h> // For exit()
 dll_export void ExitProgram(bool error) {
-	if(GUIApp == true) {
-		program_external void Win32Exit();
-		Win32Exit();
-	}
-		
 	if(error == true)
     exit(EXIT_FAILURE);
   else
     exit(EXIT_SUCCESS);
 }
 
-dll_export void SetExitIfGlobalError(bool b) {
+dll_export void SetExitIfAssertionHit(bool b) {
   ExitIfError = b;
 }
 
-dll_export bool IsExitIfGlobalErrorSet() {
+dll_export bool IsExitIfAssertionHitSet() {
 	return ExitIfError;
 }
 

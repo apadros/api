@@ -5,24 +5,24 @@
 
 // ******************** Generic ******************** //
 
-dll_import void ExitProgram(bool error); // This will not work within DLL functions
+dll_import void ExitProgram(bool error);
 
 // ******************** Error checking, setting and displaying ******************** //
 
 // Use these to create an error message which is then logged by outside code (e.g. error within a function, need it available when returning)
-dll_import bool 			 IsExitIfGlobalErrorSet();
-											 // False by default
-dll_import void 			 SetExitIfGlobalError(bool b);
+dll_import bool 			 IsExitIfAssertionHitSet();
+											 
+dll_import void 			 SetExitIfAssertionHit(bool b); // True by default
 
 dll_import void 			 ClearGlobalError();
 dll_import bool 			 GlobalErrorIsSet();
 dll_import const char* GetGlobalError();
 dll_import void 			 SetGlobalError(const char* string);
 dll_import void 			 DisplayGlobalError();
-											 // Does not set the global error
-dll_import void 			 DisplayError(const char* string);
+											 
+dll_import void 			 DisplayError(const char* string); // Does not set the global error
 
-dll_import void 			 SetDisplayInternalAssertions(bool b); // True by default
+dll_import void 			 RegisterExitFunction(void (*function)()); // Function to be called within ExitProgram()
 
 /******************** Assertions ******************** 
 
@@ -32,6 +32,9 @@ Call SetExitIfError(true) to have assertions stop program execution, otherwise w
 Assertions will be printed in command line programs and displayed in a message box in GUI programs.
 
 *****************************************************/
+
+dll_import void SetDisplayAPIAssertions(bool b); // True by default
+dll_import void SetCallExitInAPIAssertions(bool b);  // True by default
 
 // Assert()
 #include <intrin.h> // For __debugbreak()
@@ -50,27 +53,20 @@ Assertions will be printed in command line programs and displayed in a message b
 // IsExitIfErrorSet() == false by default.
 #include <stdio.h> // For sprintf
 #define Assert(_condition) { \
-	dll_import program_external bool AssertionsEnabled; \
-	if(AssertionsEnabled == true) { \
-		AssertionsEnabled = false; \
-    ClearGlobalError(); \
-    if(!(_condition)) { \
-	  	char buffer[256] = {}; \
-			program_external const char* GetFileNameAndExtension(const char*); \
-	  	sprintf(buffer, "Assertion failed \
-	  									 \n[Condition] %s \
-	  									 \n[File]      %s \
-	  									 \n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
-	  	SetGlobalError((const char*)buffer); \
-	  	DisplayGlobalError(); \
-			ClearGlobalError(); /* To avoid triggering checks within Win32PrintStackBackTrace() */ \
-			program_external void Win32PrintStackBackTrace(); \
-			Win32PrintStackBackTrace(); \
-	  	AssertionsEnabled = true; \
-	  	if(IsExitIfGlobalErrorSet() == true) \
-	  	  ExitProgram(true); \
-	  } \
-		AssertionsEnabled = true; \
+	ClearGlobalError(); \
+  if(!(_condition)) { \
+	  char buffer[256] = {}; \
+		program_external const char* GetFileNameAndExtension(const char*); \
+	  sprintf(buffer, "Assertion failed \
+	  								 \n[Condition] %s \
+	  								 \n[File]      %s \
+	  								 \n[Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
+	  SetGlobalError((const char*)buffer); \
+	  DisplayGlobalError(); \
+		program_external void Win32PrintStackBackTrace(); \
+		Win32PrintStackBackTrace(); \
+	  if(IsExitIfAssertionHitSet() == true) \
+	    ExitProgram(true); \
 	} \
 }
 
@@ -79,16 +75,14 @@ Assertions will be printed in command line programs and displayed in a message b
 // AssertRet()
 #define AssertRet(_condition) { \
 	Assert(_condition); \
-	program_external bool AssertionsEnabled; \
-	if(AssertionsEnabled == true && GlobalErrorIsSet() == true) \
+	if(GlobalErrorIsSet() == true) \
 	  return; \
 }
 
 // AssertRetType()
 #define AssertRetType(_condition, _retValue) { \
 	Assert(_condition); \
-	program_external bool AssertionsEnabled; \
-	if(AssertionsEnabled == true && GlobalErrorIsSet() == true) \
+	if(GlobalErrorIsSet() == true) \
 	  return (_retValue); \
 }
 
