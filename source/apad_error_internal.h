@@ -39,19 +39,25 @@ program_external si8 		 JumpBufferRefCounter;
 #include "apad_file.h"
 #define AssertInternal(_condition) { \
 	if(!(_condition)) { \
-	 	char buffer[256] = {}; \
-		sprintf(buffer, "[APAD_API] Internal assertion failed. \
-	  								 \n  [Condition]          %s \
-	  								 \n  [File]               %s \
-	  								 \n  [Line]               %lu \
-										 \n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
-	 	SetGlobalError((const char*)buffer); \
+	 	program_external bool AssertionHit; \
+		AssertionHit = true; \
+		\
 		program_external bool DisplayAPIAssertions; \
-		if(DisplayAPIAssertions == true) \
-			DisplayGlobalError(); \
+		if(DisplayAPIAssertions == true) { \
+			char buffer[256] = {}; \
+			sprintf(buffer, "[APAD_API] Internal assertion failed. \
+											\n  [Condition]          %s \
+											\n  [File]               %s \
+											\n  [Line]               %lu \
+											\n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
+			program_external void DisplayError(const char* string); \
+			DisplayError((const char*)buffer); \
+		} \
+		\
 		program_external bool CallExitInAPIAssertions; \
 		if(CallExitInAPIAssertions == true) \
 			ExitProgram(true); \
+		\
 		longjmp(JumpBuffer, -1); /* Unwind the call stack to the initial setjmp() call */ \
 	} \
 }

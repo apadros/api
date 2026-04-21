@@ -25,8 +25,7 @@ dll_export void Win32PrintStackBackTrace() {
   PVOID stacktrace[32] = {}; // We assume we won't need more than 32 stack frames
   USHORT depth = CaptureStackBackTrace(1 /* Skip the call to Win32PrintStackBackTrace() */, GetArrayLength(stacktrace), stacktrace, NULL);
   if(depth == 0) {
-		SetGlobalError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
-		DisplayGlobalError();
+		DisplayError(Concatenate(2, "CaptureStackBackTrace() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 		FunctionEnd();
 		return;
   }
@@ -37,16 +36,14 @@ dll_export void Win32PrintStackBackTrace() {
     HANDLE pseudoHandle = GetCurrentProcess();
     BOOL   ret = DuplicateHandle(pseudoHandle, pseudoHandle, pseudoHandle, &process, 0, FALSE, DUPLICATE_SAME_ACCESS);
     if(ret == 0) { // DuplicateHandle failed
-			SetGlobalError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
-			DisplayGlobalError();
+			DisplayError(Concatenate(2, "DuplicateHandle() failed in Win32PrintStackBackTrace(), code %i.", ToString((ui32)GetLastError())));
 			FunctionEnd();
 			return;
     }
     
     ret = SymInitialize(process, NULL, TRUE);
     if(ret == FALSE) {
-      SetGlobalError("SymInitialize() failed in Win32PrintStackBackTrace().");
-			DisplayGlobalError();
+      DisplayError("SymInitialize() failed in Win32PrintStackBackTrace().");
 			FunctionEnd();
       return;
     }
@@ -59,14 +56,10 @@ dll_export void Win32PrintStackBackTrace() {
     DWORD ret = SymSetOptions(options);
 		auto error = GetLastError();
 		if(ret != options || error != ERROR_SUCCESS) {
-			if(error == ERROR_SUCCESS) {
-				SetGlobalError("SymSetOptions() failed in Win32PrintStackBackTrace(), returned mask does not match request.");
-				DisplayGlobalError();
-			}
-			else {
-				SetGlobalError("SymSetOptions() failed in Win32PrintStackBackTrace(), unknow error.");
-				DisplayGlobalError();
-			}
+			if(error == ERROR_SUCCESS)
+				DisplayError("SymSetOptions() failed in Win32PrintStackBackTrace(), returned mask does not match request.");
+			else
+				DisplayError("SymSetOptions() failed in Win32PrintStackBackTrace(), unknow error.");
 			
 			SymCleanup(process);
 			FunctionEnd();
@@ -95,9 +88,8 @@ dll_export void Win32PrintStackBackTrace() {
     DWORD64 displacement64 = Null;
     BOOL ret = SymFromAddr(process, address, (PDWORD64)(&displacement64), pSymbol);
 		if(ret == FALSE) {
-			SetGlobalError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
-			DisplayGlobalError();
-      SymCleanup(process);
+			DisplayError(Concatenate(2, "SymFromAddr() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
+			SymCleanup(process);
 			FunctionEnd();
 			return;
     }
@@ -108,9 +100,8 @@ dll_export void Win32PrintStackBackTrace() {
     DWORD displacement = Null;
     ret = SymGetLineFromAddr64(process, address, &displacement, &fileLine);
     if(ret == FALSE) {
-      SetGlobalError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
-			DisplayGlobalError();
-      continue; // Could be windows stuff in between functions for some reason, like during window proc calls
+      DisplayError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), code %i.\n", ToString((ui32)GetLastError())));
+			continue; // Could be windows stuff in between functions for some reason, like during window proc calls
     }
 
     // Log all
@@ -123,9 +114,8 @@ dll_export void Win32PrintStackBackTrace() {
 
     // Stop after WinMain
     if(StringsAreEqual(pSymbol->Name, "WinMain") == true || StringsAreEqual(pSymbol->Name, "main")) {
-			SetGlobalError(finalString);
-			DisplayGlobalError();
-      break;
+			DisplayError(finalString);
+			break;
 		}
   }
 	

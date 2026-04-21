@@ -19,11 +19,8 @@ Debug / Error
 	- Assertions rework
 		- Internal
 			- Double check apad_win32.cpp functions' uses of assertions especially when creating handle through Win API
-			- If we remove the need to store assertion strings for user code, do we disable this functionality and keep it internal only? Still needed for internal assertions.
 		- External / user assertions
-			- Remove the setting of a global error string, display it on the fly when hitting an assertion?
 			- Include stack back trace printing if compiling without optimisations - macro definition - APAD_ASSERTIONS_BACKTRACE
-		- Add macro APAD_DEBUGGER_ASSERTIONS to build_dll_debug.bat for internal assertions ?
 	- Creation of a custom stack backtrace for release? Need to keep track of functions and call sites
 		
 GUI

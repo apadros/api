@@ -8,13 +8,13 @@
 
 // ******************** Internal API start ******************** //
 
-					 program_local 	  const ui8 ErrorStringMaxLength = UI8Max;
-					 program_local 	 			 char ErrorString[ErrorStringMaxLength] = {};
-					 program_local 	 			 bool ExitIfError = true;
-								 
-					 program_external 		 bool GUIApp = false; // Checked outside this translation unit
-					 program_external      bool DisplayAPIAssertions = true;
-					 program_external      bool CallExitInAPIAssertions = true;
+					 program_external bool GUIApp = false;
+					 
+dll_export program_external bool AssertionHit = false; //Declared as an export since it is used in external assertions
+dll_export program_external bool CallExitInExternalAssertion = true; //Declared as an export since it is used in external assertions
+
+					 program_external bool DisplayAPIAssertions = true;
+					 program_external bool CallExitInAPIAssertions = true;
 
 // ******************** Internal API end ******************** //
 
@@ -27,38 +27,12 @@ dll_export void SetDisplayAPIAssertions(bool b) {
 	DisplayAPIAssertions = b;
 }
 
-#include <stdio.h>
-dll_export void DisplayGlobalError() {
-	FunctionStart(;);
-	
-	DisplayError(GetGlobalError());
-	
-	FunctionEnd();
+dll_export bool AssertionWasHit() {
+  return AssertionHit;
 }
 
-dll_export void SetGlobalError(const char* string) {
-	// Avoid assertions here since they call into this function
-
-  if(string == Null)
-		return;
-	
-	ui32 it = 0;
-	do { 
-		ErrorString[it] = string[it];
-		it += 1;
-	} while(ErrorString[it - 1] != '\0');
-}
-
-dll_export bool GlobalErrorIsSet() {
-  return ErrorString[0] != '\0';
-}
-
-dll_export void ClearGlobalError() {
-  ErrorString[0] = '\0';
-}
-
-dll_export const char* GetGlobalError() {
-	return ErrorString;
+dll_export void ClearAssertionHit() {
+  AssertionHit = false;
 }
 
 #include <stdlib.h> // For exit()
@@ -70,14 +44,14 @@ dll_export void ExitProgram(bool error) {
 }
 
 dll_export void SetExitIfAssertionHit(bool b) {
-  ExitIfError = b;
+  CallExitInExternalAssertion = b;
 }
 
-dll_export bool IsExitIfAssertionHitSet() {
-	return ExitIfError;
+dll_export void SetCallExitInAPIAssertions(bool b) {
+	CallExitInAPIAssertions = b;
 }
 
-dll_export void DisplayError(const char* string) {
+dll_export program_external void DisplayError(const char* string) {
 	FunctionStart(;);
 	AssertInternal(string != Null);
 	
