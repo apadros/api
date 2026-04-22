@@ -16,6 +16,13 @@ dll_export program_external bool CallExitInExternalAssertion = true; //Declared 
 					 program_external bool DisplayAPIAssertions = true;
 					 program_external bool CallExitInAPIAssertions = true;
 
+#ifdef APAD_ASSERTIONS_BACKTRACE					 
+dll_export program_external bool PrintAssertionsBacktrace = true;
+#else
+dll_export program_external bool PrintAssertionsBacktrace = false;
+#endif
+
+
 // ******************** Internal API end ******************** //
 
 #include <stdlib.h>

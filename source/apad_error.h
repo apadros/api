@@ -56,8 +56,11 @@ dll_import void SetCallExitInAPIAssertions(bool b);  // True by default
 	  								 \n  [Line]      %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__); \
 	  DisplayError((const char*)buffer); \
 		\
-		program_external void Win32PrintStackBackTrace(); \
-		Win32PrintStackBackTrace(); \
+		dll_import program_external bool PrintAssertionsBacktrace; \
+		if(PrintAssertionsBacktrace == true) { \
+			dll_import program_external void Win32PrintStackBackTrace(); \
+			Win32PrintStackBackTrace(); \
+		} \
 		\
 		dll_import program_external bool CallExitInExternalAssertion; \
 	  if(CallExitInExternalAssertion == true) \

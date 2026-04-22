@@ -8,7 +8,7 @@ del build\* /q
 pushd build
 
 REM Compile all translation units into object files first
-cl /w /nologo /Od /Zi /c /std:c++17 ..\*.cpp
+cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /c /std:c++17 ..\*.cpp
 
 del test.obj
 

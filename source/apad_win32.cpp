@@ -106,9 +106,9 @@ dll_export void Win32PrintStackBackTrace() {
 
     // Log all
 		if(it == 0)
-			finalString = Concatenate(8, "Stack back trace\n", "  [", GetFileNameAndExtension(fileLine.FileName), "], [", pSymbol->Name, "()], line [", ToString((ui32)fileLine.LineNumber), "]\n");
+			finalString = Concatenate(5, "  Stack back trace\n    [", GetFileNameAndExtension(fileLine.FileName), "] line ", ToString((ui32)fileLine.LineNumber), "\n");
 		else
-			finalString = Concatenate(8, finalString, "  [", GetFileNameAndExtension(fileLine.FileName), "] line [", ToString((ui32)fileLine.LineNumber), "] calling [", previousSymbolName, "()]\n");
+			finalString = Concatenate(8, finalString, "    [", GetFileNameAndExtension(fileLine.FileName), "] line ", ToString((ui32)fileLine.LineNumber), " -> ", previousSymbolName, "()\n");
 		ClearArray(previousSymbolName);
 		CopyMemory(pSymbol->Name, bufferSize, previousSymbolName);
 
