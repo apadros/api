@@ -16,7 +16,6 @@ Bitmaps / Images
 		
 Debug / Error
 	- Replace DisplayErrorGUI() with a function pointer
-		- Double check apad_win32.cpp functions' uses of internal assertions especially when creating handle through Win API
 	- Creation of a custom stack backtrace for release? Need to keep track of functions and call sites
 		
 GUI
