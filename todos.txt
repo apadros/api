@@ -14,10 +14,6 @@ Bitmaps / Images
 		- libpng? - https://www.libpng.org/pub/png/libpng.html
 			- Include copyright / licensing info in LICENSE.txt
 		
-Debug / Error
-	- Replace DisplayErrorGUI() with a function pointer
-	- Creation of a custom stack backtrace for release? Need to keep track of functions and call sites
-		
 GUI
 	- Custom window icon
 	- Custom taskbar icon
