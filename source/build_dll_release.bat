@@ -14,21 +14,20 @@ pushd build
 
 REM Release version
 REM Compile all translation units into object files first
-cl /w /nologo /O2 /c /std:c++17 ..\*.cpp
-
-del test.obj
+cl /w /nologo /O2 /c /std:c++17 ..\apad_*.cpp
 
 REM Link all into single library
 cl /nologo /w /LD /Fe: apad_api_v%1.%2.%3.dll *.obj /link user32.lib gdi32.lib opengl32.lib dbghelp.lib >> temp.txt
 
 REM Debug version including stack back tracing
-cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /c /std:c++17 ..\*.cpp
-del test.obj
+cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /c /std:c++17 ..\apad_*.cpp
 cl /nologo /w /Od /Zi /LD /Fe: apad_api_v%1.%2.%3_debug.dll *.obj /link user32.lib gdi32.lib opengl32.lib dbghelp.lib >> temp.txt
 
 del temp.txt
 del *.obj
 del *.exp
+del *.pdb
+del *.ilk
 
 popd
 exit /b REM Exit batch script
