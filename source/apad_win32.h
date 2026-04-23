@@ -8,7 +8,7 @@
 // The first argument corresponds to the program name
 #define ConsoleAppEntryPoint(_argumentsID, _argumentCountID) int main(int _argumentCountID, char** _argumentsID)
 
-// Need to compile without optimizations and generete debug info for this to be useful
+// Need to compile without optimizations and generate debug info for this to be useful
 dll_import void Win32PrintStackBackTrace();
 
 // ******************** Memory ********************  //

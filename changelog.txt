@@ -1,3 +1,23 @@
+v0.4.2
+	[Background]
+		- Removed APAD_INTERNAL compilation macro, testing is now done through a debug version of the library
+		- Releases will now consist of 2 libraries; once for debug builds which will print stack backtracing within assertions and another, optimised, version for release builds.
+			To make use of stack backtracing, need to compile the target program without optimisations and with debug info (/Od and /Zi respectively with the Microsoft C++ compiler)
+		- Minor bug fixes and improvements
+		- Update to build_dll_release.bat to generate both versions of the library
+		
+	[Error]
+		- Added API-only internal assertions can either exit program execution or just jump out of the API immediately after an assertions is triggered. 
+			This behaviour can be set through various function calls in apad_error.h
+		- Improved printing format of user-side assertions
+		- Added stack backtrace printing functionality for debug builds
+		- Removed the concept of a global error string, error reporting must now take place immediately instead of being delayed
+		- Replaced the concept of a global error with that of an assertion hit. 
+			AssertionWasHit() can now be used to check this in case assertions' behaviour is set so that exit is not called immediately.
+		- Assertions, both internal and external, now report failure immediately instead of storing the error for later as indicated above.
+			This behaviour can be changed with various function calls within apad_error.h
+		- Added RegisterExitFunction() for custom user code to execute upon program exit
+
 v0.4.1
 	[Background]
 		- Packed all libraries into 1 for convenience since they all link with several others

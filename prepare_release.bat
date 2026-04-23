@@ -11,7 +11,7 @@ del release\*.lib /q
 del release\*.dll /q
 
 pushd source\
-call build_all_dlls.bat %1 %2 %3
+call build_dll_release.bat %1 %2 %3
 popd
 
 echo:

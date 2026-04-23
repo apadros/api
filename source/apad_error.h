@@ -19,10 +19,12 @@ Assertions will be printed in command line programs and displayed in a message b
 
 *****************************************************/
 
+// User assertions
 dll_import bool AssertionWasHit();
 dll_import void ClearAssertionHit();
 dll_import void SetExitIfAssertionHit(bool b); // True by default
 
+// Set behaviour of API-only internal assertions
 dll_import void SetDisplayAPIAssertions(bool b); // True by default
 dll_import void SetCallExitInAPIAssertions(bool b);  // True by default
 

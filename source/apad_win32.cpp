@@ -196,8 +196,7 @@ dll_export memory_block Win32LoadFile(const char* path) {
 	
   LARGE_INTEGER li = {};
   BOOL b = GetFileSizeEx(handle, &li);
-  AssertInternal(b != 0);
-	if(b == 0) {
+  if(b == 0) {
 		CloseHandle(handle);
 		AssertInternal(false);
 	}
