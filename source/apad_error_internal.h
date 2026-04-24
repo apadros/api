@@ -52,11 +52,12 @@ program_external si8 		 JumpBufferRefCounter;
 											\n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
 			program_external void DisplayError(const char* string); \
 			DisplayError((const char*)buffer); \
-		} \
-		program_external bool PrintAssertionsBacktrace; \
-		if(PrintAssertionsBacktrace == true) { \
-			program_external void Win32PrintStackBackTrace(); \
-			Win32PrintStackBackTrace(); \
+			\
+			program_external bool PrintAssertionsBacktrace; \
+			if(PrintAssertionsBacktrace == true) { \
+				program_external void Win32PrintStackBackTrace(); \
+				Win32PrintStackBackTrace(); \
+			} \
 		} \
 		\
 		program_external bool CallExitInAPIAssertions; \
