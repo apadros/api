@@ -26,8 +26,8 @@ cl /nologo /w /Od /Zi /LD /Fe: apad_api_v%1.%2.%3_debug.dll *.obj /link user32.l
 del temp.txt
 del *.obj
 del *.exp
-del *.pdb
 del *.ilk
+del vc*.pdb
 
 popd
 exit /b REM Exit batch script

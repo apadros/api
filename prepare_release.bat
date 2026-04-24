@@ -9,6 +9,7 @@ if not exist release ( mkdir release )
 del release\*.h /q
 del release\*.lib /q
 del release\*.dll /q
+del release\*.pdb /q
 
 pushd source\
 call build_dll_release.bat %1 %2 %3
