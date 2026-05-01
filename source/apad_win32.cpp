@@ -176,8 +176,7 @@ dll_export bool Win32FileExists(const char* path) {
 
 dll_export memory_block Win32LoadFile(const char* path) {
 	FunctionStart(memory_block());
-  AssertInternal(Win32FileExists(path));
-	
+  
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternal(handle != INVALID_HANDLE_VALUE);
 	
