@@ -14,6 +14,9 @@ Bitmaps / Images
 	- Integration of png support via external library 
 		- libpng? - https://www.libpng.org/pub/png/libpng.html
 			- Include copyright / licensing info in LICENSE.txt
+			
+Error
+	- Debug dll version with debugger assertions @PRIORITY
 		
 GUI
 	- Custom window icon
@@ -23,7 +26,6 @@ GUI
 		
 Log
 	- A function to return a pointer to the log contents, cast to const char* (e.g. to print)
-  - Stack trace printing
 	
 Memory
 	- When Push() allocates a new stack, any pointers to old memory are automatically invalid and there is currently no way to directly tell the user this has happened. Fix.
@@ -42,8 +44,6 @@ OpenGL / Rendering
 		
 String
 	- Rounding within F32ToString()
-	- Concatenate() triggers an assertion if any of the strings is null, make it just skip over them instead?
-		- Give the ability to supply strings as variables from an array for example without caring about which are inited
 	- Currently Concatenate() leakes memory
 	
 Text

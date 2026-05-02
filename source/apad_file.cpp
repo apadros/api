@@ -67,7 +67,7 @@ dll_export file_line ReadLine(file& f, ui32& readIndex) {
 }
 
 dll_export bool LineIsValid(file_line& f) {
-	return f.data.size > 0;
+	return f.data.size > 0 && f.count > 0;
 }
 
 dll_export void FreeLine(file_line& line) {

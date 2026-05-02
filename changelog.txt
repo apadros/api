@@ -1,3 +1,11 @@
+v0.4.3
+	[File]
+		- Added reading functions ReadLine(), LineIsValid(), GetLineDataElement() and FreeLine()
+		- Added creations and writing functions CreateFile(), WriteToFile() and WriteToFile()
+
+	[String]
+		- Removed the need to check for string == Null for Concatenate() calls, uninitialised strings will be ignored
+
 v0.4.2
 	[Background]
 		- Removed APAD_INTERNAL compilation macro, testing is now done through a debug version of the library
