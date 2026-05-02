@@ -6,15 +6,11 @@
 #include "apad_memory.h"
 #include "apad_win32.h"
 
-const ui8 MaxFileLineElements = 32;
-struct file_line {
-	const char* data[MaxFileLineElements]; // @TODO - Make variable length
-	ui8         count;
-};
-
 typedef memory_block file;
 
 // A macro can be added here in case of porting to another OS
+
+// ******************** Generic ******************** //
 
 // For some reason can't declase these function pointers as dll_import
 program_unique bool 			(*FileExists)(const char* path) = Win32FileExists;
@@ -24,7 +20,16 @@ program_unique void 			(*FreeFile)(file& f) = FreeMemory;
 dll_import 		 bool   			IsValid(file f); // Defined in apad_memory.cpp
 dll_import 		 const char* GetFileNameAndExtension(const char* path);
 
-dll_import file_line ReadLine(file& f, ui32& readIndex);
+// ******************** File reading ******************** //
+
+struct file_line {
+	memory_stack data;
+	ui8          count;
+};
+
+dll_import file_line ReadLine(file& f, ui32& readIndex); // Will treat any data between quotation marks as a single string
 dll_import bool      LineIsValid(file_line& f);
+dll_import char* 		 GetLineDataElement(file_line& line, ui8 index);
+dll_import void 		 FreeLine(file_line& line); // Must be called after every call to ReadLine() once data is not needed
 
 #endif
