@@ -1,5 +1,6 @@
 #include "apad_base_types.h"
 #include "apad_error_internal.h"
+#include "apad_file.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
@@ -85,4 +86,23 @@ dll_export char* GetLineDataElement(file_line& line, ui8 index) {
 	
 	FunctionEnd();
 	return ret;
+}
+
+dll_export file CreateFile() {
+	FunctionStart(file(););
+	auto ret = AllocateStack();
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void WriteToFile(void* data, ui32 size, file& f) {
+	FunctionStart(;);
+	Push(data, size, f);
+	FunctionEnd();
+}
+
+dll_export void WriteToFile(char* string, file& f) {
+	FunctionStart(;);
+	Push(string, GetStringLength(string), f);
+	FunctionEnd();
 }

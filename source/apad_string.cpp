@@ -102,7 +102,8 @@ dll_export char* Concatenate(ui8 count, ...) {
 	
 	ForAll(count) {
 		char* string = va_arg(list, char*);
-		PushString(string, false, stack);
+		if(string != Null) // Just to avoid having to check for Null when concatenating several strings
+			PushString(string, false, stack);
 	}
 	
 	PushNullChar(stack);

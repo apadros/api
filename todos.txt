@@ -14,12 +14,6 @@ Bitmaps / Images
 	- Integration of png support via external library 
 		- libpng? - https://www.libpng.org/pub/png/libpng.html
 			- Include copyright / licensing info in LICENSE.txt
-			
-File
-	- File parsing - extract contents of a single line, return a struct / array @WIP
-		- Add function to free all memory allocated by it
-	- An API for file writing like with a stack
-	- Add a way to push a string / char onto a file stack
 		
 GUI
 	- Custom window icon
@@ -50,6 +44,7 @@ String
 	- Rounding within F32ToString()
 	- Concatenate() triggers an assertion if any of the strings is null, make it just skip over them instead?
 		- Give the ability to supply strings as variables from an array for example without caring about which are inited
+	- Currently Concatenate() leakes memory
 	
 Text
 	- Investigate ttf file loading and usage through Windows API
