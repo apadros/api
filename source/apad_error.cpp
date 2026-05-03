@@ -58,6 +58,7 @@ dll_export void SetCallExitInAPIAssertions(bool b) {
 	CallExitInAPIAssertions = b;
 }
 
+#include <stdio.h>
 dll_export program_external void DisplayError(const char* string) {
 	FunctionStart(;);
 	AssertInternal(string != Null);

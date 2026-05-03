@@ -15,7 +15,8 @@ typedef memory_block file;
 // For some reason can't declase these function pointers as dll_import
 program_unique bool 			(*FileExists)(const char* path) = Win32FileExists;
 program_unique file 			(*LoadFile)(const char* path) = Win32LoadFile; // FileExists() must be called first
-program_unique void 			(*SaveFile)(void* data, ui32 dataSize, const char* path) = Win32SaveFile; // Will create a new file if it doesn't exist; if it does it'll get replaced.
+dll_import     void 			  SaveFile(void* data, ui32 dataSize, const char* path); // Will create a new file if it doesn't exist; if it does it'll get replaced.
+dll_import     void         SaveFile(file& f, const char* path);
 program_unique void 			(*FreeFile)(file& f) = FreeMemory;
 dll_import 		 bool   			IsValid(file f); // Defined in apad_memory.cpp
 dll_import 		 const char*  GetFileNameAndExtension(const char* path);

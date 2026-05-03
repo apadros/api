@@ -5,6 +5,19 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
+dll_export void SaveFile(file& f, const char* path) {
+	FunctionStart(;);
+	AssertInternal(path != Null);
+	SaveFile(f.memory, f.size, path);
+	FunctionEnd();
+}
+
+dll_export void SaveFile(void* data, ui32 dataSize, const char* path) {
+	FunctionStart(;);
+	Win32SaveFile(data, dataSize, path); // For some reason have to call this here instead of defining SaveFile() as a pointer to Win32SaveFile() when having an overload of SaveFile()
+	FunctionEnd();
+}
+
 dll_export const char* GetFileNameAndExtension(const char* path) {
 	FunctionStart(Null);
 	AssertInternal(path != Null);
