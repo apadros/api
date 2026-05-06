@@ -30,6 +30,18 @@ dll_export const char* GetFileNameAndExtension(const char* path) {
 	FunctionEnd();
 }
 
+dll_export const char* GetFileExtension(const char* path) {
+	FunctionStart(Null);
+	AssertInternal(path != Null);
+  
+  const char* fileName = path + GetStringLength(path);
+  do 		 fileName -= 1;
+  while (fileName[0] != '.');
+  return fileName + 1;
+	
+	FunctionEnd();
+}
+
 dll_export file_line ReadLine(file& f, ui32& readIndex) {
 	FunctionStart(file_line());
 	
