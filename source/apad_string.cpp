@@ -316,8 +316,36 @@ dll_export bool IsLetter(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
 
+dll_export bool IsWord(char* string) {
+	FunctionStart(false);
+	AssertInternal(string != Null);
+	
+	auto length = GetStringLength(string);
+	ForAll(length) {
+		if(IsLetter(string[it]) == false)
+			return false;
+	}
+	
+	FunctionEnd();
+	return true;
+}
+
 dll_export bool IsNumber(char c) {
 	return c >= '0' && c <= '9';
+}
+
+dll_export bool IsNumber(char* string) {
+	FunctionStart(false);
+	AssertInternal(string != Null);
+	
+	auto length = GetStringLength(string);
+	ForAll(length) {
+		if(IsNumber(string[it]) == false)
+			return false;
+	}
+		
+	FunctionEnd();
+	return true;
 }
 
 #include <stdlib.h>
