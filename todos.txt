@@ -46,6 +46,12 @@ String
 	- Rounding within F32ToString()
 	- Currently Concatenate() leakes memory
 	
+Time
+	- IsDate() -> IsDateAndValid() ?
+	- [date]+-/x - x days before / after [date] as a date argument @WIP
+	- </<=/>/>=[date] as date argument
+	- Checking whether it actually exists. E.g. 30th February
+	
 Text
 	- Investigate ttf file loading and usage through Windows API
 		

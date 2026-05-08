@@ -26,37 +26,44 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 
 // ******************** Local API end ******************** //
 
-dll_export bool IsDate(const char* s) {
+dll_export bool IsDateAndValid(const char* s) {
 	FunctionStart(false);
 	AssertInternal(s != Null);
 	
-	ConvertStringToLowerCase(s);
+	char* stringCopy = AllocateString(s, Null);
+	auto  fullLength = GetStringLength(stringCopy, Null);
+	ConvertStringToLowerCase(stringCopy);
 	
-	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true || StringsAreEqual(s, "today") == true) {
-		FunctionEnd();
-		return true;
-	}
+	// Need to potentially divide the string into 2 parts if an offset is present
+	char* offset = FindString("+", stringCopy);
+	if(offset == Null)
+		offset = FindString("-", stringCopy);
+	if(offset != Null)
+		offsetPlus[it] = '\0';
 	
-	// Check against allowed formats
-	auto length = GetStringLength(s);
-	if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong)) {
-		FunctionEnd();
-		return false;
-	}
-	if(s[2] != '/') {
-		FunctionEnd();
-		return false;
-	}
-	if(length >= GetStringLength(DateFormatMedium) && s[5] != '/') {
-		FunctionEnd();
-		return false;
+	// Then check the start for validity
+	// If can already tell it's false return immediately, otherwise continue to check
+	if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == false && StringsAreEqual(stringCopy, "today") == false) { // Check against allowed formats if not a day of the week of "today"
+		auto length = GetStringLength(stringCopy); // Modded length in case of presence of offsets
+		if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong)) {
+			FunctionEnd();
+			return false;
+		}
+		if(s[2] != '/') {
+			FunctionEnd();
+			return false;
+		}
+		if(length >= GetStringLength(DateFormatMedium) && s[5] != '/') {
+			FunctionEnd();
+			return false;
+		}
 	}
 	
 	// @TODO - Check date viability e.g. 31st feb
 	
 	// Check day
 	{
-		auto day = StringToInt(s, 2);
+		auto day = StringToInt(copyString, 2);
 		if(day < 0 || day > 31) {
 			FunctionEnd();
 			return false;
@@ -65,7 +72,7 @@ dll_export bool IsDate(const char* s) {
 	
 	// Check month
 	{
-		auto month = StringToInt(s + 3, 2);
+		auto month = StringToInt(copyString + 3, 2);
 		if(month < 0 || month > 12) {
 			FunctionEnd();
 			return false;
@@ -73,7 +80,15 @@ dll_export bool IsDate(const char* s) {
 	}
 	
 	// Allow whatever year is desired so long as it fits the format
+	// At this point the date pre offset is correct
 	
+	// In the case of an offset, check whether the remaining string is a number
+	if((offset != Null && IsNumber(offset + 1) == true) == false) {
+		FunctionEnd();
+		return false;
+	}
+	
+	// Otherwise it's all correct
 	FunctionEnd();
 	return true;
 }

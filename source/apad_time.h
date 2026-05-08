@@ -20,7 +20,7 @@ struct date {
 												// Return string will be allocated on global API memory.
 dll_import char* DateToString(date d); // Returned string format is dd/mm/yyyy
 dll_import date  GetDate(si32 offsetDays);
-dll_import bool  IsDate(const char* s);
+dll_import bool  IsDateAndValid(const char* s);
 dll_import date  StringToDate(const char* s); // IsDate() should always be called before this
 
 typedef ui64 time_marker;
