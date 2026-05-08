@@ -31,7 +31,6 @@ dll_export bool IsDateAndValid(const char* s) {
 	AssertInternal(s != Null);
 	
 	char* stringCopy = AllocateString(s, Null);
-	auto  fullLength = GetStringLength(stringCopy);
 	ConvertStringToLowerCase(stringCopy);
 	
 	// Need to potentially divide the string into 2 parts if an offset is present
@@ -95,50 +94,65 @@ dll_export date StringToDate(const char* s) {
 	FunctionStart(date());
 	AssertInternal(s != Null);
 	
-	ConvertStringToLowerCase(s);
+	char* stringCopy = AllocateString(s, Null);
+	ConvertStringToLowerCase(stringCopy);
 	
-	if(StringsAreEqual(s, "today") == true) {
-		auto ret = GetDate(0);
-		FunctionEnd();
-		return ret;
-	}
-	else if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
-		ui8 argDay = 0; // 1 -> 7 to match the date struct
-		{
-			ForAll(GetArrayLength(Days)) {
-				if(StringsAreEqual(s, Days[it]) == true) {
-					argDay = it + 1;
-					break;
-				}
-			}
+	// Determine if any offset present and, if so, split the string into 2 parts
+	si16 offset = 0;
+	{
+		char* offsetStart = (char*)FindSubstring("+", stringCopy);
+		bool  offsetPlus = offsetStart != Null;
+		if(offsetStart == Null)
+			offsetStart = (char*)FindSubstring("-", stringCopy);
+		if(offsetStart != Null && IsNumber(offsetStart + 1) == true) {
+			*offsetStart = '\0';
+			offset = StringToInt(offsetStart + 1, Null);
+			if(offsetPlus == false)
+				offset *= -1;
 		}
-		
-		si8 offset = argDay - GetDate(0).dayOfTheWeek;
-		if(offset < 0)
-			offset += 7;
-		
+	}
+	
+	// Work out the date
+	if(StringsAreEqual(stringCopy, "today") == true) {
 		auto ret = GetDate(offset);
 		FunctionEnd();
 		return ret;
 	}
+	else if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == true) {
+		ui8 argDay = 0; // 1 -> 7 to match the date struct
+		ForAll(GetArrayLength(Days)) {
+			if(StringsAreEqual(stringCopy, Days[it]) == true) {
+				argDay = it + 1;
+				break;
+			}
+		}
+		
+		si8 dayOffset = argDay - GetDate(0).dayOfTheWeek;
+		if(dayOffset < 0)
+			dayOffset += 7;
+		
+		auto ret = GetDate(dayOffset + offset);
+		FunctionEnd();
+		return ret;
+	}
 	else { // Date in short, medium or long format
-		ui8 day = StringToInt(s, 2);
-		ui8 month = StringToInt(s + 3, 2);
+		ui8 day = StringToInt(stringCopy, 2);
+		ui8 month = StringToInt(stringCopy + 3, 2);
 		
 		ui16 year = 0;
-		if(GetStringLength(s) == GetStringLength(DateFormatShort)) { // If no year is supplied
+		if(GetStringLength(stringCopy) == GetStringLength(DateFormatShort)) { // If no year is supplied
 			auto currentDate = GetDate(0);
 			if(month < currentDate.month || month == currentDate.month && day < currentDate.day)
 				year = currentDate.year + 1;
 			else
 				year = currentDate.year;
 		}
-		else if(GetStringLength(s) == GetStringLength(DateFormatMedium)) {
-			char string[] = { '2', '0', s[6], s[7] };
+		else if(GetStringLength(stringCopy) == GetStringLength(DateFormatMedium)) {
+			char string[] = { '2', '0', stringCopy[6], stringCopy[7] };
 			year = StringToInt(string, 4);
 		}
 		else // Long date format
-			year = StringToInt(s + 6, Null);
+			year = StringToInt(stringCopy + 6, Null);
 		
 		// Get the offset between today and target date, then return
 		{
@@ -148,7 +162,7 @@ dll_export date StringToDate(const char* s) {
 			auto*  time = localtime(&timeNowSecs); // Non-UTC time
 			
 			// Set desired day, month and year
-			time->tm_mday = day;
+			time->tm_mday = day + offset; // Even if offset sends the value above the max for that month, mktime() will interpret it correctly
 			time->tm_mon = month - 1;
 			time->tm_year = year - 1900;
 			
@@ -160,8 +174,7 @@ dll_export date StringToDate(const char* s) {
 		}
 	}
 	
-	InvalidCodePath;
-	
+	AssertInternal(false); // We shouldn't have reached this line
 	FunctionEnd();
 	return date();
 }
