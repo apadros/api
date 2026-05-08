@@ -13,6 +13,7 @@ struct date {
 };
 
 /* Supported date argument formats are:
+ * - today
  * - dd/mm, dd/mm/yy and dd/mm/yyyy
  * - Day of the week: mon, tue, wed, thu, fri, sat & sun
  */

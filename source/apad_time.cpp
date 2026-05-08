@@ -32,7 +32,7 @@ dll_export bool IsDate(const char* s) {
 	
 	ConvertStringToLowerCase(s);
 	
-	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
+	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true || StringsAreEqual(s, "today") == true) {
 		FunctionEnd();
 		return true;
 	}
@@ -84,7 +84,12 @@ dll_export date StringToDate(const char* s) {
 	
 	ConvertStringToLowerCase(s);
 	
-	if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
+	if(StringsAreEqual(s, "today") == true) {
+		auto ret = GetDate(0);
+		FunctionEnd();
+		return ret;
+	}
+	else if(StringIsEqualToAny(s, Days, GetArrayLength(Days)) == true) {
 		ui8 argDay = 0; // 1 -> 7 to match the date struct
 		{
 			ForAll(GetArrayLength(Days)) {
@@ -99,8 +104,9 @@ dll_export date StringToDate(const char* s) {
 		if(offset < 0)
 			offset += 7;
 		
+		auto ret = GetDate(offset);
 		FunctionEnd();
-		return GetDate(offset);
+		return ret;
 	}
 	else { // Date in short, medium or long format
 		ui8 day = StringToInt(s, 2);
