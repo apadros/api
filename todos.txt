@@ -48,8 +48,6 @@ String
 	
 Time
 	- Check for dates not available on the calendar (e.g. 30th feb)
-	- IsDate() -> IsDateAndValid() ?
-	- </<=/>/>=[date] as date argument
 	- Checking whether it actually exists. E.g. 30th February
 	
 Text

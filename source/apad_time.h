@@ -16,7 +16,7 @@ struct date {
  * - today
  * - dd/mm, dd/mm/yy and dd/mm/yyyy
  * - Day of the week: mon, tue, wed, thu, fri, sat & sun
- * - [date][+ | -][days] e.g. today+5
+ * - date[[+ | -]days] e.g. today+5
  */
 												// Return string will be allocated on global API memory.
 dll_import char* DateToString(date d); // Returned string format is dd/mm/yyyy
