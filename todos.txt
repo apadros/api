@@ -48,7 +48,6 @@ String
 	
 Time
 	- Check for dates not available on the calendar (e.g. 30th feb)
-	- Checking whether it actually exists. E.g. 30th February
 	
 Testbenches
 	- Either as cpp or bat files 

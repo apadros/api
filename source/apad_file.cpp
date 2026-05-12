@@ -42,7 +42,7 @@ dll_export const char* GetFileExtension(const char* path) {
 	FunctionEnd();
 }
 
-dll_export file_line ReadLine(file& f, ui32& readIndex) {
+dll_export file_line ParseLine(file& f, ui32& readIndex) {
 	FunctionStart(file_line());
 	
 	if(readIndex >= f.size)
