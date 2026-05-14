@@ -60,13 +60,15 @@ program_local void PushNullChar(memory_stack& stack) {
 program_external char* PushString(const char* string, bool addEOS, memory_block& stack) {
   FunctionStart(Null);
 	
-	auto length = GetStringLength(string);
-	void* mem = Push((void*)string, length, stack);
+	auto  length = GetStringLength(string);
+	void* ret = (ui8*)stack.memory + stack.size;
+	if(length > 0)
+		ret = Push((void*)string, length, stack);
 	if(addEOS == true)
 		PushNullChar(stack);
 	
 	FunctionEnd();
-	return (char*)mem;
+	return (char*)ret;
 }
 
 // ******************** Internal API end ******************** //
