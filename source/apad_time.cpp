@@ -250,3 +250,13 @@ dll_export f32 GetTimeElapsedMilli(time_marker markerStart, time_marker markerEn
 	FunctionEnd();
 	return ret;
 }
+
+dll_export char* GetTimeNow() {
+	FunctionStart(Null);
+	time_t timeNowSecs = time(NULL);
+	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
+	char*  convertedTime = asctime(timeNow); // Format: Www Mmm dd hh:mm:ss yyy
+	char*  ret = AllocateString(convertedTime + 11, 8);
+	FunctionEnd();
+	return ret;
+}
