@@ -10,8 +10,6 @@
 
 // ******************** Internal API start ******************** //
 
-program_external char* PushString(const char* string, bool addEOS, memory_block& stack);
-
 // ******************** Internal API end ******************** //
 
 dll_export log_file OpenLogFile() {

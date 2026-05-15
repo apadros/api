@@ -57,7 +57,7 @@ program_local void PushNullChar(memory_stack& stack) {
 }
 
 // Also used in log.cpp
-program_external char* PushString(const char* string, bool addEOS, memory_block& stack) {
+dll_export char* PushString(const char* string, bool addEOS, memory_block& stack) {
   FunctionStart(Null);
 	
 	auto  length = GetStringLength(string);
