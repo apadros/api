@@ -224,6 +224,17 @@ dll_export memory_block Win32LoadFile(const char* path) {
   return allocatedMemory;
 }
 
+dll_export void Win32DeleteFile(const char* path) {
+	FunctionStart(;);
+	AssertInternal(path != Null);
+	AssertInternal(GetStringLength(path) <= MAX_PATH);
+	
+	BOOL ret = DeleteFileA(path);
+	AssertInternal(ret != 0);
+	
+	FunctionEnd();
+}
+
 dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
   FunctionStart(;);
   AssertInternal(data != Null);

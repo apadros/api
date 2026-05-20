@@ -37,7 +37,7 @@ program_external si8 		 JumpBufferRefCounter;
 #include <Windows.h> // For GetLastError(), including just the relative header leads to a "No Target Architecture" compilation error
 #include <stdio.h> // For sprintf
 #include "apad_file.h"
-#define AssertInternal(_condition) { \
+#define AssertInternal(_condition) { /* GetLastError() included at the end */ \
 	if(!(_condition)) { \
 	 	program_external bool AssertionHit; \
 		AssertionHit = true; \
