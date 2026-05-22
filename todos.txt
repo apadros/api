@@ -9,6 +9,10 @@ Array
 		- ForArray()
 		- Templated?
 	- AddToArray() contains a non-internal assertions, issue when used internally
+	
+Background
+	- Update prepare_release.bat to automatically switch to the release branch and set up correct structure @PRIORITY
+		- Include a read.txt in source files for assertion macros @PRIORITY
 		
 Bitmaps / Images
 	- Integration of png support via external library 
