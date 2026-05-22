@@ -28,7 +28,9 @@ dll_import si32  StringToInt(const char* s, ui16 length /* Set to Null to conver
 // ******************** Others ******************** //
 
 dll_import bool IsLetter(char c);
+dll_import bool IsWord(char* string);
 dll_import bool IsNumber(char c);
+dll_import bool IsNumber(char* string);
 
 dll_import bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return, newline & feed
 
@@ -49,6 +51,8 @@ dll_import const char* FindSubstring(const char* sub, const char* string);
 dll_import 			 void  FreeString(char* string);
 								 			 // Will return the length wihtout the null-character
 dll_import 			 ui16  GetStringLength(const char* s);
+											 // If only a \0 is wanted, set string to "" and addEOS to true. Supplying "\0" as string will not have any effect (GetStringLength() won't count it)
+dll_import 			 char* PushString(const char* string, bool addEOS, memory_block& stack);
 dll_import 			 bool  StringIsEqualToAny(const char* string, const char** strings, ui8 count);
 dll_import 			 bool  StringsAreEqual(const char* s1, const char* s2);
 

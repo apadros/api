@@ -1,10 +1,28 @@
 v0.4.3
+	[Background]
+		- Updates to various batch files
+		
 	[File]
-		- Added reading functions ReadLine(), LineIsValid(), GetLineDataElement() and FreeLine()
-		- Added creations and writing functions CreateFile(), WriteToFile() and WriteToFile()
+		- Added reading functions ParseLine(), LineIsValid(), GetLineDataElement() and FreeLine() and helper macro LineReadLoopHeader()
+		- Added creation and writing functions CreateFile() and WriteToFile() + overload
+		- Added function GetFileExtension()
+		- FileExists() now has to be called before calling LoadFile(), check is no longer done internally
 
+	[Memory]
+		- Added macro PushStruct()
+		
 	[String]
+		- Added functions IsWord(), IsNumber() overload and PushString()
 		- Removed the need to check for string == Null for Concatenate() calls, uninitialised strings will be ignored
+
+	[Time]
+		- Added support for "today" and day offsets as allowed date strings or part thereof (e.g. date+5)
+		- Renamed IsDate() to IsDateAndValid()
+		- Added function GetTimeNow()
+		
+	[Win32]
+		- Added function Win32DeleteFile()
+		- Win32FileExists() now has to be called before calling Win32LoadFile(), check is no longer done internally
 
 v0.4.2
 	[Background]

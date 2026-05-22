@@ -44,7 +44,6 @@ OpenGL / Rendering
 		
 String
 	- Rounding within F32ToString()
-	- Currently Concatenate() leakes memory
 	
 Time
 	- Check for dates not available on the calendar (e.g. 30th feb)
