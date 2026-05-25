@@ -72,6 +72,7 @@ dll_export void Win32PrintStackBackTrace() {
   const ui8 bufferSize = UI8Max;
   char previousSymbolName[bufferSize] = {};
 	const char* finalString = Null;
+	bool ignore = false; // Ignore repeated fails of SymGetLineFromAddr64() when going through kernel functions after CreateWindow()
   ForAll(depth) {
     if(depth >= GetArrayLength(stacktrace)) {
 			SymCleanup(process);
@@ -100,9 +101,14 @@ dll_export void Win32PrintStackBackTrace() {
     fileLine.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
     DWORD displacement = Null;
     ret = SymGetLineFromAddr64(process, address, &displacement, &fileLine);
-    if(ret == FALSE) {
-      DisplayError(Concatenate(2, "SymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), Windows code ", ToString((ui32)GetLastError())));
-			continue; // Could be windows stuff in between functions for some reason, like during window proc calls
+    if(ret == FALSE) { // This triggers multiple times through assertions in the window proc function (call stack goes through the kernel, SymGetLineFromAddr64() doesn't seem to like that)
+			if(StringsAreEqual(pSymbol->Name, "CallWindowProcW") == true)
+				ignore = true;
+			if(ignore == false)
+				finalString = Concatenate(4, finalString, "\nSymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), Windows code ", ToString((ui32)GetLastError()), "\n");
+			if(StringsAreEqual(pSymbol->Name, "CreateWindowA") == true)
+				ignore = false;
+			continue;
     }
 
     // Log all

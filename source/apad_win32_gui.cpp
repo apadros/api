@@ -3,6 +3,7 @@
 
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
+#include "apad_opengl.h"
 #include "apad_string.h"
 #include "apad_win32_gui.h"
 
@@ -46,6 +47,9 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		HGLRC context = wglCreateContext(dc);
 		AssertInternal(context != NULL);
+		
+		// Clear out any errors before we begin
+		AssertInternal(CheckOpenGLError() == Null);
 				
 		// @TODO - Set / enable everything that is needed
 		// glEnable(GL_TEXTURE_2D);
@@ -220,7 +224,12 @@ dll_export void Win32EndGUIUpdateLoop() {
   do currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
   while (currentFrameTimeMilli < targetFrameTimeMilli);
 	
-	// SwapBuffers(dc); // @TODO - OpengGL needs to be set up first, otherwise will take ~60ms
+	// glClearColor(0, 0, 0, 0);
+	// AssertInternal(glGetError() == GL_NO_ERROR);
+	// glClear(GL_COLOR_BUFFER_BIT);
+	// AssertInternal(glGetError() == GL_NO_ERROR);
+	// SwapBuffers(dc);
+	
 	dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
 
 	lastLoopMarker = GetTimeMarker();

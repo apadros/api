@@ -1,11 +1,9 @@
 @echo off
 
-cls
-
 REM Setup build directory
 if not exist build ( mkdir build )
-del build\* /q
-pushd build
+cd build
+del dll_* /q
 
 REM Standard debug version
 cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /c /std:c++17 ..\apad_*.cpp
@@ -15,5 +13,3 @@ del temp.txt
 del *.obj
 del *.exp
 del *.ilk
-
-popd
