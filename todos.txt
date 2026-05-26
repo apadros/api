@@ -42,7 +42,7 @@ Misc
 	
 OpenGL / Rendering
 	- Currently need to link with opengl32.lib even when making a command line program. Make this optional.
-	- GL-specific assertions / error logging (glGetError())
+	- GL-specific assertions / error logging (glGetError()) @WIP - Create GL-specific internal assertion
 	- Rendering of a sample pixel buffer
 		- Immediate mode / fixed-function rendering
 		

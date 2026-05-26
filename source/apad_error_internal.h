@@ -34,10 +34,10 @@ program_external si8 		 JumpBufferRefCounter;
 #define FunctionEnd() \
 	JumpBufferRefCounter -= 1
 
-#include <Windows.h> // For GetLastError(), including just the relative header leads to a "No Target Architecture" compilation error
+// NOT to be used directly
 #include <stdio.h> // For sprintf
 #include "apad_file.h"
-#define AssertInternal(_condition) { /* GetLastError() included at the end */ \
+#define BeginInternalAssertion(_condition) \
 	if(!(_condition)) { \
 	 	program_external bool AssertionHit; \
 		AssertionHit = true; \
@@ -48,8 +48,10 @@ program_external si8 		 JumpBufferRefCounter;
 			sprintf(buffer, "[APAD_API] Internal assertion failed. \
 											\n  [Condition]          %s \
 											\n  [File]               %s \
-											\n  [Line]               %lu \
-											\n  [Last Windows error] %u", #_condition, GetFileNameAndExtension(__FILE__), __LINE__, GetLastError()); \
+											\n  [Line]               %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__);
+
+// NOT to be used directly
+#define EndInternalAssertion() \
 			program_external void DisplayError(const char* string); \
 			DisplayError((const char*)buffer); \
 			\
@@ -65,9 +67,13 @@ program_external si8 		 JumpBufferRefCounter;
 			ExitProgram(true); \
 		\
 		longjmp(JumpBuffer, -1); /* Unwind the call stack to the initial setjmp() call */ \
-	} \
+	}
+
+#define AssertInternal(_condition) { \
+	BeginInternalAssertion(_condition) \
+	EndInternalAssertion() \
 }
-	
+
 #endif
 
 #endif

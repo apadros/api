@@ -3,10 +3,10 @@
 #include <Windows.h>
 
 #include "apad_base_types.h"
-#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_win32_internal.h"
 
 // ******************** Local API start ******************** //
 
@@ -136,7 +136,7 @@ dll_export void* Win32AllocateMemory(ui32 size) {
   AssertInternal(size > 0);
 	
   void* mem = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-  AssertInternal(mem != NULL);
+  AssertInternalWin32(mem != NULL);
 	
 	FunctionEnd();
   return mem;
@@ -147,7 +147,7 @@ dll_export void Win32FreeMemory(void* mem) {
   AssertInternal(mem != Null);
 	
   auto ret = VirtualFree(mem, 0, MEM_RELEASE);
-	AssertInternal(ret != 0);
+	AssertInternalWin32(ret != 0);
 	
 	FunctionEnd();
 }
@@ -168,9 +168,9 @@ dll_export bool Win32FileExists(const char* path) {
 	auto error = GetLastError();
   if (handle == INVALID_HANDLE_VALUE && (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND)) {
 		// Store the assertion string
-		AssertInternal(handle != INVALID_HANDLE_VALUE);
-		AssertInternal(error != ERROR_FILE_NOT_FOUND);
-		AssertInternal(error != ERROR_PATH_NOT_FOUND);
+		AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
+		AssertInternalWin32(error != ERROR_FILE_NOT_FOUND);
+		AssertInternalWin32(error != ERROR_PATH_NOT_FOUND);
 	}
 	#endif
 
@@ -184,7 +184,7 @@ dll_export memory_block Win32LoadFile(const char* path) {
 	FunctionStart(memory_block());
   
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	AssertInternal(handle != INVALID_HANDLE_VALUE);
+	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
 	
 	#if 0
 	if(handle == INVALID_HANDLE_VALUE) {
@@ -203,11 +203,11 @@ dll_export memory_block Win32LoadFile(const char* path) {
   BOOL b = GetFileSizeEx(handle, &li);
   if(b == 0) {
 		CloseHandle(handle);
-		AssertInternal(false);
+		AssertInternalWin32(false);
 	}
   if(li.QuadPart > 0xFFFFFFFF) {
 		CloseHandle(handle);
-		AssertInternal(false);
+		AssertInternalWin32(false);
 	}
   
   DWORD fileSize = (DWORD)li.QuadPart;
@@ -217,11 +217,11 @@ dll_export memory_block Win32LoadFile(const char* path) {
   Assert(b == TRUE);
   if(b != TRUE) {
 		CloseHandle(handle);
-		AssertInternal(false);
+		AssertInternalWin32(false);
 	}
   if(bytesRead != fileSize) {
 		CloseHandle(handle);
-		AssertInternal(false);
+		AssertInternalWin32(false);
 	}
 
 	CloseHandle(handle);
@@ -236,7 +236,7 @@ dll_export void Win32DeleteFile(const char* path) {
 	AssertInternal(GetStringLength(path) <= MAX_PATH);
 	
 	BOOL ret = DeleteFileA(path);
-	AssertInternal(ret != 0);
+	AssertInternalWin32(ret != 0);
 	
 	FunctionEnd();
 }
@@ -247,7 +247,7 @@ dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
 	AssertInternal(dataSize > 0);
 	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	AssertInternal(handle != INVALID_HANDLE_VALUE);
+	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
 	// @TODO - Handle this better, possibly return without an assertion to allow calling code to handle failure to save
 	
   DWORD written = 0;
@@ -271,14 +271,14 @@ dll_export time_marker Win32GetTimeMarker() {
 		dll_import program_external ui64 cpuCounterFrequencyKHz;
 		if(cpuCounterFrequencyKHz == Null) {
 			LARGE_INTEGER temp = {};
-			AssertInternal(QueryPerformanceFrequency(&temp) != 0);
+			AssertInternalWin32(QueryPerformanceFrequency(&temp) != 0);
 			cpuCounterFrequencyKHz = temp.QuadPart;
-			AssertInternal(cpuCounterFrequencyKHz != Null);
+			AssertInternalWin32(cpuCounterFrequencyKHz != Null);
 		}
 	}
 	
   LARGE_INTEGER temp = {};
-  AssertInternal(QueryPerformanceCounter(&temp) != 0);
+  AssertInternalWin32(QueryPerformanceCounter(&temp) != 0);
   auto ret = temp.QuadPart; // Value in kilo counts
 	
 	FunctionEnd();
