@@ -49,14 +49,7 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		HGLRC context = wglCreateContext(dc);
 		AssertInternalWin32(context != NULL);
 		
-		wglMakeCurrent(dc, context);
-		AssertInternalGL();
-		
-		// @TODO - Set / enable everything that is needed
-		// glEnable(GL_TEXTURE_2D);
-		// glEnable(GL_DEPTH_TEST);
-		// glEnable(GL_ALPHA_TEST);
-		// @TODO - GL assertions if / after enabling / setting everything
+		AssertInternal(wglMakeCurrent(dc, context) == TRUE);
 		
 		ReleaseDC(window, dc);
   }
@@ -195,6 +188,11 @@ dll_export void Win32BeginGUIUpdateLoop() {
 			ExitProgram(false);
 	}
 	
+	glClearColor(0, 0, 0, 0);
+	AssertInternalGL();
+	glClear(GL_COLOR_BUFFER_BIT);
+	AssertInternalGL();
+	
 	FunctionEnd();
 }
 
@@ -225,11 +223,7 @@ dll_export void Win32EndGUIUpdateLoop() {
   do currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
   while (currentFrameTimeMilli < targetFrameTimeMilli);
 	
-	// glClearColor(0, 0, 0, 0);
-	// AssertInternal(glGetError() == GL_NO_ERROR);
-	// glClear(GL_COLOR_BUFFER_BIT);
-	// AssertInternal(glGetError() == GL_NO_ERROR);
-	// SwapBuffers(dc);
+	AssertInternalWin32(SwapBuffers(dc) == TRUE);
 	
 	dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
 
