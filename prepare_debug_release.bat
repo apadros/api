@@ -5,11 +5,10 @@ if %1.==. ( goto Help )
 if %2.==. ( goto Help )
 if %3.==. ( goto Help )
 
-if not exist release ( mkdir release )
-del release\*.h /q
-del release\*.lib /q
-del release\*.dll /q
-del release\*.pdb /q
+if exist release (rmdir release /s /q)
+mkdir release
+mkdir release\bin
+mkdir release\source
 
 pushd source\
 call build_dll_release.bat %1 %2 %3
@@ -19,9 +18,9 @@ echo:
 echo MOVING...
 echo:
 
-move source\build\* release\
-copy source\*.h release\
-del  release\apad_error_internal.h
+move source\build\* release\bin\
+copy source\*.h release\source\
+del  release\source\apad_*_internal.h
 
 exit /b REM Exit batch script
 

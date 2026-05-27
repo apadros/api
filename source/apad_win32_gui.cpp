@@ -51,6 +51,14 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		AssertInternal(wglMakeCurrent(dc, context) == TRUE);
 		
+		// Set the project matrix based on the window client space
+		RECT r = {};
+		AssertInternalWin32(GetClientRect(window, &r) != 0);		
+		glMatrixMode(GL_PROJECTION);
+		AssertInternalGL();
+		glOrtho(r.left, r.right, r.top, r.bottom, -1, 1);
+		AssertInternalGL();
+		
 		ReleaseDC(window, dc);
   }
 	else if(msg == WM_CLOSE) {
