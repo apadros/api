@@ -46,9 +46,9 @@ program_external si8 		 JumpBufferRefCounter;
 		if(DisplayAPIAssertions == true) { \
 			char buffer[256] = {}; \
 			sprintf(buffer, "[APAD_API] Internal assertion failed. \
-											\n  [Condition]          %s \
-											\n  [File]               %s \
-											\n  [Line]               %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__);
+											\n  [Condition]     %s \
+											\n  [File]          %s \
+											\n  [Line]          %lu", #_condition, GetFileNameAndExtension(__FILE__), __LINE__);
 
 // NOT to be used directly
 #define EndInternalAssertion() \

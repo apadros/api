@@ -1,11 +1,12 @@
 #include <windows.h>
 #include <gl\gl.h>
 
-#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_opengl.h"
+#include "apad_opengl_internal.h"
 #include "apad_string.h"
 #include "apad_win32_gui.h"
+#include "apad_win32_internal.h"
 
 // ******************** Internal API start ******************** //
 
@@ -40,17 +41,17 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		HDC dc = GetDC(window);
 		int format = ChoosePixelFormat(dc, &pfd);
-		AssertInternal(format != 0);
+		AssertInternalWin32(format != 0);
 		
 		BOOL ret = SetPixelFormat(dc, format, &pfd);
-		AssertInternal(ret == TRUE);
+		AssertInternalWin32(ret == TRUE);
 		
 		HGLRC context = wglCreateContext(dc);
-		AssertInternal(context != NULL);
+		AssertInternalWin32(context != NULL);
 		
-		// Clear out any errors before we begin
-		AssertInternal(CheckOpenGLError() == Null);
-				
+		wglMakeCurrent(dc, context);
+		AssertInternalGL();
+		
 		// @TODO - Set / enable everything that is needed
 		// glEnable(GL_TEXTURE_2D);
 		// glEnable(GL_DEPTH_TEST);
@@ -121,27 +122,27 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	// DPI
   {
     auto ret = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-		AssertInternal(ret == TRUE);
+		AssertInternalWin32(ret == TRUE);
   }
 
 	auto library = LoadLibraryA("Winmm.dll");
-	AssertInternal(library != NULL);
+	AssertInternalWin32(library != NULL);
 	
 	// Set the minimum os clock resolution for Sleep()
   {
     MMRESULT (*timeGetDevCaps)(LPTIMECAPS, UINT) = (MMRESULT (*)(LPTIMECAPS, UINT))GetProcAddress(library, "timeGetDevCaps");
-		AssertInternal(timeGetDevCaps != NULL);
+		AssertInternalWin32(timeGetDevCaps != NULL);
 		
     TIMECAPS caps = {};
 		auto ret = timeGetDevCaps(&caps, sizeof(TIMECAPS));
-		AssertInternal(ret == MMSYSERR_NOERROR);
-		AssertInternal(caps.wPeriodMin == 1);
+		AssertInternalWin32(ret == MMSYSERR_NOERROR);
+		AssertInternalWin32(caps.wPeriodMin == 1);
       
     MMRESULT (*timeBeginPeriod)(UINT) = (MMRESULT (*)(UINT))GetProcAddress(library, "timeBeginPeriod");
-		AssertInternal(timeBeginPeriod != NULL);
+		AssertInternalWin32(timeBeginPeriod != NULL);
 		
     ret = timeBeginPeriod(caps.wPeriodMin);
-		AssertInternal(ret == TIMERR_NOERROR);
+		AssertInternalWin32(ret == TIMERR_NOERROR);
 		
 		sleepPeriod = caps.wPeriodMin;
 		
@@ -154,13 +155,13 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	ui16 height = 0;
 	{
 		RECT workArea = {};
-		AssertInternal(SystemParametersInfoA(SPI_GETWORKAREA, 0, &workArea, 0) != 0);
+		AssertInternalWin32(SystemParametersInfoA(SPI_GETWORKAREA, 0, &workArea, 0) != 0);
 		
 		width = workArea.right - workArea.left;
 		height = workArea.bottom;
 	}
-	AssertInternal(width > 0);
-	AssertInternal(height > 0);
+	AssertInternalWin32(width > 0);
+	AssertInternalWin32(height > 0);
 	
 	WNDCLASSA wndclass = {};
   // wndclass.cbSize = sizeof(WNDCLASSEX);
@@ -170,13 +171,13 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
   wndclass.hCursor = LoadCursorA(NULL, (LPCSTR)IDC_ARROW); // @TODO - Is this needed by default?
   wndclass.lpszClassName = "APAD window class";
 	
-	AssertInternal(RegisterClassA(&wndclass) != 0);
+	AssertInternalWin32(RegisterClassA(&wndclass) != 0);
 	
 	windowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
 															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
 															 0, 0, width, height, 
 															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
-  AssertInternal(windowHandle != NULL);
+  AssertInternalWin32(windowHandle != NULL);
 	
 	FunctionEnd();
 }
@@ -206,7 +207,7 @@ dll_export void Win32EndGUIUpdateLoop() {
 		return;
 	}
 
-	AssertInternal(windowHandle != NULL);
+	AssertInternalWin32(windowHandle != NULL);
 	if(windowHandle == NULL)
 		ExitProgram(true);
 	
