@@ -284,3 +284,7 @@ dll_export time_marker Win32GetTimeMarker() {
 	FunctionEnd();
 	return ret;
 }
+
+dll_export void Win32OutputDebugString(const char* string) {
+	OutputDebugStringA(string);
+}

@@ -16,6 +16,7 @@ program_local HWND windowHandle = NULL;
 program_local UINT 				sleepPeriod = Null;
 program_local time_marker lastLoopMarker = Null;
 program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
+program_local  ui16        screenHeight = Null;
 
 // No need to export this, only used in apad_error.cpp
 void Win32ErrorMessageBox(const char* string) {
@@ -31,6 +32,10 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	
 	if(msg == WM_CREATE) {
 		// Init OpenGL
+		
+		windowHandle = window;
+		screenHeight = GetSystemMetrics(SM_CYSCREEN); // In pixels
+		AssertInternalWin32(screenHeight > 0); // Will == 0 if GetSystemMetrics() fails
 		
     PIXELFORMATDESCRIPTOR pfd = {};
 		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -52,11 +57,11 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		AssertInternal(wglMakeCurrent(dc, context) == TRUE);
 		
 		// Set the project matrix based on the window client space
-		RECT r = {};
-		AssertInternalWin32(GetClientRect(window, &r) != 0);		
+		auto size = Win32GetProgramWindowClientSize();
+		AssertInternal(size.width > 0 && size.height > 0);
 		glMatrixMode(GL_PROJECTION);
 		AssertInternalGL();
-		glOrtho(r.left, r.right, r.top, r.bottom, -1, 1);
+		glOrtho(0, size.width, 0, size.height, -1, 1);
 		AssertInternalGL();
 		
 		ReleaseDC(window, dc);
@@ -81,17 +86,17 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	return ret;
 }
 
-dll_import rectangle Win32GetProgramWindowInnerSize() {
+dll_import size Win32GetProgramWindowClientSize() {
+	FunctionStart(size());
 	AssertInternal(windowHandle != NULL);
 	RECT r = {};
 	AssertInternalWin32(GetClientRect(windowHandle, &r) != 0);
-	rectangle ret = {};
-	ret.left = 0;
-	ret.bottom = 0;
+	size ret = {};
 	ret.width = r.right - r.left;
 	AssertInternal(ret.width != 0);
 	ret.height = r.bottom - r.top;
 	AssertInternal(ret.height != 0);
+	FunctionEnd();
 	return ret;
 }
 
@@ -197,15 +202,40 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	FunctionEnd();
 }
 
-dll_export void Win32BeginGUIUpdateLoop() {
-	FunctionStart(;);
+#include <windowsx.h>
+dll_export win32_events Win32BeginGUIUpdateLoop() {
+	FunctionStart(win32_events());
+	
+	win32_events ret = {};
 	
 	MSG msg;
   ClearStruct(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
-		bool exit = msg.message == WM_QUIT;
-    TranslateMessage(&msg);
+		bool exit = false;
+		
+		switch(msg.message) {
+			case WM_QUIT:
+				exit = true; 
+				break;
+			
+			case WM_LBUTTONDOWN: {
+				ret.mouseLeftClick = true;
+				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				ret.mouseY = screenHeight - GET_Y_LPARAM(msg.lParam);
+			} break;
+			
+			case WM_RBUTTONDOWN: {
+				ret.mouseRightClick = true;
+				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				ret.mouseY = screenHeight - GET_Y_LPARAM(msg.lParam);
+			} break;
+			
+			default: break;
+		};
+		
+		TranslateMessage(&msg);
     DispatchMessageA(&msg);
+		
 		if(exit == true)
 			ExitProgram(false);
 	}
@@ -216,6 +246,8 @@ dll_export void Win32BeginGUIUpdateLoop() {
 	AssertInternalGL();
 	
 	FunctionEnd();
+	
+	return ret;
 }
 
 dll_export void Win32EndGUIUpdateLoop() {
@@ -254,4 +286,27 @@ dll_export void Win32EndGUIUpdateLoop() {
 	ReleaseDC(windowHandle, dc);
 	
 	FunctionEnd();
+}
+
+#include "apad_maths.h"
+dll_export point Win32GetMousePosWithinClient() {
+	FunctionStart(point());
+	
+	POINT p = {};
+	AssertInternalWin32(GetCursorPos(&p) != 0); // Will return screen coordinates
+	AssertInternal(windowHandle != NULL);
+	AssertInternalWin32(ScreenToClient(windowHandle, &p) != 0); // Will update p relative to the top left corner of the client area
+	
+	auto client = Win32GetProgramWindowClientSize();
+	
+	// Cap the point directly since it could return negative numbers
+	Cap(p.x, 0, client.width);
+	Cap(p.y, 0, client.height);
+	
+	point ret = {};
+	ret.x = p.x;
+	ret.y = client.height - p.y;
+	
+	FunctionEnd();
+	return ret;
 }

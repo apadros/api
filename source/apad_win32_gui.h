@@ -11,16 +11,44 @@ struct rectangle {
 	f32 height;
 };
 
+struct point {
+	union {
+		ui16 x;
+		ui16 width;
+	};
+	
+	union {
+		ui16 y;
+		ui16 height;
+	};
+};
+typedef point size;
+
+// ******************** Core ******************** //
+
 #define GUIAppEntryPoint(_instanceID) int CALLBACK WinMain(HINSTANCE _instanceID, HINSTANCE prevInstance, LPSTR commandLine, int commandShow)
 
 dll_import void Win32InitGUI(const char* windowTitle /* Can be set to Null */, HINSTANCE instance);
-															 
+	
+struct win32_events {
+	bool mouseLeftClick;
+	bool mouseLeftDown;
+	bool mouseRightClick;
+	bool mouseRightDown;
+	ui16 mouseX;
+	ui16 mouseY;
+};
+	
 // These need to be encased in a while(true) loop
-dll_import void Win32BeginGUIUpdateLoop();
-dll_import void Win32EndGUIUpdateLoop();
+dll_import win32_events Win32BeginGUIUpdateLoop();
+dll_import void   		  Win32EndGUIUpdateLoop();
 
 dll_import void DisplayLastWin32Error();
 
-dll_export rectangle Win32GetProgramWindowInnerSize();
+// ******************** Others ******************** //
+
+dll_export size Win32GetProgramWindowClientSize();
+
+dll_export point Win32GetMousePosWithinClient(); // Return point will be capped to the dimensions of the client area
 
 #endif
