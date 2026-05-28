@@ -81,6 +81,20 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	return ret;
 }
 
+dll_import rectangle Win32GetProgramWindowInnerSize() {
+	AssertInternal(windowHandle != NULL);
+	RECT r = {};
+	AssertInternalWin32(GetClientRect(windowHandle, &r) != 0);
+	rectangle ret = {};
+	ret.left = 0;
+	ret.bottom = 0;
+	ret.width = r.right - r.left;
+	AssertInternal(ret.width != 0);
+	ret.height = r.bottom - r.top;
+	AssertInternal(ret.height != 0);
+	return ret;
+}
+
 dll_export void DisplayLastWin32Error() {
 	FunctionStart(;);
 	

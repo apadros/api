@@ -4,6 +4,13 @@
 #include <windows.h>
 #include "apad_intrinsics.h"
 
+struct rectangle {
+	f32 left;
+	f32 bottom;
+	f32 width;
+	f32 height;
+};
+
 #define GUIAppEntryPoint(_instanceID) int CALLBACK WinMain(HINSTANCE _instanceID, HINSTANCE prevInstance, LPSTR commandLine, int commandShow)
 
 dll_import void Win32InitGUI(const char* windowTitle /* Can be set to Null */, HINSTANCE instance);
@@ -13,5 +20,7 @@ dll_import void Win32BeginGUIUpdateLoop();
 dll_import void Win32EndGUIUpdateLoop();
 
 dll_import void DisplayLastWin32Error();
+
+dll_export rectangle Win32GetProgramWindowInnerSize();
 
 #endif
