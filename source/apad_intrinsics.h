@@ -54,7 +54,7 @@
 
 // Bit fields. 
 // Dot not test for true or false, instead use > 0 or == 0
-#define BitIsSet(_bit, _field) ((ui32)(_field) & (ui32)(_bit))
+#define BitIsSet(_bit /* 0 -> 7 */, _field) ((ui32)(_field) & (ui32)(1 << (_bit)))
 #define ClearBit(_bit, _field) (_field = decltype(_field)((ui32)(_field) & (~(ui32)(_bit))))
 #define SetBit(_bit, _field) (_field = decltype(_field)((ui32)(_field) | (ui32)(_bit)))
 

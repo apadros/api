@@ -43,6 +43,18 @@ struct win32_events {
 	
 	ui16 mouseX;
 	ui16 mouseY;
+	
+	char keyPressed;
+};
+
+struct win32_keyboard_state {
+	bool capslock;
+	bool leftShift;
+	bool rightShift;
+	bool leftAlt;
+	bool rightAlt;
+	bool leftCtrl;
+	bool rightCtrl;
 };
 	
 // These need to be encased in a while(true) loop

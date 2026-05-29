@@ -250,6 +250,19 @@ dll_export win32_events Win32BeginGUIUpdateLoop() {
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
+			case WM_KEYDOWN: {
+				// For some reason these aren't properly defined in msdn documentation
+				#define VirtualKey0 0x30
+				#define VirtualKey9 0x39
+				#define VirtualKeyA 0x41
+				#define VirtualKeyZ 0x5A
+				// VK_NUMPAD0 and VK_NUMPAD9 for keypad-specific keys
+				auto key = msg.wParam;
+				// Assert(key >= VirtualKey0 && key <= VirtualKey9 || key >= VirtualKeyA && key  <= VirtualKeyZ);
+				Assert(key >= VirtualKeyA && key  <= VirtualKeyZ);
+				ret.keyPressed = key - VirtualKeyA;
+			} break;
+			
 			default: break;
 		};
 		
@@ -326,6 +339,34 @@ dll_export point Win32GetMousePosWithinClient() {
 	point ret = {};
 	ret.x = p.x;
 	ret.y = client.height - p.y;
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export win32_keyboard_state Win32GetKeyboardState() {
+	FunctionStart(win32_keyboard_state());
+	
+	ui8 keys[256];
+	BOOL win32Ret = GetKeyboardState((PBYTE)(&keys));
+	AssertInternalWin32(win32Ret != 0);
+	
+	/* MSDN
+		 When the function returns, each member of the array pointed to by the lpKeyState parameter contains status data for a virtual key. 
+		 If the high-order bit is 1, the key is down; otherwise, it is up. 
+		 If the key is a toggle key, for example CAPS LOCK, then the low-order bit is 1 when the key is toggled and is 0 if the key is untoggled. 
+		 The low-order bit is meaningless for non-toggle keys. A toggle key is said to be toggled when it is turned on. 
+		 A toggle key's indicator light (if any) on the keyboard will be on when the key is toggled, and off when the key is untoggled.
+	*/
+	
+	win32_keyboard_state ret = {};
+	ret.capslock = BitIsSet(0, keys[VK_CAPITAL]) == 1;
+	ret.leftShift = BitIsSet(7, keys[VK_LSHIFT]) > 0;
+	ret.rightShift = BitIsSet(7, keys[VK_RSHIFT]) > 0;
+	ret.leftAlt = BitIsSet(7, keys[VK_LMENU]) > 0;
+	ret.rightAlt = BitIsSet(7, keys[VK_RMENU]) > 0;
+	ret.leftCtrl = BitIsSet(7, keys[VK_LCONTROL]) > 0;
+	ret.rightCtrl = BitIsSet(7, keys[VK_RCONTROL]) > 0;
 	
 	FunctionEnd();
 	return ret;
