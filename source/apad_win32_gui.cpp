@@ -16,7 +16,6 @@ program_local HWND windowHandle = NULL;
 program_local UINT 				sleepPeriod = Null;
 program_local time_marker lastLoopMarker = Null;
 program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
-program_local  ui16        screenHeight = Null;
 
 // No need to export this, only used in apad_error.cpp
 void Win32ErrorMessageBox(const char* string) {
@@ -34,8 +33,6 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		// Init OpenGL
 		
 		windowHandle = window;
-		screenHeight = GetSystemMetrics(SM_CYSCREEN); // In pixels
-		AssertInternalWin32(screenHeight > 0); // Will == 0 if GetSystemMetrics() fails
 		
     PIXELFORMATDESCRIPTOR pfd = {};
 		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -219,15 +216,38 @@ dll_export win32_events Win32BeginGUIUpdateLoop() {
 				break;
 			
 			case WM_LBUTTONDOWN: {
-				ret.mouseLeftClick = true;
+				ret.mouseLeftClickDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
-				ret.mouseY = screenHeight - GET_Y_LPARAM(msg.lParam);
+				ui16 height = Win32GetProgramWindowClientSize().height;
+				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+			} break;
+			
+			case WM_LBUTTONUP: {
+				ret.mouseLeftClickUp = true;
+				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				ui16 height = Win32GetProgramWindowClientSize().height;
+				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_RBUTTONDOWN: {
-				ret.mouseRightClick = true;
+				ret.mouseRightClickDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
-				ret.mouseY = screenHeight - GET_Y_LPARAM(msg.lParam);
+				ui16 height = Win32GetProgramWindowClientSize().height;
+				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+			} break;
+			
+			case WM_RBUTTONUP: {
+				ret.mouseRightClickUp = true;
+				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				ui16 height = Win32GetProgramWindowClientSize().height;
+				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+			} break;
+			
+			case WM_MOUSEMOVE: {
+				ret.mouseMoved = true;
+				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				ui16 height = Win32GetProgramWindowClientSize().height;
+				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			default: break;
