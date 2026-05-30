@@ -200,10 +200,10 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 }
 
 #include <windowsx.h>
-dll_export win32_events Win32BeginGUIUpdateLoop() {
-	FunctionStart(win32_events());
+dll_export win32_state Win32BeginGUIUpdateLoop() {
+	FunctionStart(win32_state());
 	
-	win32_events ret = {};
+	win32_state ret = {};
 	
 	MSG msg;
   ClearStruct(msg);
@@ -250,6 +250,7 @@ dll_export win32_events Win32BeginGUIUpdateLoop() {
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
+			// Multiple events will be generate if a key is held down
 			case WM_KEYDOWN: {
 				// For some reason these aren't properly defined in msdn documentation
 				#define VirtualKey0 0x30
@@ -271,6 +272,21 @@ dll_export win32_events Win32BeginGUIUpdateLoop() {
 		
 		if(exit == true)
 			ExitProgram(false);
+	}
+	
+	// Keyboard state
+	{
+		ui8 keys[256];
+		BOOL win32Ret = GetKeyboardState((PBYTE)(&keys));
+		AssertInternalWin32(win32Ret != 0);
+		
+		ret.capsLock = BitIsSet(0, keys[VK_CAPITAL]);
+		ret.leftShift = BitIsSet(7, keys[VK_LSHIFT]);
+		ret.rightShift = BitIsSet(7, keys[VK_RSHIFT]);
+		ret.leftAlt = BitIsSet(7, keys[VK_LMENU]);
+		ret.rightAlt = BitIsSet(7, keys[VK_RMENU]);
+		ret.leftCtrl = BitIsSet(7, keys[VK_LCONTROL]);
+		ret.rightCtrl = BitIsSet(7, keys[VK_RCONTROL]);
 	}
 	
 	glClearColor(0, 0, 0, 0);
@@ -339,26 +355,6 @@ dll_export point Win32GetMousePosWithinClient() {
 	point ret = {};
 	ret.x = p.x;
 	ret.y = client.height - p.y;
-	
-	FunctionEnd();
-	return ret;
-}
-
-dll_export win32_keyboard_state Win32GetKeyboardState() {
-	FunctionStart(win32_keyboard_state());
-	
-	ui8 keys[256];
-	BOOL win32Ret = GetKeyboardState((PBYTE)(&keys));
-	AssertInternalWin32(win32Ret != 0);
-	
-	win32_keyboard_state ret = {};
-	ret.capsLock = BitIsSet(0, keys[VK_CAPITAL]);
-	ret.leftShift = BitIsSet(7, keys[VK_LSHIFT]);
-	ret.rightShift = BitIsSet(7, keys[VK_RSHIFT]);
-	ret.leftAlt = BitIsSet(7, keys[VK_LMENU]);
-	ret.rightAlt = BitIsSet(7, keys[VK_RMENU]);
-	ret.leftCtrl = BitIsSet(7, keys[VK_LCONTROL]);
-	ret.rightCtrl = BitIsSet(7, keys[VK_RCONTROL]);
 	
 	FunctionEnd();
 	return ret;
