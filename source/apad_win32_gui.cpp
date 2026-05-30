@@ -260,7 +260,7 @@ dll_export win32_events Win32BeginGUIUpdateLoop() {
 				auto key = msg.wParam;
 				// Assert(key >= VirtualKey0 && key <= VirtualKey9 || key >= VirtualKeyA && key  <= VirtualKeyZ);
 				if(key >= VirtualKeyA && key  <= VirtualKeyZ)
-					ret.keyPressed = key - VirtualKeyA;
+					ret.keyPressed = key - VirtualKeyA + 'a';
 			} break;
 			
 			default: break;
