@@ -255,19 +255,28 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
-			// Multiple events will be generate if a key is held down
-			case WM_KEYDOWN: {
-				// For some reason these aren't properly defined in msdn documentation
-				#define VirtualKey0 0x30
-				#define VirtualKey9 0x39
-				#define VirtualKeyA 0x41
-				#define VirtualKeyZ 0x5A
-				// VK_NUMPAD0 and VK_NUMPAD9 for keypad-specific keys
+			case WM_KEYDOWN: // When a key that can be mapped to a char is pressed, both this and a WM_CHAR message will be generated	.
+											 // Also, multiple events will be generate if a key is held down
+			case WM_CHAR: { // Need this for correct mapping of text keys being pressed - context sensitive
 				auto key = msg.wParam;
-				// Assert(key >= VirtualKey0 && key <= VirtualKey9 || key >= VirtualKeyA && key  <= VirtualKeyZ);
-				if(key >= VirtualKeyA && key  <= VirtualKeyZ)
-					ret.keyPressed = key - VirtualKeyA + 'a';
+				bool read = false;
+				switch(key) {
+					case VK_BACK:   { ret.backspacePressed = true; read = true; } break;
+					case VK_ESCAPE: { ret.escapePressed = true; 	 read = true; } break;				
+					case VK_SPACE:  { ret.keyPressed = ' '; 	 		 read = true; } break;				
+					case VK_RETURN: { ret.enterPressed = true;     read = true; } break;
+					case VK_TAB:    { ret.tabPressed = true;     	 read = true; } break;
+					case VK_LEFT:   { ret.leftPressed = true;      read = true; } break;
+					case VK_RIGHT:  { ret.rightPressed = true;     read = true; } break;
+					case VK_DOWN:   { ret.downPressed = true;      read = true; } break;
+					case VK_UP:     { ret.upPressed = true;     	 read = true; } break;
+					default: break;
+				};
+				
+				if(read == false && msg.message == WM_CHAR)
+					ret.keyPressed = key;
 			} break;
+			
 			
 			default: break;
 		};
