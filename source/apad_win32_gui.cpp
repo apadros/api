@@ -214,7 +214,12 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 			case WM_QUIT:
 				exit = true; 
 				break;
-			
+				
+			// WM_LBUTTONDBLCLK was attempted but it didn't work even specifying CS_DBLCLKS as a window style
+			// as per the MSDN documentation.
+			// Also accoring to the docs, a WM_LBUTTONDOWN is generated first anyway, so might as well keep
+			// track of double clicking manually.
+				
 			case WM_LBUTTONDOWN: {
 				ret.mouseLeftClickDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);

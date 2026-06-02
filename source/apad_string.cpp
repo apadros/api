@@ -59,11 +59,14 @@ program_local void PushNullChar(memory_stack& stack) {
 // Also used in log.cpp
 dll_export char* PushString(const char* string, bool addEOS, memory_block& stack) {
   FunctionStart(Null);
+	AssertInternal(string != Null || addEOS == true);
 	
-	auto  length = GetStringLength(string);
 	void* ret = (ui8*)stack.memory + stack.size;
-	if(length > 0)
-		ret = Push((void*)string, length, stack);
+	if(string != Null) {
+		auto length = GetStringLength(string);
+		if(length > 0)
+			ret = Push((void*)string, length, stack);
+	}
 	if(addEOS == true)
 		PushNullChar(stack);
 	
