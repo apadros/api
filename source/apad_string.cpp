@@ -131,7 +131,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	if(length == Null)
 		copyLength = sLength;
 	else
-		copyLength = Min(length, sLength);
+		copyLength = GetMin(length, sLength);
 	
 	auto stack = AllocateStack(copyLength + 1);
 	Push((void*)s, copyLength, stack);
