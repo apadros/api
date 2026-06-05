@@ -217,7 +217,7 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 				
 			// WM_LBUTTONDBLCLK was attempted but it didn't work even specifying CS_DBLCLKS as a window style
 			// as per the MSDN documentation.
-			// Also accoring to the docs, a WM_LBUTTONDOWN is generated first anyway, so might as well keep
+			// Also, accoring to the docs, a WM_LBUTTONDOWN is generated first anyway, so might as well keep
 			// track of double clicking manually.
 				
 			case WM_LBUTTONDOWN: {
@@ -266,6 +266,7 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 					case VK_SPACE:  { ret.keyPressed = ' '; 	 		 read = true; } break;				
 					case VK_RETURN: { ret.enterPressed = true;     read = true; } break;
 					case VK_TAB:    { ret.tabPressed = true;     	 read = true; } break;
+					case VK_DELETE: { ret.deletePressed = true;    read = true; } break;
 					case VK_LEFT:   { ret.leftPressed = true;      read = true; } break;
 					case VK_RIGHT:  { ret.rightPressed = true;     read = true; } break;
 					case VK_DOWN:   { ret.downPressed = true;      read = true; } break;
