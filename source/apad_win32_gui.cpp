@@ -13,9 +13,11 @@
 program_local HWND windowHandle = NULL;
 
 #include "apad_time.h"
-program_local UINT 				sleepPeriod = Null;
-program_local time_marker lastLoopMarker = Null;
-program_local f32         dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
+program_local UINT 				SleepPeriod = Null;
+program_local time_marker LastLoopMarker = Null;
+program_local f32         Dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
+program_local time_marker LastLeftClickMarker = GetTimeMarker(); // GetTimeElapsedMilli() will hit an assertion if this == 0
+program_local f32  				DoubleClickTime = 0.5; // Seconds
 
 // No need to export this, only used in apad_error.cpp
 void Win32ErrorMessageBox(const char* string) {
@@ -109,7 +111,7 @@ dll_export void DisplayLastWin32Error() {
 program_local void Win32Exit() { // Called within ExitProgram()
 	// Don't care about assertions at this point
 	
-	if(sleepPeriod != Null); {
+	if(SleepPeriod != Null); {
 		auto library = LoadLibrary("Winmm.dll");
 		if(library == NULL)
 			return;
@@ -118,7 +120,7 @@ program_local void Win32Exit() { // Called within ExitProgram()
 		if(timeEndPeriod == NULL)
 			return;
 	
-		auto ret = timeEndPeriod(sleepPeriod);
+		auto ret = timeEndPeriod(SleepPeriod);
 		if(ret != TIMERR_NOERROR)
 			return;
 		
@@ -161,7 +163,7 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
     ret = timeBeginPeriod(caps.wPeriodMin);
 		AssertInternalWin32(ret == TIMERR_NOERROR);
 		
-		sleepPeriod = caps.wPeriodMin;
+		SleepPeriod = caps.wPeriodMin;
 		
 		atexit(Win32Exit); // @TODO - Returns 0 for no error. What to do if it doesn't?
   }
@@ -200,6 +202,7 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 }
 
 #include <windowsx.h>
+#include "apad_time.h"
 dll_export win32_state Win32BeginGUIUpdateLoop() {
 	FunctionStart(win32_state());
 	
@@ -221,6 +224,10 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 			// track of double clicking manually.
 				
 			case WM_LBUTTONDOWN: {
+				auto newMarker = GetTimeMarker();
+				if(GetTimeElapsedMilli(LastLeftClickMarker, newMarker) / 1000 <= DoubleClickTime)
+					ret.mouseLeftDoubleClick = true;
+				LastLeftClickMarker = newMarker;
 				ret.mouseLeftClickDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
@@ -317,8 +324,8 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 dll_export void Win32EndGUIUpdateLoop() {
 	FunctionStart(;);
 	
-	if(lastLoopMarker == Null) {
-		lastLoopMarker = GetTimeMarker();
+	if(LastLoopMarker == Null) {
+		LastLoopMarker = GetTimeMarker();
 		FunctionEnd();
 		return;
 	}
@@ -332,20 +339,20 @@ dll_export void Win32EndGUIUpdateLoop() {
 
 	auto dc = GetDC(windowHandle);
 	
-	f32 currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+	f32 currentFrameTimeMilli = GetTimeElapsedMilli(LastLoopMarker, GetTimeMarker());
 	if (currentFrameTimeMilli + 1 < targetFrameTimeMilli) { // Allow a 1ms threshold for Sleep() timing inaccuracy
     f32 sleepTimeMilli = targetFrameTimeMilli - (currentFrameTimeMilli + 1);
 		Sleep((DWORD)sleepTimeMilli);
   }
 		
-  do currentFrameTimeMilli = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker());
+  do currentFrameTimeMilli = GetTimeElapsedMilli(LastLoopMarker, GetTimeMarker());
   while (currentFrameTimeMilli < targetFrameTimeMilli);
 	
 	AssertInternalWin32(SwapBuffers(dc) == TRUE);
 	
-	dt = GetTimeElapsedMilli(lastLoopMarker, GetTimeMarker()) / 1000;
+	Dt = GetTimeElapsedMilli(LastLoopMarker, GetTimeMarker()) / 1000;
 
-	lastLoopMarker = GetTimeMarker();
+	LastLoopMarker = GetTimeMarker();
 		
 	ReleaseDC(windowHandle, dc);
 	
