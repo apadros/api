@@ -262,6 +262,15 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
+			// @TODO - Test with freely-rotating mouse wheel
+			case WM_MOUSEWHEEL: { // Sent outside of client area but within confines of program window
+				// According to msdn documentation, WHEEL_DELTA == 120 and is used for standard mouse wheels.
+				// For freely-rotating wheels, value will be different
+				auto rotation = GET_WHEEL_DELTA_WPARAM(msg.wParam);
+				f32  fraction = (f32)rotation / WHEEL_DELTA;
+				ret.mouseWheelRotation = fraction;
+			} break;
+			
 			case WM_KEYDOWN: // When a key that can be mapped to a char is pressed, both this and a WM_CHAR message will be generated	.
 											 // Also, multiple events will be generate if a key is held down
 			case WM_CHAR: { // Need this for correct mapping of text keys being pressed - context sensitive
