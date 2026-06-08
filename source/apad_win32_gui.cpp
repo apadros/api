@@ -55,10 +55,11 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		AssertInternal(wglMakeCurrent(dc, context) == TRUE);
 		
-		// Set the project matrix based on the window client space
+		// Set the projection matrix based on the window client space
 		auto size = Win32GetProgramWindowClientSize();
 		AssertInternal(size.width > 0 && size.height > 0);
 		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
 		AssertInternalGL();
 		glOrtho(0, size.width, 0, size.height, -1, 1);
 		AssertInternalGL();
