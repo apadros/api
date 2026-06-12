@@ -2,13 +2,51 @@
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 
+dll_export vector vector::operator+(vector& v) {
+	vector ret = {};
+	ret.x = x + v.x;
+	ret.y = y + v.y;
+	return ret;
+}
+
+dll_export vector vector::operator-(vector& v) {
+	vector ret = {};
+	ret.x = x - v.x;
+	ret.y = y - v.y;
+	return ret;
+}
+
+dll_export void vector::operator+=(vector& v) {
+	this->x += v.x;
+	this->y += v.y;
+}
+
+dll_export void vector::operator-=(vector& v) {
+	this->x -= v.x;
+	this->y -= v.y;
+}
+
+dll_export vector vector::operator*(f32 f) {
+	vector ret = {};
+	ret.x = x * f;
+	ret.y = y * f;
+	return ret;
+}
+
+dll_export vector vector::operator/(f32 f) {
+	vector ret = {};
+	ret.x = x / f;
+	ret.y = y / f;
+	return ret;
+}
+
 dll_export program_external bool Overlap(f32 x0, f32 y0, f32 left1, f32 bottom1, f32 width1, f32 height1) {
 	return x0 >= left1 && x0 <= left1 + width1 &&
 				 y0 >= bottom1 && y0 <= bottom1 + height1;
 }
 
-dll_export program_external size GetMiddle(rectangle r) {
-	size ret = {};
+dll_export program_external vector GetMiddle(rectangle r) {
+	vector ret = {};
 	ret.width = r.left + r.width / 2;
 	ret.height = r.bottom + r.height / 2;
 	return ret;

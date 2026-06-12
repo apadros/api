@@ -86,12 +86,12 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	return ret;
 }
 
-dll_import size Win32GetProgramWindowClientSize() {
-	FunctionStart(size());
+dll_import vector Win32GetProgramWindowClientSize() {
+	FunctionStart(vector());
 	AssertInternal(windowHandle != NULL);
 	RECT r = {};
 	AssertInternalWin32(GetClientRect(windowHandle, &r) != 0);
-	size ret = {};
+	vector ret = {};
 	ret.width = r.right - r.left;
 	AssertInternal(ret.width != 0);
 	ret.height = r.bottom - r.top;
@@ -370,8 +370,8 @@ dll_export void Win32EndGUIUpdateLoop() {
 }
 
 #include "apad_maths.h"
-dll_export point Win32GetMousePosWithinClient() {
-	FunctionStart(point());
+dll_export vector Win32GetMousePosWithinClient() {
+	FunctionStart(vector());
 	
 	POINT p = {};
 	AssertInternalWin32(GetCursorPos(&p) != 0); // Will return screen coordinates
@@ -384,7 +384,7 @@ dll_export point Win32GetMousePosWithinClient() {
 	Cap(p.x, 0, client.width);
 	Cap(p.y, 0, client.height);
 	
-	point ret = {};
+	vector ret = {};
 	ret.x = p.x;
 	ret.y = client.height - p.y;
 	
