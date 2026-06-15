@@ -104,6 +104,50 @@ dll_export void FreeStack(memory_block& stack) {
 	FunctionEnd();
 }
 
+dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
+	FunctionStart(Null);
+	AssertInternal(size > 0);
+	AssertInternal(offset < stack.size);
+	
+	// Push at the end in case stack needs to be reallocated
+	Push(size, stack);
+	
+	// Move everything from offset up up by size
+	// Do so manually since we're modifying the same memory we're reading from
+	FromTo(stack.size - size, offset) {
+		ui8* src  = (ui8*)stack.memory + it - 1;
+		ui8* dest = (ui8*)stack.memory + it;
+		*dest = *src;
+	}
+	
+	void* ret = (ui8*)stack.memory + offset;
+	ClearMemory(ret, size);
+	
+	FunctionEnd();
+	return ret;
+}
+
+#include "apad_maths.h"
+dll_export void Remove(ui32 size, ui32 offset, memory_stack& stack) {
+	FunctionStart(;);
+	AssertInternal(size > 0);
+	AssertInternal(offset < stack.size);
+	AssertInternal(offset + size <= stack.size);
+	
+	ui32 sizeToMove = stack.size - (offset + size);
+	
+	ForAll(sizeToMove) { // Move manually since we're reading from and writing to the same memory block
+		ui8* src = (ui8*)stack.memory + offset + size + it;
+	  ui8* dest = (ui8*)stack.memory + offset + it;
+		*dest = *src;
+	}
+	
+	ClearMemory((ui8*)stack.memory + stack.size - size, sizeToMove);
+	stack.size -= size;
+	
+	FunctionEnd();
+}
+
 dll_export void* Push(ui32 size, memory_block& stack) {
 	FunctionStart(Null);
 	AssertInternal(IsValid(stack));
