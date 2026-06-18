@@ -107,7 +107,7 @@ dll_export void FreeStack(memory_block& stack) {
 dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	FunctionStart(Null);
 	AssertInternal(size > 0);
-	AssertInternal(offset < stack.size);
+	AssertInternal(offset <= stack.size);
 	
 	// Push at the end in case stack needs to be reallocated
 	Push(size, stack);
@@ -142,7 +142,7 @@ dll_export void Remove(ui32 size, ui32 offset, memory_stack& stack) {
 		*dest = *src;
 	}
 	
-	ClearMemory((ui8*)stack.memory + stack.size - size, sizeToMove);
+	ClearMemory((ui8*)stack.memory + stack.size - size, size);
 	stack.size -= size;
 	
 	FunctionEnd();
