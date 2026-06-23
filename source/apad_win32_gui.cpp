@@ -86,7 +86,7 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	return ret;
 }
 
-dll_import vector Win32GetProgramWindowClientSize() {
+dll_export vector Win32GetProgramWindowClientSize() {
 	FunctionStart(vector());
 	AssertInternal(windowHandle != NULL);
 	RECT r = {};
@@ -388,6 +388,59 @@ dll_export vector Win32GetMousePosWithinClient() {
 	ret.x = p.x;
 	ret.y = client.height - p.y;
 	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export char* Win32OpenFileGUI(const char* directory, const char* filters) {
+	FunctionStart(Null);
+	AssertInternal(filters != Null);
+	
+	char buffer[MAX_PATH];
+			
+	OPENFILENAMEA data = {};
+	data.lStructSize = sizeof(OPENFILENAMEA);
+	data.lpstrFilter = filters;
+	data.nFilterIndex = 1;
+	data.lpstrFile = buffer;
+	data.lpstrFile[0] = '\0';
+	data.nMaxFile = MAX_PATH;
+	data.lpstrInitialDir = directory;
+	data.Flags = OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST; // Does OFN_PATHMUSTEXIST intrinsically include OFN_FILEMUSTEXIST?
+	// OFN_ALLOWMULTISELECT - Will allow selection of multiple files
+	
+	BOOL success = GetSaveFileNameA(&data);
+	char* ret = Null;
+	if(success != 0) // File selected and OK clicked
+		ret = AllocateString(buffer, Null);
+	// 0 indicates cancel clicked or error occured, call  CommDlgExtendedError() to get error info
+		
+	FunctionEnd();
+	return ret;
+}
+
+dll_export char* Win32SaveAsFileGUI(const char* directory, const char* filters) {
+	FunctionStart(Null);
+	AssertInternal(filters != Null);
+	
+	char buffer[MAX_PATH];
+			
+	OPENFILENAMEA data = {};
+	data.lStructSize = sizeof(OPENFILENAMEA);
+	data.lpstrFilter = filters;
+	data.nFilterIndex = 1;
+	data.lpstrFile = buffer;
+	data.lpstrFile[0] = '\0';
+	data.nMaxFile = MAX_PATH;
+	data.lpstrInitialDir = directory;
+	data.Flags = OFN_ENABLESIZING | OFN_OVERWRITEPROMPT;
+	
+	BOOL success = GetSaveFileNameA(&data);
+	char* ret = Null;
+	if(success != 0) // File selected and OK clicked
+		ret = AllocateString(buffer, Null);
+	// 0 indicates cancel clicked or error occured, call  CommDlgExtendedError() to get error info
+		
 	FunctionEnd();
 	return ret;
 }
