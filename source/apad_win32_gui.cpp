@@ -381,8 +381,8 @@ dll_export vector Win32GetMousePosWithinClient() {
 	auto client = Win32GetProgramWindowClientSize();
 	
 	// Cap the point directly since it could return negative numbers
-	Cap(p.x, 0, client.width);
-	Cap(p.y, 0, client.height);
+	Clamp(p.x, 0, client.width);
+	Clamp(p.y, 0, client.height);
 	
 	vector ret = {};
 	ret.x = p.x;
@@ -419,7 +419,7 @@ dll_export char* Win32OpenFileGUI(const char* directory, const char* filters) {
 	return ret;
 }
 
-dll_export char* Win32SaveAsFileGUI(const char* directory, const char* filters) {
+dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) {
 	FunctionStart(Null);
 	AssertInternal(filters != Null);
 	
