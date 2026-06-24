@@ -432,7 +432,7 @@ dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) 
 	data.lpstrFile = buffer;
 	data.lpstrFile[0] = '\0';
 	data.nMaxFile = MAX_PATH;
-	data.lpstrInitialDir = directory;
+	data.lpstrInitialDir = directory == Null ? "." : directory;
 	data.Flags = OFN_ENABLESIZING | OFN_OVERWRITEPROMPT;
 	
 	BOOL success = GetSaveFileNameA(&data);
@@ -440,7 +440,21 @@ dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) 
 	if(success != 0) // File selected and OK clicked
 		ret = AllocateString(buffer, Null);
 	// 0 indicates cancel clicked or error occured, call  CommDlgExtendedError() to get error info
+	
+	// If the user types a file name and hits ok, the extension isn't automatically added to the path, need to do so manually
+	if(data.nFileExtension == 0) {
+		const char* extensionString = filters;
+		AssertInternal(data.nFilterIndex >= 1);
+		ForAll(data.nFilterIndex - 1) {
+			extensionString += GetStringLength(extensionString) + 1; // File type
+			extensionString += GetStringLength(extensionString) + 1; // File extension
+		}
+		extensionString += GetStringLength(extensionString) + 1; // Skip to desired extension
+		extensionString = GetFileExtension(extensionString) - 1; // Move to .extension
 		
+		ret = Concatenate(2, ret, extensionString);
+	}
+	
 	FunctionEnd();
 	return ret;
 }
