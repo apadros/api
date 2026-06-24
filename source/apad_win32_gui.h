@@ -64,6 +64,8 @@ dll_import char* Win32OpenFileGUI(const char* directory, // Directory to open th
 																	
 dll_import char* Win32SaveFileAsGUI(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
 																	  const char* filters);  // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0"
+																		
+dll_import void Win32DisplayInfoBox(const char* string, bool error);
 
 
 #endif

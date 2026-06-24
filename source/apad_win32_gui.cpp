@@ -20,10 +20,10 @@ program_local time_marker LastLeftClickMarker = GetTimeMarker(); // GetTimeElaps
 program_local f32  				DoubleClickTime = 0.5; // Seconds
 
 // No need to export this, only used in apad_error.cpp
-void Win32ErrorMessageBox(const char* string) {
+dll_export program_external void Win32DisplayInfoBox(const char* string, bool error) {
 	FunctionStart(;);
 	
-	MessageBox(NULL, string, "Error", MB_OK | MB_ICONEXCLAMATION);
+	MessageBox(NULL, string, error == true ? "Error" : "Info", MB_OK | (error == true ? MB_ICONEXCLAMATION : MB_ICONINFORMATION));
 	
 	FunctionEnd();
 }
@@ -104,7 +104,7 @@ dll_export void DisplayLastWin32Error() {
 	FunctionStart(;);
 	
 	auto error = GetLastError();
-	Win32ErrorMessageBox(ToString((ui32)error));
+	Win32DisplayInfoBox(ToString((ui32)error), true);
 	
 	FunctionEnd();
 }

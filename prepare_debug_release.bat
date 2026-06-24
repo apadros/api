@@ -6,6 +6,7 @@ mkdir release\bin
 mkdir release\source
 
 pushd source\
+if exist build (del build /q)
 call build_dll_debug.bat
 popd
 

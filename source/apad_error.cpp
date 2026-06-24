@@ -66,8 +66,8 @@ dll_export program_external void DisplayError(const char* string) {
 	if(GUIApp == false)
 		printf("\n%s\n", string);
 	else {
-		program_external void Win32ErrorMessageBox(const char* string);
-		Win32ErrorMessageBox(string);
+		program_external void Win32DisplayInfoBox(const char* string, bool error);
+		Win32DisplayInfoBox(string, false);
 	}
 	
 	FunctionEnd();
