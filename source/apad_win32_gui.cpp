@@ -439,7 +439,8 @@ dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) 
 	char* ret = Null;
 	if(success != 0) // File selected and OK clicked
 		ret = AllocateString(buffer, Null);
-	// 0 indicates cancel clicked or error occured, call  CommDlgExtendedError() to get error info
+	else // 0 indicates cancel clicked or error occured, call CommDlgExtendedError() to get error info
+		return Null;
 	
 	// If the user types a file name and hits ok, the extension isn't automatically added to the path, need to do so manually
 	if(data.nFileExtension == 0) {

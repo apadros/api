@@ -158,6 +158,7 @@ dll_export bool Win32FileExists(const char* path) {
   AssertInternal(path != Null);
 	AssertInternal(GetStringLength(path) + 1 <= MAX_PATH);
 	
+	// @TODO - Repleace with PathFileExistsA() ?
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
 		FunctionEnd();
@@ -339,4 +340,13 @@ dll_export void Win32DeleteDirectory(const char* path) {
 	BOOL ret = RemoveDirectory(path);
 	AssertInternalWin32(ret != 0);
 	FunctionEnd();
+}
+
+#include <shlwapi.h>
+dll_export bool Win32DirectoryExists(const char* path) {
+	FunctionStart(false);
+	AssertInternal(path != Null);
+	BOOL ret = PathFileExistsA(path);	
+	FunctionEnd();
+	return ret == TRUE ? true : false;
 }
