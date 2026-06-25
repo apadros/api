@@ -6,6 +6,7 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_win32.h"
 #include "apad_win32_internal.h"
 
 // ******************** Local API start ******************** //
@@ -287,4 +288,55 @@ dll_export time_marker Win32GetTimeMarker() {
 
 dll_export void Win32OutputDebugString(const char* string) {
 	OutputDebugStringA(string);
+}
+
+dll_export char* Win32GetCurrentDirectoryFullPath() {
+	FunctionStart(Null);
+	char buffer[MAX_PATH];
+	{
+		DWORD ret = GetCurrentDirectory(MAX_PATH, (LPSTR)(&buffer));
+		AssertInternalWin32(ret > 0);
+	}
+	char* ret = AllocateString(buffer, Null);
+	FunctionEnd();
+	return ret;
+}
+
+dll_export char* Win32GetCurrentDirectory() {
+	FunctionStart(Null);
+	
+	char* path = Win32GetCurrentDirectoryFullPath();
+	
+	char* directory = path + GetStringLength(path);
+	do directory -= 1;
+	while(directory != path && *directory != '\\');
+	AssertInternal(*directory == '\\');
+	directory += 1;
+				
+	FunctionEnd();
+	return directory;
+}
+
+dll_export void Win32SetCurrentDirectory(const char* path) {
+	FunctionStart(;);
+	AssertInternal(path != Null);
+	
+	BOOL ret = SetCurrentDirectoryA(path);
+	AssertInternalWin32(ret != 0);
+	
+	FunctionEnd();	
+}
+
+dll_export void Win32CreateDirectory(const char* path) {
+	FunctionStart(;);
+	BOOL ret = CreateDirectory(path, Null);
+	AssertInternalWin32(ret != 0);
+	FunctionEnd();
+}
+
+dll_export void Win32DeleteDirectory(const char* path) {
+	FunctionStart(;);
+	BOOL ret = RemoveDirectory(path);
+	AssertInternalWin32(ret != 0);
+	FunctionEnd();
 }

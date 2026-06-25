@@ -444,7 +444,7 @@ dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) 
 	// If the user types a file name and hits ok, the extension isn't automatically added to the path, need to do so manually
 	if(data.nFileExtension == 0) {
 		const char* extensionString = filters;
-		AssertInternal(data.nFilterIndex >= 1);
+		AssertInternalWin32(data.nFilterIndex >= 1);
 		ForAll(data.nFilterIndex - 1) {
 			extensionString += GetStringLength(extensionString) + 1; // File type
 			extensionString += GetStringLength(extensionString) + 1; // File extension
