@@ -2,6 +2,11 @@
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 
+dll_export f32 LERP(f32 min, f32 max, f32 perc) {
+	Clamp(perc, 0.0f, 1.0f);
+	return min + perc * (max - min);
+}
+
 dll_export vector vector::operator+(vector& v) {
 	vector ret = {};
 	ret.x = x + v.x;

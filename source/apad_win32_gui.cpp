@@ -55,6 +55,11 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 		
 		AssertInternal(wglMakeCurrent(dc, context) == TRUE);
 		
+		glEnable(GL_BLEND);
+		AssertInternalGL();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		AssertInternalGL();
+		
 		// Set the projection matrix based on the window client space
 		auto size = Win32GetProgramWindowClientSize();
 		AssertInternal(size.width > 0 && size.height > 0);
@@ -208,6 +213,7 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 	FunctionStart(win32_state());
 	
 	win32_state ret = {};
+	ret.lastFrameTime = Dt;
 	
 	MSG msg;
   ClearStruct(msg);
