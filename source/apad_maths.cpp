@@ -1,20 +1,32 @@
+#include <math.h>
 #include "apad_base_types.h"
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 
-dll_export vector GetTopRight(rectangle& r) {
+program_local f32 PI = 3.14159265359f;
+
+program_local f32 RadiansToDegrees(f32 rads) {
+	return rads * PI / 180;
+}
+
+program_local f32 DegreesToRadias(f32 degs) {
+	return degs * 180 / PI;
+}
+
+dll_export program_external vector GetTopRight(rectangle& r) {
 	vector ret = {};
 	ret.x = r.left + r.width;
 	ret.y = r.bottom + r.height;
 	return ret;
 }
 
-dll_export f32 LERP(f32 min, f32 max, f32 perc) {
+dll_export program_external f32 LERP(f32 min, f32 max, f32 perc) {
 	Clamp(perc, 0.0f, 1.0f);
 	return min + perc * (max - min);
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export vector vector::operator+(vector& v) {
 	vector ret = {};
 	ret.x = x + v.x;
@@ -22,6 +34,7 @@ dll_export vector vector::operator+(vector& v) {
 	return ret;
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export vector vector::operator-(vector& v) {
 	vector ret = {};
 	ret.x = x - v.x;
@@ -29,16 +42,19 @@ dll_export vector vector::operator-(vector& v) {
 	return ret;
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export void vector::operator+=(vector& v) {
 	this->x += v.x;
 	this->y += v.y;
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export void vector::operator-=(vector& v) {
 	this->x -= v.x;
 	this->y -= v.y;
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export vector vector::operator*(f32 f) {
 	vector ret = {};
 	ret.x = x * f;
@@ -46,6 +62,7 @@ dll_export vector vector::operator*(f32 f) {
 	return ret;
 }
 
+// Making this 'program_external' fails compilation when #including math.h. Go figure.
 dll_export vector vector::operator/(f32 f) {
 	vector ret = {};
 	ret.x = x / f;
@@ -65,7 +82,7 @@ dll_export program_external vector GetMiddle(rectangle r) {
 	return ret;
 }
 
-dll_export rectangle CreateRectangle(f32 left, f32 bottom, f32 width, f32 height) {
+dll_export program_external rectangle CreateRectangle(f32 left, f32 bottom, f32 width, f32 height) {
 	FunctionStart(rectangle());
 	AssertInternal(width != 0);
 	AssertInternal(height != 0);
@@ -76,4 +93,20 @@ dll_export rectangle CreateRectangle(f32 left, f32 bottom, f32 width, f32 height
 	ret.height = height;
 	FunctionEnd();
 	return ret;
+}
+
+dll_export program_external f32 Sine(f32 degs) {
+	auto rads = RadiansToDegrees(degs);
+	auto ret = sinf(rads);
+	return RadiansToDegrees(ret);
+}
+
+dll_export program_external f32 Cos(f32 degs) {
+	auto rads = RadiansToDegrees(degs);
+	auto ret = cosf(rads);
+	return RadiansToDegrees(ret);
+}
+
+dll_export f32 RoundToNearestInteger(f32 value) {
+	return round(value);
 }
