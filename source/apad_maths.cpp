@@ -1,4 +1,5 @@
 #include "apad_base_types.h"
+#include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 
@@ -61,5 +62,18 @@ dll_export program_external vector GetMiddle(rectangle r) {
 	vector ret = {};
 	ret.width = r.left + r.width / 2;
 	ret.height = r.bottom + r.height / 2;
+	return ret;
+}
+
+dll_export rectangle CreateRectangle(f32 left, f32 bottom, f32 width, f32 height) {
+	FunctionStart(rectangle());
+	AssertInternal(width != 0);
+	AssertInternal(height != 0);
+	rectangle ret = {};
+	ret.left = left;
+	ret.bottom = bottom;
+	ret.width = width;
+	ret.height = height;
+	FunctionEnd();
 	return ret;
 }
