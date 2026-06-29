@@ -2,6 +2,13 @@
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
 
+dll_export vector GetTopRight(rectangle& r) {
+	vector ret = {};
+	ret.x = r.left + r.width;
+	ret.y = r.bottom + r.height;
+	return ret;
+}
+
 dll_export f32 LERP(f32 min, f32 max, f32 perc) {
 	Clamp(perc, 0.0f, 1.0f);
 	return min + perc * (max - min);
