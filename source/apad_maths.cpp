@@ -98,13 +98,13 @@ dll_export program_external rectangle CreateRectangle(f32 left, f32 bottom, f32 
 dll_export program_external f32 Sine(f32 degs) {
 	auto rads = RadiansToDegrees(degs);
 	auto ret = sinf(rads);
-	return RadiansToDegrees(ret);
+	return ret;
 }
 
 dll_export program_external f32 Cos(f32 degs) {
 	auto rads = RadiansToDegrees(degs);
 	auto ret = cosf(rads);
-	return RadiansToDegrees(ret);
+	return ret;
 }
 
 dll_export f32 RoundToNearestInteger(f32 value) {
