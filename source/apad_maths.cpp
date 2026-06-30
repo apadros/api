@@ -75,6 +75,15 @@ dll_export program_external bool Overlap(f32 x0, f32 y0, f32 left1, f32 bottom1,
 				 y0 >= bottom1 && y0 <= bottom1 + height1;
 }
 
+dll_export program_external bool Overlap(f32 x0, f32 y0, f32 x1, f32 y1, f32 testDistance) {
+	FunctionStart(false);
+	AssertInternal(testDistance > 0);
+	auto v = CreateVector(x1 - x0, y1 - y0);
+	auto ret = Magnitude(v) <= testDistance;
+	FunctionEnd();
+	return ret;
+}
+
 dll_export program_external vector GetMiddle(rectangle r) {
 	vector ret = {};
 	ret.width = r.left + r.width / 2;
@@ -107,6 +116,29 @@ dll_export program_external f32 Cos(f32 degs) {
 	return ret;
 }
 
-dll_export f32 RoundToNearestInteger(f32 value) {
+dll_export program_external f32 RoundToNearestInteger(f32 value) {
 	return round(value);
+}
+
+dll_export program_external f32 SquareRoot(f32 f) {
+	FunctionStart(Null);
+	AssertInternal(f > 0);
+	auto ret = sqrt(f);
+	FunctionEnd();
+	return ret;
+}
+
+dll_export program_external vector CreateVector(f32 x, f32 y) {
+	vector ret;
+	ret.x = x;
+	ret.y = y;
+	return ret;
+}
+
+dll_export program_external f32 Magnitude(f32 f) {
+	return f < 0 ? -f : f;
+}
+
+dll_export program_external f32 Magnitude(vector& v) {
+	return SquareRoot(v.x * v.x + v.y * v.y);
 }
