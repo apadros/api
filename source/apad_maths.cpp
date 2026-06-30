@@ -121,6 +121,8 @@ dll_export program_external f32 RoundToNearestInteger(f32 value) {
 }
 
 dll_export program_external f32 SquareRoot(f32 f) {
+	if(f == 0.0f)
+		return f;
 	FunctionStart(Null);
 	AssertInternal(f > 0);
 	auto ret = sqrt(f);
@@ -141,4 +143,10 @@ dll_export program_external f32 Magnitude(f32 f) {
 
 dll_export program_external f32 Magnitude(vector& v) {
 	return SquareRoot(v.x * v.x + v.y * v.y);
+}
+
+dll_export program_external f32 Tan(f32 degs) {
+	auto rads = RadiansToDegrees(degs);
+	auto ret = tanf(rads);
+	return ret;
 }
