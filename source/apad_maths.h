@@ -30,6 +30,9 @@ struct vector {
 	dll_import vector operator/(f32 f);
 };
 
+dll_import f32 			 ArcCos(f32 f);
+dll_import f32 			 ArcSine(f32 f);
+dll_import f32 			 ArcTan(f32 f);
 #define 				     Clamp(_value, _min, _max) { if((_value) < (_min)) (_value) = (_min); \
 								     													   else if((_value) > (_max)) (_value) = (_max); }
 dll_import f32 			 Cos(f32 degs);

@@ -7,11 +7,11 @@
 program_local f32 PI = 3.14159265359f;
 
 program_local f32 RadiansToDegrees(f32 rads) {
-	return rads * PI / 180;
+	return rads / PI * 180;
 }
 
-program_local f32 DegreesToRadias(f32 degs) {
-	return degs * 180 / PI;
+program_local f32 DegreesToRadians(f32 degs) {
+	return degs / 180 * PI;
 }
 
 dll_export program_external vector GetTopRight(rectangle& r) {
@@ -105,13 +105,13 @@ dll_export program_external rectangle CreateRectangle(f32 left, f32 bottom, f32 
 }
 
 dll_export program_external f32 Sine(f32 degs) {
-	auto rads = RadiansToDegrees(degs);
+	auto rads = DegreesToRadians(degs);
 	auto ret = sinf(rads);
 	return ret;
 }
 
 dll_export program_external f32 Cos(f32 degs) {
-	auto rads = RadiansToDegrees(degs);
+	auto rads = DegreesToRadians(degs);
 	auto ret = cosf(rads);
 	return ret;
 }
@@ -146,7 +146,22 @@ dll_export program_external f32 Magnitude(vector& v) {
 }
 
 dll_export program_external f32 Tan(f32 degs) {
-	auto rads = RadiansToDegrees(degs);
+	auto rads = DegreesToRadians(degs);
 	auto ret = tanf(rads);
 	return ret;
+}
+
+dll_export program_external f32 ArcTan(f32 f) {
+	auto ret = atanf(f);
+	return RadiansToDegrees(ret);
+}
+
+dll_export program_external f32 ArcSine(f32 f) {
+	auto ret = asinf(f);
+	return RadiansToDegrees(ret);
+}
+
+dll_export program_external f32 ArcCos(f32 f) {
+	auto ret = acosf(f);
+	return RadiansToDegrees(ret);
 }
