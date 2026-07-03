@@ -84,7 +84,7 @@ dll_export program_external bool Overlap(f32 x0, f32 y0, f32 x1, f32 y1, f32 tes
 	return ret;
 }
 
-dll_export program_external vector GetMiddle(rectangle r) {
+dll_export program_external vector GetCenter(rectangle r) {
 	vector ret = {};
 	ret.width = r.left + r.width / 2;
 	ret.height = r.bottom + r.height / 2;
