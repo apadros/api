@@ -11,9 +11,14 @@
 
 program_local 			text_body* CurrentTextBody;
 program_local 			ui16       CursorCharOffset; // 0-based from the start of CurrentTextBody text
-program_local 			vector     CursorPos;
+program_local 			vector     CursorPos; // Relative to the bottom-left corner of CurrentTextBody
 program_local 			f32        CursorBlinkTimeElapsed;
 program_local const f32  			 CursorBlinkFullLength = 1.5f; // Time to go fully transparent and back to full opaqueness
+
+program_local void SetCursorPos(f32 x, f32 y) {
+	CursorPos.x = x;
+	CursorPos.y = y;
+}
 
 dll_export program_external text_body AllocateTextBody(f32 textHeight, ui8 flags) {
 	FunctionStart(text_body());
@@ -95,6 +100,140 @@ dll_export program_external char* GetTextBodyText(text_body& tb) {
 	return ret;
 }
 
+dll_export program_external void InsertCharAtCursor(char c) {
+	FunctionStart(;);
+	AssertInternal(TextIsBeingUpdated() == true);
+	
+	auto inserted = InsertString(&c, 1, *CurrentTextBody, CursorCharOffset);
+	CursorCharOffset += inserted;
+	
+	FunctionEnd();
+}
+
+struct text_update_pipeline_data {
+	bool wantToExitUp;
+	bool wantToExitDown;
+};
+dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win32_state& osState) {
+	FunctionStart(text_update_pipeline_data());
+	AssertInternal(TextIsBeingUpdated() == true);
+	
+	text_update_pipeline_data ret = {};
+	
+	if(osState.keyPressed != Null) // Add text
+		InsertCharAtCursor(osState.keyPressed);
+	else if(osState.backspacePressed == true){ // Remove text
+		bool del = CursorCharOffset > 0; // If the cursor was already at 0, moving down would incorrectly deleted the very first letter
+		MoveCursor(-1);
+		if(del == true)
+			RemoveChar(*CurrentTextBody, CursorCharOffset);
+	}
+	else if(osState.enterPressed == true) { // Jump to next line if allowed, otherwise end writing
+	  if(BitIsSet(TextBodyFlagNewlines, CurrentTextBody->flags) == true) {
+			// Scan back to see if the current line contains a bullet point
+			bool  bulletPoint = false;
+			char* text = GetTextBodyText(*CurrentTextBody);
+			FromTo(CursorCharOffset, 0) {
+				char c = text[it];
+				if(c == BulletPointChar) {
+					bulletPoint = true;
+					break;
+				}
+				else if(c == NewlineChar)
+					break;
+			}
+		
+			InsertCharAtCursor(NewlineChar);
+		
+			if(bulletPoint == true)
+				InsertCharAtCursor(BulletPointChar);
+		}
+		else
+			EndTextUpdate();
+	}
+	else if(CursorCharOffset >= 1 && GetTextBodyText(*CurrentTextBody)[CursorCharOffset - 1] == BulletPointChar && osState.tabPressed == true) // Remove bullet point if tab is pressed after it
+		GetTextBodyText(*CurrentTextBody)[CursorCharOffset - 1] = ' ';
+	else if(osState.escapePressed == true) // Esc hit
+		EndTextUpdate();
+	else if(osState.leftPressed == true && CursorCharOffset >= 1)
+		MoveCursor(-1);
+	else if(osState.rightPressed == true && CursorCharOffset < GetTextBodyLength(*CurrentTextBody))
+		MoveCursor(1);
+	else if(osState.downPressed == true) { // Move down one line within text body if possible
+		// Need to scan behind and in front of the cursor to determine the bounds of the current line
+		char* end = FindChar(NewlineChar, CursorCharOffset, true);
+		if(end != Null) {
+			ui32  lineStartOffset = CursorCharOffset;
+			char* start = FindChar(NewlineChar, CursorCharOffset, false);
+			if(start != Null)
+				lineStartOffset -= (ui8*)start + 1 - (ui8*)GetTextBodyText(*CurrentTextBody);
+			
+			ui32 delta = (ui32)((ui8*)end + 1 - CursorCharOffset + lineStartOffset);
+			MoveCursor(delta);
+		}
+		else
+			ret.wantToExitDown = true;
+	}
+	else if(osState.upPressed == true) {
+		char* start = FindChar(NewlineChar, CursorCharOffset, false);
+		if(start != Null) { // Move up one line within text body
+			// Need to scan behind and in front of the cursor to determine the bounds of the current line
+			bool  previousLineIsLonger = false;
+			char* previousLineStart = FindChar(NewlineChar, GetCharOffsetFromStart(start), false);
+			if(previousLineStart == Null) // The line above is the very first one
+				previousLineIsLonger = GetCharOffsetFromStart(start) > CursorCharOffset - GetCharOffsetFromStart(start + 1); 
+			else { // The line above is at least the second in the paragraph
+				auto lineLength = GetCharOffsetFromStart(start) - GetCharOffsetFromStart(previousLineStart + 1);
+				previousLineIsLonger = lineLength > CursorCharOffset - GetCharOffsetFromStart(start + 1);
+			}
+			
+			if(previousLineIsLonger == true) { // Just move cursor up
+				ui16 cursorCharOffset = CursorCharOffset - GetCharOffsetFromStart(start + 1);
+				ui16 lineStartIndex = previousLineStart == Null ? 0 : GetCharOffsetFromStart(previousLineStart + 1);
+				CursorCharOffset = lineStartIndex + cursorCharOffset;
+			}
+			else // Place cursor at the end of the previous line
+				MoveCursor(GetCharOffsetFromStart(start) - CursorCharOffset);
+		}
+		else
+			ret.wantToExitUp = true;
+	}
+	
+	// Update cursor pos relative to text body bottom-left corner
+	{
+		vector pos = {};
+		AssertInternal(CursorCharOffset <= GetTextBodyLength(*CurrentTextBody));
+		auto* text = GetTextBodyText(*CurrentTextBody);
+		ForAll(CursorCharOffset) {
+			if(text[it] == NewlineChar) {
+				pos.x = 0;
+				pos.y -= CurrentTextBody->textHeight * 1.5f;
+			}
+			else
+				pos.x += CurrentTextBody->textHeight * 1.5f;
+		}
+		if(CursorCharOffset > 0)
+			pos.x -= CurrentTextBody->textHeight * 0.25f; // Place half way between 2 glyphs
+		
+		f32 textBodyHeight = GetTextRenderDimensions(text, GetTextBodyLength(*CurrentTextBody), CurrentTextBody->textHeight).height;
+		pos.y = textBodyHeight + pos.y;
+		SetCursorPos(pos.x, pos.y);
+	}
+	
+	// Update cursor blink animation timeline
+	CursorBlinkTimeElapsed += osState.lastFrameTime;
+	if(CursorBlinkTimeElapsed > CursorBlinkFullLength) {
+		// In case we get a frame time >= CursorBlinkFullLength * 2 for whatever reason
+		do 		CursorBlinkTimeElapsed -= CursorBlinkFullLength;
+		while(CursorBlinkTimeElapsed > CursorBlinkFullLength);
+	}
+	AssertInternal(CursorBlinkTimeElapsed >= 0);
+	AssertInternal(CursorBlinkTimeElapsed <= CursorBlinkFullLength);
+		
+	FunctionEnd();
+	return ret;
+}
+
 dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	FunctionStart(;);
 	AssertInternal(TextBodyIsValid(tb) == true);
@@ -103,24 +242,21 @@ dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	FunctionEnd();
 }
 
-dll_export program_external void RemoveCharBeforeCursor() {
-	FunctionStart(;);
-	AssertInternal(TextIsBeingUpdated() == true);
-	bool del = CursorCharOffset > 0; // If the cursor was already at 0, moving down would incorrectly deleted the very first letter
-	MoveCursor(-1);
-	if(del == true)
-		RemoveChar(*CurrentTextBody, CursorCharOffset);
+dll_export program_external vector GetTextBodyTextRenderDimensions(text_body& tb) {
+	FunctionStart(vector());
+	auto ret = GetTextRenderDimensions(GetTextBodyText(tb), GetTextBodyLength(tb), tb.textHeight);
 	FunctionEnd();
+	return ret;
 }
 
 dll_export program_external vector GetTextRenderDimensions(char* text, ui32 length, f32 height) {
 	FunctionStart(vector());
 	AssertInternal(text != Null);
+	AssertInternal(length > 0);
+	AssertInternal(height > 0);
 
 	vector ret = CreateVector(Null, height);
-	if(length == 0)
-		return ret;
-
+	
 	f32 xOffset = 0;
 	ForAll(length) {
 		if(text[it] == NewlineChar) {
@@ -470,9 +606,8 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 	return ret;
 }
 
-dll_export program_external void SetCursorPos(f32 x, f32 y) {
-	CursorPos.x = x;
-	CursorPos.y = y;
+dll_export program_external vector GetCursorPos() {
+	return CursorPos;
 }
 
 dll_export program_external bool TextIsBeingUpdated() {
@@ -503,17 +638,7 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 	FunctionEnd();
 }
 
-dll_export program_external void InsertCharAtCursor(char c) {
-	FunctionStart(;);
-	AssertInternal(TextIsBeingUpdated() == true);
-	
-	auto inserted = InsertString(&c, 1, *CurrentTextBody, CursorCharOffset);
-	CursorCharOffset += inserted;
-	
-	FunctionEnd();
-}
-
-dll_export program_external ui16 GetCharOffsetFromStart(char* c) {
+dll_export program_external ui16 GetCharOffsetFromStartFromStart(char* c) {
 	FunctionStart(Null);
 	AssertInternal(TextIsBeingUpdated() == true);
 	auto ret = (ui16)((ui8*)c - (ui8*)GetTextBodyText(*CurrentTextBody));
@@ -522,11 +647,11 @@ dll_export program_external ui16 GetCharOffsetFromStart(char* c) {
 }
 
 dll_export program_external char* FindChar(char c, ui16 pos, bool scanForward) {
-	FunctionStart(Null);
-	AssertInternal(TextIsBeingUpdated() == true);
-
 	if(scanForward == false && pos == 0)
 		return Null;
+
+	FunctionStart(Null);
+	AssertInternal(TextIsBeingUpdated() == true);
 
 	char* text = GetTextBodyText(*CurrentTextBody);
 	ui32  start = scanForward == true ? pos : pos - 1;
@@ -547,6 +672,12 @@ dll_export program_external void EndTextUpdate() {
 	CursorCharOffset = 0;
 }
 
+dll_export program_external text_body* GetCurrentTextBody() {
+	FunctionStart(Null);
+	AssertInternal(TextIsBeingUpdated() == true);
+	return CurrentTextBody;
+	FunctionEnd();
+}
 
 dll_export program_external void BeginTextUpdate(text_body& text) {
 	CurrentTextBody = &text;

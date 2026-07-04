@@ -23,6 +23,7 @@ dll_import void 		 ClearTextBody(text_body& tb);
 dll_import void 		 FreeTextBody(text_body& tb);
 dll_import ui32 		 GetTextBodyLength(text_body& tb);
 dll_import char* 		 GetTextBodyText(text_body& tb);
+dll_export vector 	 GetTextBodyTextRenderDimensions(text_body& tb);
 dll_import ui16      InsertString(char* string, ui32 length, text_body& tb, ui32 pos); // Returns chars inserted
 dll_import void 		 RemoveChar(text_body& tb, ui32 pos);
 dll_import bool 		 TextBodyIsValid(text_body& tb);
@@ -34,18 +35,20 @@ const ui8 NewlineChar = 		'\n';
 
 dll_import void  BeginTextUpdate(text_body& text); // Will place the cursor at the end of the text body
 dll_import void  EndTextUpdate();
-dll_import void  InsertCharAtCursor(char c);
 dll_import bool  TextIsBeingUpdated();
 
 // The following functions are only valid if text is being updated
-dll_import char* FindChar(char c, ui16 pos, bool scanForward);
-dll_import ui16  GetCharOffsetFromStart(char* c);
-dll_export void  RemoveCharBeforeCursor();
+struct win32_state;
+dll_import char* 										 FindChar(char c, ui16 pos, bool scanForward);
+dll_import ui16  										 GetCharOffsetFromStart(char* c);
+dll_export text_body* 							 GetCurrentTextBody();
+dll_import void  										 InsertCharAtCursor(char c);
+dll_import text_update_pipeline_data RunTextUpdatePipeline(win32_state& osState);
 
 // ******************** Cursor ******************** //
 
-dll_import void MoveCursor(si8 charOffset);
-dll_import void SetCursorPos(f32 x, f32 y);
+dll_import vector GetCursorPos(); // Will be relative to the bottom-left of the current text body
+dll_import void   MoveCursor(si8 charOffset);
 
 // ******************** Rendering ******************** //
 
