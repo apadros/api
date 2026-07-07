@@ -104,6 +104,13 @@ dll_export program_external rectangle CreateRectangle(f32 left, f32 bottom, f32 
 	return ret;
 }
 
+dll_export program_external rectangle CreateRectangle(vector pos, vector size) {
+	FunctionStart(rectangle());
+	auto ret = CreateRectangle(pos.x, pos.y, size.width, size.height);
+	FunctionEnd();
+	return ret;
+}
+
 dll_export program_external f32 Sine(f32 degs) {
 	auto rads = DegreesToRadians(degs);
 	auto ret = sinf(rads);
