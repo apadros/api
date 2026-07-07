@@ -14,6 +14,7 @@ program_local 			ui16       CursorCharOffset; // 0-based from the start of Curre
 program_local 			vector     CursorPos; // Relative to the bottom-left corner of CurrentTextBody
 program_local 			f32        CursorBlinkTimeElapsed;
 program_local const f32  			 CursorBlinkFullLength = 1.5f; // Time to go fully transparent and back to full opaqueness
+program_local       f32        CursorAlpha;
 
 program_local void SetCursorPos(f32 x, f32 y) {
 	CursorPos.x = x;
@@ -42,19 +43,19 @@ struct text_body_line {
 };
 program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	FunctionStart(text_body_line());
-	
+
 	char* start = FindTextBodyChar(NewlineChar, charOffset, false, tb);
 	if(start == Null) // We're at the first line
 		start = GetTextBodyText(tb);
 	char* end = FindTextBodyChar(NewlineChar, charOffset, true, tb);
 	if(end == Null) // We're at the last line
 		end = GetTextBodyText(tb) + GetTextBodyLength(tb) - 1;
-			
+
 	text_body_line ret = {};
 	ret.start = start;
 	ret.end = end;
 	ret.charLength = (ui8*)end + 1 - (ui8*)start;
-	
+
 	FunctionEnd();
 	return ret;
 }
@@ -97,6 +98,10 @@ dll_export program_external ui16 InsertString(char* string, ui32 length, text_bo
 		if(IsLetter(c) == true && BitIsSet(TextBodyFlagLetters, tb.flags) == false ||
 			c == BulletPointChar && BitIsSet(TextBodyFlagBulletPoints, tb.flags) == false ||
 			c == NewlineChar && BitIsSet(TextBodyFlagNewlines, tb.flags) == false)
+			add = false;
+
+		// If wanting to add a bullet point, check if previous char is already one and, if so, don't add
+		if(add == true && c == BulletPointChar && pos > 0 && GetTextBodyText(tb)[pos - 1] == BulletPointChar)
 			add = false;
 
 		if(add == true) {
@@ -264,6 +269,15 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 	}
 	AssertInternal(CursorBlinkTimeElapsed >= 0);
 	AssertInternal(CursorBlinkTimeElapsed <= CursorBlinkFullLength);
+	
+	// Update alpha value
+	if(CursorBlinkTimeElapsed >= 0 && CursorBlinkTimeElapsed < CursorBlinkFullLength / 2)
+		CursorAlpha = LERP(1.0f, 0.0f, CursorBlinkTimeElapsed / (CursorBlinkFullLength / 2));
+	else
+		CursorAlpha = LERP(0.0f, 1.0f, (CursorBlinkTimeElapsed - CursorBlinkFullLength / 2) / (CursorBlinkFullLength / 2)); 
+	AssertInternal(CursorAlpha >= 0);
+	AssertInternal(CursorAlpha <= 1.0f);
+			
 
 	FunctionEnd();
 	return ret;
@@ -680,7 +694,7 @@ dll_export program_external void SetCursor(f32 x, f32 y) {
 		auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
 		charOffset += line.charLength;
 	}
-	
+
 	// Then check where target x is in current line
 	{
 		auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
@@ -812,4 +826,8 @@ dll_export program_external void DrawRectangleFull(f32 left, f32 bottom, f32 wid
 
 dll_export program_external f32 UI8ColourToF32(ui8 u) {
 	return (f32)u / 255;
+}
+
+dll_export program_external f32 GetCursorAlphaValue() {
+	return CursorAlpha;
 }
