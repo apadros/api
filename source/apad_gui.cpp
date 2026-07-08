@@ -16,11 +16,6 @@ program_local 			f32        CursorBlinkTimeElapsed;
 program_local const f32  			 CursorBlinkFullLength = 1.5f; // Time to go fully transparent and back to full opaqueness
 program_local       f32        CursorAlpha;
 
-program_local void SetCursorPos(f32 x, f32 y) {
-	CursorPos.x = x;
-	CursorPos.y = y;
-}
-
 // @TODO - This will need to be updated when introducing fonts
 program_local f32 GetLineHeight(f32 textHeight) {
 	return textHeight * 1.5f;
@@ -47,9 +42,14 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	char* start = FindTextBodyChar(NewlineChar, charOffset, false, tb);
 	if(start == Null) // We're at the first line
 		start = GetTextBodyText(tb);
+	else
+		start += 1; // Remove the newline char
 	char* end = FindTextBodyChar(NewlineChar, charOffset, true, tb);
-	if(end == Null) // We're at the last line
-		end = GetTextBodyText(tb) + GetTextBodyLength(tb) - 1;
+	if(end == Null) { // We're at the last line
+		auto length = GetTextBodyLength(tb);
+		if(length > 0)
+			end = GetTextBodyText(tb) + length - 1;
+	}
 
 	text_body_line ret = {};
 	ret.start = start;
@@ -95,9 +95,9 @@ dll_export program_external ui16 InsertString(char* string, ui32 length, text_bo
 		char c = string[it];
 
 		bool add = true;
-		if(IsLetter(c) == true && BitIsSet(TextBodyFlagLetters, tb.flags) == false ||
-			c == BulletPointChar && BitIsSet(TextBodyFlagBulletPoints, tb.flags) == false ||
-			c == NewlineChar && BitIsSet(TextBodyFlagNewlines, tb.flags) == false)
+		if(IsLetter(c) == true && tb.flags & TextBodyFlagLetters == 0 ||
+			c == BulletPointChar && tb.flags & TextBodyFlagBulletPoints == 0 ||
+			c == NewlineChar && tb.flags & TextBodyFlagNewlines == 0)
 			add = false;
 
 		// If wanting to add a bullet point, check if previous char is already one and, if so, don't add
@@ -169,7 +169,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			RemoveChar(*CurrentTextBody, CursorCharOffset);
 	}
 	else if(osState.enterPressed == true) { // Jump to next line if allowed, otherwise end writing
-	  if(BitIsSet(TextBodyFlagNewlines, CurrentTextBody->flags) == true) {
+	  if(CurrentTextBody->flags & TextBodyFlagNewlines > 0) {
 			// Scan back to see if the current line contains a bullet point
 			bool  bulletPoint = false;
 			char* text = GetTextBodyText(*CurrentTextBody);
@@ -240,8 +240,8 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 	}
 
 	// Update cursor pos relative to text body bottom-left corner
-	{
-		vector pos = {};
+	if(TextIsBeingUpdated() == true) { // In case esc is hit before this point
+		vector pos = { 0, -CurrentTextBody->textHeight };
 		AssertInternal(CursorCharOffset <= GetTextBodyLength(*CurrentTextBody));
 		auto* text = GetTextBodyText(*CurrentTextBody);
 		ForAll(CursorCharOffset) {
@@ -255,9 +255,9 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		if(CursorCharOffset > 0)
 			pos.x -= CurrentTextBody->textHeight * 0.25f; // Place half way between 2 glyphs
 
-		f32 textBodyHeight = GetTextRenderDimensions(text, GetTextBodyLength(*CurrentTextBody), CurrentTextBody->textHeight).height;
+		f32 textBodyHeight = GetTextBodyRenderDimensions(*CurrentTextBody).height;
 		pos.y = textBodyHeight + pos.y;
-		SetCursorPos(pos.x, pos.y);
+		CursorPos = pos;
 	}
 
 	// Update cursor blink animation timeline
@@ -304,7 +304,6 @@ dll_export program_external vector GetTextBodyRenderDimensions(text_body& tb) {
 dll_export program_external vector GetTextRenderDimensions(char* text, ui32 length, f32 height) {
 	FunctionStart(vector());
 	AssertInternal(text != Null);
-	AssertInternal(length > 0);
 	AssertInternal(height > 0);
 
 	vector ret = CreateVector(Null, height);
@@ -678,15 +677,14 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 	FunctionEnd();
 }
 
-dll_export program_external void SetCursor(f32 x, f32 y) {
+dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
 	auto size = GetTextBodyRenderDimensions(*CurrentTextBody);
 	Clamp(x, 0, size.width);
 	Clamp(y, 0, size.height);
 
-	ui16 lines = size.height / GetLineHeight(CurrentTextBody->textHeight);
-	ui16 lineNumber = (size.height - y) / lines; // 0-based
+	ui16 lineNumber = (size.height - y) / GetLineHeight(CurrentTextBody->textHeight); // 0-based
 
 	// Get the char offset to correct line first
 	ui16 charOffset = 0;
@@ -702,11 +700,17 @@ dll_export program_external void SetCursor(f32 x, f32 y) {
 		f32  glyphSpace = GetGlyphSpaceWidth(CurrentTextBody->textHeight);
 		f32  pixelLength = (glyphWidth + glyphSpace) * line.charLength - glyphSpace;
 		AssertInternal(pixelLength >= 0);
-		if(x >= pixelLength)
-			SetCursorCharOffset(charOffset + line.charLength);
+		if(x == 0)
+			SetCursorCharOffset(charOffset);
+		else if(x >= pixelLength) {
+			if(*line.end == NewlineChar)
+				SetCursorCharOffset(charOffset + line.charLength - 1);
+			else
+				SetCursorCharOffset(charOffset + line.charLength);
+		}
 		else {
-			ui16 offset = line.charLength / (glyphWidth + glyphSpace); // Not completely accurate but close enough for now
-			SetCursorCharOffset(charOffset + offset);
+			ui16 offset = x / (glyphWidth + glyphSpace); // Not completely accurate but close enough for now
+			SetCursorCharOffset(charOffset + offset + 1); // Place to the right of selected glyph
 		}
 	}
 
@@ -750,8 +754,8 @@ dll_export program_external void EndTextUpdate() {
 dll_export program_external text_body* GetCurrentTextBody() {
 	FunctionStart(Null);
 	AssertInternal(TextIsBeingUpdated() == true);
-	return CurrentTextBody;
 	FunctionEnd();
+	return CurrentTextBody;
 }
 
 dll_export void SetCursorCharOffset(ui16 offset) {
