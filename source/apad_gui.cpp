@@ -17,7 +17,7 @@ program_local const f32  			 CursorBlinkFullLength = 1.5f; // Time to go fully t
 program_local       f32        CursorAlpha;
 
 // @TODO - This will need to be updated when introducing fonts
-program_local f32 GetLineHeight(f32 textHeight) {
+dll_export program_external f32 GetTextLineHeight(f32 textHeight) {
 	return textHeight * 1.5f;
 }
 
@@ -33,8 +33,8 @@ program_local f32 GetGlyphSpaceWidth(f32 textHeight) {
 
 struct text_body_line {
 	char* start;
-	char* end; // Inclusive
-	ui16  charLength;
+	char* end; // Not inclusive, will point to newline char if present at the end of the line
+	ui16  charLength; // Doesn't count newline chars
 };
 program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	FunctionStart(text_body_line());
@@ -44,17 +44,16 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 		start = GetTextBodyText(tb);
 	else
 		start += 1; // Remove the newline char
+	
 	char* end = FindTextBodyChar(NewlineChar, charOffset, true, tb);
-	if(end == Null) { // We're at the last line
-		auto length = GetTextBodyLength(tb);
-		if(length > 0)
-			end = GetTextBodyText(tb) + length - 1;
-	}
+	if(end == Null) // We're at the last line
+		end = GetTextBodyText(tb) + GetTextBodyLength(tb);
+	AssertInternal(end >= start);
 
 	text_body_line ret = {};
 	ret.start = start;
 	ret.end = end;
-	ret.charLength = (ui8*)end + 1 - (ui8*)start;
+	ret.charLength = (ui8*)end - (ui8*)start;
 
 	FunctionEnd();
 	return ret;
@@ -154,6 +153,10 @@ dll_export program_external void InsertCharAtCursor(char c) {
 	FunctionEnd();
 }
 
+dll_export program_external ui16 GetCursorCharOffset() {
+	return CursorCharOffset;
+}
+
 dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win32_state& osState) {
 	FunctionStart(text_update_pipeline_data());
 	AssertInternal(TextIsBeingUpdated() == true);
@@ -247,7 +250,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		ForAll(CursorCharOffset) {
 			if(text[it] == NewlineChar) {
 				pos.x = 0;
-				pos.y -= GetLineHeight(CurrentTextBody->textHeight);
+				pos.y -= GetTextLineHeight(CurrentTextBody->textHeight);
 			}
 			else
 				pos.x += GetGlyphWidth(CurrentTextBody->textHeight) + GetGlyphSpaceWidth(CurrentTextBody->textHeight);
@@ -312,7 +315,7 @@ dll_export program_external vector GetTextRenderDimensions(char* text, ui32 leng
 	ForAll(length) {
 		if(text[it] == NewlineChar) {
 			xOffset = 0;
-			ret.y += GetLineHeight(height);
+			ret.y += GetTextLineHeight(height);
 		}
 		else {
 			if(xOffset > 0)
@@ -361,7 +364,7 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 			case(' '): break;
 
 			case(NewlineChar): {
-				nextY -= GetLineHeight(height);
+				nextY -= GetTextLineHeight(height);
 				ret.bottom = nextY;
 				nextX = x;
 			} break;
@@ -684,13 +687,15 @@ dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 	Clamp(x, 0, size.width);
 	Clamp(y, 0, size.height);
 
-	ui16 lineNumber = (size.height - y) / GetLineHeight(CurrentTextBody->textHeight); // 0-based
+	ui16 lineNumber = (size.height - y) / GetTextLineHeight(CurrentTextBody->textHeight); // 0-based
 
 	// Get the char offset to correct line first
 	ui16 charOffset = 0;
 	ForAll(lineNumber) {
 		auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
 		charOffset += line.charLength;
+		if(lineNumber > 0)
+			charOffset += 1; // Newline char
 	}
 
 	// Then check where target x is in current line
@@ -699,15 +704,12 @@ dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 		f32  glyphWidth = GetGlyphWidth(CurrentTextBody->textHeight);
 		f32  glyphSpace = GetGlyphSpaceWidth(CurrentTextBody->textHeight);
 		f32  pixelLength = (glyphWidth + glyphSpace) * line.charLength - glyphSpace;
-		AssertInternal(pixelLength >= 0);
+		if(pixelLength < 0) // This can happen if the target line is the very last and is empty (i.e. enter was just hit at the end of the text body)
+			pixelLength = 0;
 		if(x == 0)
 			SetCursorCharOffset(charOffset);
-		else if(x >= pixelLength) {
-			if(*line.end == NewlineChar)
-				SetCursorCharOffset(charOffset + line.charLength - 1);
-			else
-				SetCursorCharOffset(charOffset + line.charLength);
-		}
+		else if(x >= pixelLength)
+			SetCursorCharOffset(charOffset + line.charLength);
 		else {
 			ui16 offset = x / (glyphWidth + glyphSpace); // Not completely accurate but close enough for now
 			SetCursorCharOffset(charOffset + offset + 1); // Place to the right of selected glyph
