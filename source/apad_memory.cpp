@@ -11,7 +11,8 @@
 
 dll_export void ResetStack(memory_block& stack) {
 	FunctionStart(;);
-	ClearMemory(stack.memory, stack.size);
+	if(stack.size > 0)
+		ClearMemory(stack.memory, stack.size);
   stack.size = 0;
 	FunctionEnd();
 }

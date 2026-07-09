@@ -41,15 +41,14 @@ dll_import bool  TextIsBeingUpdated();
 
 // The following functions are only valid if text is being updated
 struct win32_state;
-dll_import ui16  			GetCharOffsetFromStart(char* c);
-dll_export text_body* GetCurrentTextBody();
-dll_export ui16       GetCursorCharOffset();
-dll_import void  			InsertCharAtCursor(char c);
-
 struct text_update_pipeline_data {
 	bool wantToLeaveTextBodyUp; 	// When pressing up at the top edge of a text_body
 	bool wantToLeaveTextBodyDown; // When pressing down at the bottom edge of a text_body
 };
+dll_import ui16  										 GetCharOffsetFromStart(char* c);
+dll_export text_body* 							 GetCurrentTextBody();
+dll_export ui16       							 GetCursorCharOffset();
+dll_import void  										 InsertCharAtCursor(char c);
 dll_import text_update_pipeline_data RunTextUpdatePipeline(win32_state& osState);
 
 // ******************** Cursor ******************** //

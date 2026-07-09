@@ -94,9 +94,9 @@ dll_export program_external ui16 InsertString(char* string, ui32 length, text_bo
 		char c = string[it];
 
 		bool add = true;
-		if(IsLetter(c) == true && tb.flags & TextBodyFlagLetters == 0 ||
-			c == BulletPointChar && tb.flags & TextBodyFlagBulletPoints == 0 ||
-			c == NewlineChar && tb.flags & TextBodyFlagNewlines == 0)
+		if(IsLetter(c) == true && (tb.flags & TextBodyFlagLetters) == 0 ||
+			c == BulletPointChar && (tb.flags & TextBodyFlagBulletPoints) == 0 ||
+			c == NewlineChar && (tb.flags & TextBodyFlagNewlines) == 0)
 			add = false;
 
 		// If wanting to add a bullet point, check if previous char is already one and, if so, don't add
