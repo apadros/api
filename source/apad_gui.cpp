@@ -59,13 +59,16 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	return ret;
 }
 
-dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 height, f32 textHeight, ui8 flags) {
+dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 textBorderOffset, f32 textHeight, ui8 flags) {
 	FunctionStart(text_body());
+	AssertInternal(width > 0);
+	AssertInternal(textBorderOffset > 0);
 	AssertInternal(textHeight > 0);
 
 	text_body ret = {};
 	ret.memory = AllocateStack();
-	ret.background = CreateRectangle(left, bottom, width, height);
+	ret.container = CreateRectangle(left, bottom, width, textHeight + textBorderOffset * 2);
+	ret.textBorderOffset = textBorderOffset;
 	ret.textHeight = textHeight;
 	ret.flags = flags;
 
@@ -259,7 +262,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		if(CursorCharOffset > 0)
 			pos.x -= CurrentTextBody->textHeight * 0.25f; // Place half way between 2 glyphs
 
-		f32 textBodyHeight = GetTextRenderDimensions(*CurrentTextBody).height;
+		f32 textBodyHeight = GetTextRectangle(*CurrentTextBody).height;
 		pos.y = textBodyHeight + pos.y;
 		CursorPos = pos;
 	}
@@ -295,12 +298,24 @@ dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	FunctionEnd();
 }
 
-dll_export program_external vector GetTextRenderDimensions(text_body& tb) {
-	FunctionStart(vector());
-	vector ret = CreateVector(Null, tb.textHeight);
+dll_export program_external rectangle GetTextRectangle(text_body& tb) {
+	FunctionStart(rectangle());
+	
+	vector size = CreateVector(Null, tb.textHeight);
 	auto length = GetTextLength(tb);
 	if(length > 0)
-		ret = GetTextRenderDimensions(GetText(tb), length, tb.textHeight);
+		size = GetTextRenderDimensions(GetText(tb), length, tb.textHeight);
+	
+	f32 left = Null;
+	if((tb.flags & TextBodyFlagLeftAligned) > 0)
+		left = tb.container.left + tb.textBorderOffset;
+	else // Horizontally centered
+		left = GetCenter(tb.container).x - size.x / 2;
+	
+	f32 bottom = tb.container.bottom + tb.container.height - tb.textBorderOffset - size.y;
+	
+	auto ret = CreateRectangle(left, bottom, size.x, size.y);
+	
 	FunctionEnd();
 	return ret;
 }
@@ -684,7 +699,7 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
-	auto size = GetTextRenderDimensions(*CurrentTextBody);
+	auto size = GetTextRectangle(*CurrentTextBody).size;
 	Clamp(x, 0, size.width);
 	Clamp(y, 0, size.height);
 
