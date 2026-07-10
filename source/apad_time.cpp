@@ -42,9 +42,9 @@ dll_export bool IsDateAndValid(const char* s) {
 	
 	// Then check the start for validity
 	// If can already tell it's false return immediately, otherwise continue to check
-	if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == false && StringsAreEqual(stringCopy, "today") == false) { // Check against allowed formats if not a day of the week or "today"
-		auto length = GetStringLength(stringCopy); // Modded length in case of presence of offsets
-		if(length != GetStringLength(DateFormatShort) && length != GetStringLength(DateFormatMedium) && length != GetStringLength(DateFormatLong)) {
+	if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == false && AreEqual(stringCopy, "today") == false) { // Check against allowed formats if not a day of the week or "today"
+		auto length = GetLength(stringCopy); // Modded length in case of presence of offsets
+		if(length != GetLength(DateFormatShort) && length != GetLength(DateFormatMedium) && length != GetLength(DateFormatLong)) {
 			FunctionEnd();
 			return false;
 		}
@@ -52,7 +52,7 @@ dll_export bool IsDateAndValid(const char* s) {
 			FunctionEnd();
 			return false;
 		}
-		if(length >= GetStringLength(DateFormatMedium) && stringCopy[5] != '/') {
+		if(length >= GetLength(DateFormatMedium) && stringCopy[5] != '/') {
 			FunctionEnd();
 			return false;
 		}
@@ -113,7 +113,7 @@ dll_export date StringToDate(const char* s) {
 	}
 	
 	// Work out the date
-	if(StringsAreEqual(stringCopy, "today") == true) {
+	if(AreEqual(stringCopy, "today") == true) {
 		auto ret = GetDate(offset);
 		FunctionEnd();
 		return ret;
@@ -121,7 +121,7 @@ dll_export date StringToDate(const char* s) {
 	else if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == true) {
 		ui8 argDay = 0; // 1 -> 7 to match the date struct
 		ForAll(GetArrayLength(Days)) {
-			if(StringsAreEqual(stringCopy, Days[it]) == true) {
+			if(AreEqual(stringCopy, Days[it]) == true) {
 				argDay = it + 1;
 				break;
 			}
@@ -140,14 +140,14 @@ dll_export date StringToDate(const char* s) {
 		ui8 month = StringToInt(stringCopy + 3, 2);
 		
 		ui16 year = 0;
-		if(GetStringLength(stringCopy) == GetStringLength(DateFormatShort)) { // If no year is supplied
+		if(GetLength(stringCopy) == GetLength(DateFormatShort)) { // If no year is supplied
 			auto currentDate = GetDate(0);
 			if(month < currentDate.month || month == currentDate.month && day < currentDate.day)
 				year = currentDate.year + 1;
 			else
 				year = currentDate.year;
 		}
-		else if(GetStringLength(stringCopy) == GetStringLength(DateFormatMedium)) {
+		else if(GetLength(stringCopy) == GetLength(DateFormatMedium)) {
 			char string[] = { '2', '0', stringCopy[6], stringCopy[7] };
 			year = StringToInt(string, 4);
 		}
@@ -205,7 +205,7 @@ dll_export char* DateToString(date d) {
 		ret[0] = temp[0];
 		ret[1] = temp[1];
 	}
-	FreeString(temp);
+	Free(temp);
 	
 	temp = ToString(d.month);
 	if(d.month <= 9) {
@@ -216,14 +216,14 @@ dll_export char* DateToString(date d) {
 		ret[3] = temp[0];
 		ret[4] = temp[1];
 	}
-	FreeString(temp);
+	Free(temp);
 	
 	temp = ToString(d.year);
 	ret[6] = temp[0];
 	ret[7] = temp[1];
 	ret[8] = temp[2];
 	ret[9] = temp[3];
-	FreeString(temp);
+	Free(temp);
 	
 	FunctionEnd();
 	return ret;

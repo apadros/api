@@ -39,15 +39,15 @@ struct text_body_line {
 program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	FunctionStart(text_body_line());
 
-	char* start = FindTextBodyChar(NewlineChar, charOffset, false, tb);
+	char* start = FindChar(NewlineChar, charOffset, false, tb);
 	if(start == Null) // We're at the first line
-		start = GetTextBodyText(tb);
+		start = GetText(tb);
 	else
 		start += 1; // Remove the newline char
 	
-	char* end = FindTextBodyChar(NewlineChar, charOffset, true, tb);
+	char* end = FindChar(NewlineChar, charOffset, true, tb);
 	if(end == Null) // We're at the last line
-		end = GetTextBodyText(tb) + GetTextBodyLength(tb);
+		end = GetText(tb) + GetTextLength(tb);
 	AssertInternal(end >= start);
 
 	text_body_line ret = {};
@@ -59,12 +59,13 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	return ret;
 }
 
-dll_export program_external text_body AllocateTextBody(f32 textHeight, ui8 flags) {
+dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 height, f32 textHeight, ui8 flags) {
 	FunctionStart(text_body());
 	AssertInternal(textHeight > 0);
 
 	text_body ret = {};
 	ret.memory = AllocateStack();
+	ret.background = CreateRectangle(left, bottom, width, height);
 	ret.textHeight = textHeight;
 	ret.flags = flags;
 
@@ -72,21 +73,21 @@ dll_export program_external text_body AllocateTextBody(f32 textHeight, ui8 flags
 	return ret;
 }
 
-dll_export program_external bool TextBodyIsValid(text_body& tb) {
+dll_export program_external bool IsValid(text_body& tb) {
 	FunctionStart(false);
 	bool ret = IsValid(tb.memory);
 	FunctionEnd();
 	return ret;
 }
 
-dll_export program_external ui16 InsertString(char* string, ui32 length, text_body& tb, ui32 pos) {
+dll_export program_external ui16 Insert(char* string, ui32 length, text_body& tb, ui32 pos) {
 	FunctionStart(Null);
 
 	AssertInternal(string != Null);
 	AssertInternal(length > 0);
-	AssertInternal(TextBodyIsValid(tb) == true);
+	AssertInternal(IsValid(tb) == true);
 
-	if(pos > GetTextBodyLength(tb))
+	if(pos > GetTextLength(tb))
 		return Null;
 
 	ui16 added = 0;
@@ -100,7 +101,7 @@ dll_export program_external ui16 InsertString(char* string, ui32 length, text_bo
 			add = false;
 
 		// If wanting to add a bullet point, check if previous char is already one and, if so, don't add
-		if(add == true && c == BulletPointChar && pos > 0 && GetTextBodyText(tb)[pos - 1] == BulletPointChar)
+		if(add == true && c == BulletPointChar && pos > 0 && GetText(tb)[pos - 1] == BulletPointChar)
 			add = false;
 
 		if(add == true) {
@@ -114,30 +115,30 @@ dll_export program_external ui16 InsertString(char* string, ui32 length, text_bo
 	return added;
 }
 
-dll_export program_external void FreeTextBody(text_body& tb) {
+dll_export program_external void FreeText(text_body& tb) {
 	FunctionStart(;);
-	if(TextBodyIsValid(tb) == true)
-		FreeStack(tb.memory);
+	if(IsValid(tb) == true)
+		Free(tb.memory);
 	FunctionEnd();
 }
 
-dll_export program_external void ClearTextBody(text_body& tb) {
+dll_export program_external void ClearText(text_body& tb) {
 	FunctionStart(;);
-	ResetStack(tb.memory);
+	Reset(tb.memory);
 	FunctionEnd();
 }
 
-dll_export program_external ui32 GetTextBodyLength(text_body& tb) {
+dll_export program_external ui32 GetTextLength(text_body& tb) {
 	FunctionStart(Null);
-	AssertInternal(TextBodyIsValid(tb) == true);
+	AssertInternal(IsValid(tb) == true);
 	auto ret = tb.memory.size;
 	FunctionEnd();
 	return ret;
 }
 
-dll_export program_external char* GetTextBodyText(text_body& tb) {
+dll_export program_external char* GetText(text_body& tb) {
 	FunctionStart(Null);
-	AssertInternal(TextBodyIsValid(tb) == true);
+	AssertInternal(IsValid(tb) == true);
 	auto ret = (char*)tb.memory.memory;
 	FunctionEnd();
 	return ret;
@@ -147,7 +148,7 @@ dll_export program_external void InsertCharAtCursor(char c) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
 
-	auto inserted = InsertString(&c, 1, *CurrentTextBody, CursorCharOffset);
+	auto inserted = Insert(&c, 1, *CurrentTextBody, CursorCharOffset);
 	CursorCharOffset += inserted;
 
 	FunctionEnd();
@@ -175,7 +176,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 	  if(CurrentTextBody->flags & TextBodyFlagNewlines > 0) {
 			// Scan back to see if the current line contains a bullet point
 			bool  bulletPoint = false;
-			char* text = GetTextBodyText(*CurrentTextBody);
+			char* text = GetText(*CurrentTextBody);
 			FromTo(CursorCharOffset, 0) {
 				char c = text[it];
 				if(c == BulletPointChar) {
@@ -194,22 +195,22 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		else
 			EndTextUpdate();
 	}
-	else if(CursorCharOffset >= 1 && GetTextBodyText(*CurrentTextBody)[CursorCharOffset - 1] == BulletPointChar && osState.tabPressed == true) // Remove bullet point if tab is pressed after it
-		GetTextBodyText(*CurrentTextBody)[CursorCharOffset - 1] = ' ';
+	else if(CursorCharOffset >= 1 && GetText(*CurrentTextBody)[CursorCharOffset - 1] == BulletPointChar && osState.tabPressed == true) // Remove bullet point if tab is pressed after it
+		GetText(*CurrentTextBody)[CursorCharOffset - 1] = ' ';
 	else if(osState.escapePressed == true) // Esc hit
 		EndTextUpdate();
 	else if(osState.leftPressed == true && CursorCharOffset >= 1)
 		MoveCursor(-1);
-	else if(osState.rightPressed == true && CursorCharOffset < GetTextBodyLength(*CurrentTextBody))
+	else if(osState.rightPressed == true && CursorCharOffset < GetTextLength(*CurrentTextBody))
 		MoveCursor(1);
 	else if(osState.downPressed == true) { // Move down one line within text body if possible
 		// Need to scan behind and in front of the cursor to determine the bounds of the current line
-		char* end = FindTextBodyChar(NewlineChar, CursorCharOffset, true, *CurrentTextBody);
+		char* end = FindChar(NewlineChar, CursorCharOffset, true, *CurrentTextBody);
 		if(end != Null) {
 			ui32  lineStartOffset = CursorCharOffset;
-			char* start = FindTextBodyChar(NewlineChar, CursorCharOffset, false, *CurrentTextBody);
+			char* start = FindChar(NewlineChar, CursorCharOffset, false, *CurrentTextBody);
 			if(start != Null)
-				lineStartOffset -= (ui8*)start + 1 - (ui8*)GetTextBodyText(*CurrentTextBody);
+				lineStartOffset -= (ui8*)start + 1 - (ui8*)GetText(*CurrentTextBody);
 
 			ui32 delta = (ui32)((ui8*)end + 1 - CursorCharOffset + lineStartOffset);
 			MoveCursor(delta);
@@ -218,11 +219,11 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			ret.wantToLeaveTextBodyDown = true;
 	}
 	else if(osState.upPressed == true) {
-		char* start = FindTextBodyChar(NewlineChar, CursorCharOffset, false, *CurrentTextBody);
+		char* start = FindChar(NewlineChar, CursorCharOffset, false, *CurrentTextBody);
 		if(start != Null) { // Move up one line within text body
 			// Need to scan behind and in front of the cursor to determine the bounds of the current line
 			bool  previousLineIsLonger = false;
-			char* previousLineStart = FindTextBodyChar(NewlineChar, GetCharOffsetFromStart(start), false, *CurrentTextBody);
+			char* previousLineStart = FindChar(NewlineChar, GetCharOffsetFromStart(start), false, *CurrentTextBody);
 			if(previousLineStart == Null) // The line above is the very first one
 				previousLineIsLonger = GetCharOffsetFromStart(start) > CursorCharOffset - GetCharOffsetFromStart(start + 1);
 			else { // The line above is at least the second in the paragraph
@@ -245,8 +246,8 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 	// Update cursor pos relative to text body bottom-left corner
 	if(TextIsBeingUpdated() == true) { // In case esc is hit before this point
 		vector pos = { 0, -CurrentTextBody->textHeight };
-		AssertInternal(CursorCharOffset <= GetTextBodyLength(*CurrentTextBody));
-		auto* text = GetTextBodyText(*CurrentTextBody);
+		AssertInternal(CursorCharOffset <= GetTextLength(*CurrentTextBody));
+		auto* text = GetText(*CurrentTextBody);
 		ForAll(CursorCharOffset) {
 			if(text[it] == NewlineChar) {
 				pos.x = 0;
@@ -258,7 +259,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		if(CursorCharOffset > 0)
 			pos.x -= CurrentTextBody->textHeight * 0.25f; // Place half way between 2 glyphs
 
-		f32 textBodyHeight = GetTextBodyRenderDimensions(*CurrentTextBody).height;
+		f32 textBodyHeight = GetTextRenderDimensions(*CurrentTextBody).height;
 		pos.y = textBodyHeight + pos.y;
 		CursorPos = pos;
 	}
@@ -288,18 +289,18 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 
 dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	FunctionStart(;);
-	AssertInternal(TextBodyIsValid(tb) == true);
-	if(pos < GetTextBodyLength(tb))
+	AssertInternal(IsValid(tb) == true);
+	if(pos < GetTextLength(tb))
 		Remove(sizeof(char), pos, tb.memory);
 	FunctionEnd();
 }
 
-dll_export program_external vector GetTextBodyRenderDimensions(text_body& tb) {
+dll_export program_external vector GetTextRenderDimensions(text_body& tb) {
 	FunctionStart(vector());
 	vector ret = CreateVector(Null, tb.textHeight);
-	auto length = GetTextBodyLength(tb);
+	auto length = GetTextLength(tb);
 	if(length > 0)
-		ret = GetTextRenderDimensions(GetTextBodyText(tb), length, tb.textHeight);
+		ret = GetTextRenderDimensions(GetText(tb), length, tb.textHeight);
 	FunctionEnd();
 	return ret;
 }
@@ -683,7 +684,7 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
-	auto size = GetTextBodyRenderDimensions(*CurrentTextBody);
+	auto size = GetTextRenderDimensions(*CurrentTextBody);
 	Clamp(x, 0, size.width);
 	Clamp(y, 0, size.height);
 
@@ -722,21 +723,21 @@ dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 dll_export program_external ui16 GetCharOffsetFromStart(char* c) {
 	FunctionStart(Null);
 	AssertInternal(TextIsBeingUpdated() == true);
-	auto ret = (ui16)((ui8*)c - (ui8*)GetTextBodyText(*CurrentTextBody));
+	auto ret = (ui16)((ui8*)c - (ui8*)GetText(*CurrentTextBody));
 	FunctionEnd();
 	return ret;
 }
 
-dll_export program_external char* FindTextBodyChar(char c, ui16 pos, bool scanForward, text_body& tb) {
+dll_export program_external char* FindChar(char c, ui16 pos, bool scanForward, text_body& tb) {
 	if(scanForward == false && pos == 0)
 		return Null;
 
 	FunctionStart(Null);
 	AssertInternal(TextIsBeingUpdated() == true);
 
-	char* text = GetTextBodyText(tb);
+	char* text = GetText(tb);
 	ui32  start = scanForward == true ? pos : pos - 1;
-	ui32  end = scanForward == true ? GetTextBodyLength(tb) : 0;
+	ui32  end = scanForward == true ? GetTextLength(tb) : 0;
 	FromTo(start, end) {
 		if(text[it] == c)
 			return text + it;
@@ -764,7 +765,7 @@ dll_export void SetCursorCharOffset(ui16 offset) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
 
-	auto length = GetTextBodyLength(*CurrentTextBody);
+	auto length = GetTextLength(*CurrentTextBody);
 	if(offset > length)
 		offset = length;
 	CursorCharOffset = offset;
@@ -775,7 +776,7 @@ dll_export void SetCursorCharOffset(ui16 offset) {
 
 dll_export program_external void BeginTextUpdate(text_body& text) {
 	CurrentTextBody = &text;
-	CursorCharOffset = GetTextBodyLength(text);
+	CursorCharOffset = GetTextLength(text);
 	CursorBlinkTimeElapsed = 0;
 }
 

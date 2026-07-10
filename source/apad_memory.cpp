@@ -9,15 +9,15 @@
 
 // ******************** Internal API end ******************** //
 
-dll_export void ResetStack(memory_block& stack) {
+dll_export void Reset(memory_block& stack) {
 	FunctionStart(;);
 	if(stack.size > 0)
-		ClearMemory(stack.memory, stack.size);
+		Clear(stack.memory, stack.size);
   stack.size = 0;
 	FunctionEnd();
 }
 
-dll_export void ClearMemory(void* memory, ui32 size) {
+dll_export void Clear(void* memory, ui32 size) {
 	FunctionStart(;);
 	AssertInternal(memory != Null);
   AssertInternal(size > 0);
@@ -26,7 +26,7 @@ dll_export void ClearMemory(void* memory, ui32 size) {
 	FunctionEnd();
 }
 
-dll_export void CopyMemory(void* source, ui32 size, void* destination) {
+dll_export void Copy(void* source, ui32 size, void* destination) {
   FunctionStart(;);
 	AssertInternal(source != Null);
   AssertInternal(size > 0);
@@ -51,7 +51,7 @@ dll_export memory_block AllocateMemory(ui32 size) {
 	return ret;
 }
 
-dll_export void FreeMemory(memory_block& block) {
+dll_export void Free(memory_block& block) {
 	FunctionStart(;);
 	Win32FreeMemory(block.memory);
 	ClearStruct(block);
@@ -96,15 +96,6 @@ dll_export memory_block AllocateStack(ui32 capacity) {
 	return block;
 }
 
-dll_export void FreeStack(memory_block& stack) {
-	FunctionStart(;);
-	AssertInternal(IsValid(stack));
-	
-	FreeMemory(stack);
-	
-	FunctionEnd();
-}
-
 dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	FunctionStart(Null);
 	AssertInternal(size > 0);
@@ -122,7 +113,7 @@ dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	}
 	
 	void* ret = (ui8*)stack.memory + offset;
-	ClearMemory(ret, size);
+	Clear(ret, size);
 	
 	FunctionEnd();
 	return ret;
@@ -143,7 +134,7 @@ dll_export void Remove(ui32 size, ui32 offset, memory_stack& stack) {
 		*dest = *src;
 	}
 	
-	ClearMemory((ui8*)stack.memory + stack.size - size, size);
+	Clear((ui8*)stack.memory + stack.size - size, size);
 	stack.size -= size;
 	
 	FunctionEnd();
@@ -171,7 +162,7 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 		if(stack.size > 0) // If == 0 it will trigger an error
 			Push(stack.memory, stack.size, newStack);
 		
-		FreeStack(stack);
+		Free(stack);
 		stack = newStack;
 		
 		FunctionEnd();
@@ -184,7 +175,7 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 dll_export void* Push(void* data, ui32 size, memory_block& stack) {
 	FunctionStart(Null);
   void* mem = Push(size, stack);
-	CopyMemory(data, size, mem);
+	Copy(data, size, mem);
 	FunctionEnd();
 	return mem;
 }

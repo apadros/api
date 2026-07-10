@@ -22,7 +22,7 @@ dll_export const char* GetFileNameAndExtension(const char* path) {
 	FunctionStart(Null);
 	AssertInternal(path != Null);
   
-  const char* fileName = path + GetStringLength(path);
+  const char* fileName = path + GetLength(path);
   do 		 fileName -= 1;
   while (fileName[0] != '\\' && fileName[0] != '/');
   return fileName + 1;
@@ -34,7 +34,7 @@ dll_export const char* GetFileExtension(const char* path) {
 	FunctionStart(Null);
 	AssertInternal(path != Null);
   
-  const char* fileName = path + GetStringLength(path);
+  const char* fileName = path + GetLength(path);
   do 		 fileName -= 1;
   while (fileName[0] != '.');
   return fileName + 1;
@@ -97,7 +97,7 @@ dll_export bool LineIsValid(file_line& f) {
 
 dll_export void FreeLine(file_line& line) {
 	FunctionStart(;);
-	FreeStack(line.data);
+	Free(line.data);
 	FunctionEnd();
 }
 
@@ -128,6 +128,6 @@ dll_export void WriteToFile(void* data, ui32 size, file& f) {
 
 dll_export void WriteToFile(char* string, file& f) {
 	FunctionStart(;);
-	Push(string, GetStringLength(string), f);
+	Push(string, GetLength(string), f);
 	FunctionEnd();
 }

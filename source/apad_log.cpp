@@ -24,7 +24,7 @@ dll_export log_file OpenLogFile() {
 dll_export void CloseLogFile(log_file& log) {
 	FunctionStart(;);
 	
-	FreeStack(log);
+	Free(log);
 	
 	FunctionEnd();
 }
@@ -39,7 +39,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 	va_list args;
 	va_start(args, formatString);
 	
-	auto formatStringLength = GetStringLength(formatString);
+	auto formatStringLength = GetLength(formatString);
   ForAll(formatStringLength) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
@@ -58,7 +58,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 				auto sub = ExtractSubstring(formatString + it, 4);
 				
 				ForAll(formatsLength) {
-					if(StringsAreEqual(sub, formats[it]) == true) { // Found the format
+					if(AreEqual(sub, formats[it]) == true) { // Found the format
 						formatIndex = it;
 						break;
 					}
@@ -68,7 +68,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 					sub[3] = '\0';
 					
 					ForAll(formatsLength) {
-						if(StringsAreEqual(sub, formats[it]) == true) { // Found the format
+						if(AreEqual(sub, formats[it]) == true) { // Found the format
 							formatIndex = it;
 							break;
 						}
@@ -76,7 +76,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 					
 					if(formatIndex == -1) { // Last attempt, compare to string format
 						sub[1] = '\0';
-						if(StringsAreEqual(sub, formats[0]) == true) 
+						if(AreEqual(sub, formats[0]) == true) 
 							formatIndex = 0;
 					}
 				}
@@ -87,77 +87,77 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 			switch(formatIndex) {
 				case 0: { // String
 				  auto s = va_arg(args, char*);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 1;
 				} break;
 				
 				case 1: { // SI8
 					si8 i = va_arg(args, si8);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 3;
 				} break;
 				
 				case 2: { // UI8
 					ui8 i = va_arg(args, ui8);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 3;
 				} break;
 				
 				case 3: { // SI16
 					si16 i = va_arg(args, si16);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 4: { // UI16
 					ui16 i = va_arg(args, ui16);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 5: { // SI32
 					si32 i = va_arg(args, si32);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 6: { // UI32
 					ui32 i = va_arg(args, ui32);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 7: { // SI64
 					si64 i = va_arg(args, si64);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 8: { // UI64
 					ui64 i = va_arg(args, ui64);
 					const char* s = ToString(i);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 4;
 				} break;
 				
 				case 9: { // F32
 					f32 f = (f32)va_arg(args, f64);
 					const char* s = ToString(f);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 3;
 				} break;
 				
 				case 10: { // F64
 				  f64 f = va_arg(args, f64);
 					const char* s = ToString(f);
-					PushString(s, false, log);
+					Push(s, false, log);
 					it += 3;
 				} break;
 				

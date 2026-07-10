@@ -453,10 +453,10 @@ dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) 
 		const char* extensionString = filters;
 		AssertInternalWin32(data.nFilterIndex >= 1);
 		ForAll(data.nFilterIndex - 1) {
-			extensionString += GetStringLength(extensionString) + 1; // File type
-			extensionString += GetStringLength(extensionString) + 1; // File extension
+			extensionString += GetLength(extensionString) + 1; // File type
+			extensionString += GetLength(extensionString) + 1; // File extension
 		}
-		extensionString += GetStringLength(extensionString) + 1; // Skip to desired extension
+		extensionString += GetLength(extensionString) + 1; // Skip to desired extension
 		extensionString = GetFileExtension(extensionString) - 1; // Move to .extension
 		
 		ret = Concatenate(2, ret, extensionString);

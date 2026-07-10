@@ -26,10 +26,10 @@ program_local void ExitStringAPI() {
 		ForAll(blocks) {
 			auto* block = table + it;
 			if(IsValid(*block) == true)
-				FreeMemory(*block);
+				Free(*block);
 		}
 		
-		FreeStack(stringTable);
+		Free(stringTable);
 	}
 	
 	FunctionEnd();
@@ -57,13 +57,13 @@ program_local void PushNullChar(memory_stack& stack) {
 }
 
 // Also used in log.cpp
-dll_export char* PushString(const char* string, bool addEOS, memory_block& stack) {
+dll_export char* Push(const char* string, bool addEOS, memory_block& stack) {
   FunctionStart(Null);
 	AssertInternal(string != Null || addEOS == true);
 	
 	void* ret = (ui8*)stack.memory + stack.size;
 	if(string != Null) {
-		auto length = GetStringLength(string);
+		auto length = GetLength(string);
 		if(length > 0)
 			ret = Push((void*)string, length, stack);
 	}
@@ -85,7 +85,7 @@ dll_export void ConvertStringToLowerCase(const char* s) {
 	FunctionStart(;);
 	AssertInternal(s != Null);
 	
-	auto length = GetStringLength(s);
+	auto length = GetLength(s);
 	ForAll(length) {
     if(s[it] >= 'A' && s[it] <= 'Z')
 			((char*)s)[it] += 'a' - 'A';
@@ -108,7 +108,7 @@ dll_export char* Concatenate(ui8 count, ...) {
 	ForAll(count) {
 		char* string = va_arg(list, char*);
 		if(string != Null) // Just to avoid having to check for Null when concatenating several strings
-			PushString(string, false, stack);
+			Push(string, false, stack);
 	}
 	
 	PushNullChar(stack);
@@ -125,7 +125,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	FunctionStart(Null);
 	AssertInternal(s != Null);
 	
-	auto sLength = GetStringLength(s);
+	auto sLength = GetLength(s);
 	
 	ui16 copyLength = 0;
 	if(length == Null)
@@ -143,7 +143,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	return (char*)stack.memory;
 }
 
-dll_export ui16 GetStringLength(const char* s) {
+dll_export ui16 GetLength(const char* s) {
   FunctionStart(0);
 	AssertInternal(s != Null);
   
@@ -264,7 +264,7 @@ dll_export char* ToString(f64 f) {
 	return ret;
 }
 
-dll_export bool StringsAreEqual(const char* s1, const char* s2) {
+dll_export bool AreEqual(const char* s1, const char* s2) {
   FunctionStart(false);
 	
 	AssertInternal(s1 != Null);
@@ -301,7 +301,7 @@ dll_export bool ContainsAnySubstring(const char* string, const char** substrings
   return false;
 }
 
-dll_export void CopyString(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
+dll_export void Copy(const char* source, si16 srcLength, const char* destination, ui16 destLength) {
 	FunctionStart(;);
 	
 	AssertInternal(source != Null);
@@ -309,10 +309,10 @@ dll_export void CopyString(const char* source, si16 srcLength, const char* desti
 	AssertInternal(destination != Null);
 	AssertInternal(destLength > 0);
 	
-	auto copyLength = srcLength == -1 ? (GetStringLength(source) + 1) : srcLength;
+	auto copyLength = srcLength == -1 ? (GetLength(source) + 1) : srcLength;
 	AssertInternal(copyLength <= destLength);
 	
-	CopyMemory((void*)source, copyLength, (void*)destination);
+	Copy((void*)source, copyLength, (void*)destination);
 	
 	FunctionEnd();
 }
@@ -325,7 +325,7 @@ dll_export bool IsWord(char* string) {
 	FunctionStart(false);
 	AssertInternal(string != Null);
 	
-	auto length = GetStringLength(string);
+	auto length = GetLength(string);
 	ForAll(length) {
 		if(IsLetter(string[it]) == false)
 			return false;
@@ -343,7 +343,7 @@ dll_export bool IsNumber(char* string) {
 	FunctionStart(false);
 	AssertInternal(string != Null);
 	
-	auto length = GetStringLength(string);
+	auto length = GetLength(string);
 	ForAll(length) {
 		if(IsNumber(string[it]) == false)
 			return false;
@@ -365,7 +365,7 @@ dll_export si32 StringToInt(const char* string, ui16 length) {
 	else { // Want to convert only part of the string or string is an array without a null char
 		auto copy = AllocateString(string, length);
 		ret = atoi(copy);
-		FreeString(copy);
+		Free(copy);
 	}
 	
 	FunctionEnd();
@@ -376,7 +376,7 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	FunctionStart(Null);
 	AssertInternal(s != Null);
 	
-	auto sLength = GetStringLength(s);
+	auto sLength = GetLength(s);
 	AssertInternal(sLength > 0);
 	
 	ui8  copyLength = 0;
@@ -386,7 +386,7 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 		copyLength = length;
 	
 	auto stack = AllocateStack(copyLength + 1);
-	// Use this instead of PushString() since the latter will push the entire string
+	// Use the memory versions since the string versions will push the entire string
 	// instead of just a section if that is what's wanted.
 	void* mem = Push((void*)s, copyLength, stack); 
 	PushNullChar(stack);
@@ -397,7 +397,7 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	return (char*)stack.memory;
 }
 
-dll_export void FreeString(char* string) {
+dll_export void Free(char* string) {
 	FunctionStart(;);
 	AssertInternal(string != Null);
 	
@@ -406,7 +406,7 @@ dll_export void FreeString(char* string) {
 	ForAll(blocks) {
 		auto* block = table + it;
 		if(block->memory == string) {
-			FreeMemory(*block);
+			Free(*block);
 			// @TODO - Reset the block when pool allocation functionality implemented
 			break;
 		}
@@ -424,7 +424,7 @@ dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8
 	ForAll(count) {
 		auto s = strings[it];
 		AssertInternal(s != Null);
-		if(StringsAreEqual(string, s) == true) {
+		if(AreEqual(string, s) == true) {
 			FunctionEnd();
 			return true;
 		}

@@ -103,11 +103,11 @@ dll_export void Win32PrintStackBackTrace() {
     DWORD displacement = Null;
     ret = SymGetLineFromAddr64(process, address, &displacement, &fileLine);
     if(ret == FALSE) { // This triggers multiple times through assertions in the window proc function (call stack goes through the kernel, SymGetLineFromAddr64() doesn't seem to like that)
-			if(StringsAreEqual(pSymbol->Name, "CallWindowProcW") == true)
+			if(AreEqual(pSymbol->Name, "CallWindowProcW") == true)
 				ignore = true;
 			if(ignore == false)
 				finalString = Concatenate(4, finalString, "\nSymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), Windows code ", ToString((ui32)GetLastError()), "\n");
-			if(StringsAreEqual(pSymbol->Name, "CreateWindowA") == true)
+			if(AreEqual(pSymbol->Name, "CreateWindowA") == true)
 				ignore = false;
 			continue;
     }
@@ -118,10 +118,10 @@ dll_export void Win32PrintStackBackTrace() {
 		else
 			finalString = Concatenate(8, finalString, "\n    [", GetFileNameAndExtension(fileLine.FileName), "] line ", ToString((ui32)fileLine.LineNumber), " -> ", previousSymbolName, "()");
 		ClearArray(previousSymbolName);
-		CopyMemory(pSymbol->Name, bufferSize, previousSymbolName);
+		Copy(pSymbol->Name, bufferSize, previousSymbolName);
 
     // Stop after WinMain
-    if(StringsAreEqual(pSymbol->Name, "WinMain") == true || StringsAreEqual(pSymbol->Name, "main")) {
+    if(AreEqual(pSymbol->Name, "WinMain") == true || AreEqual(pSymbol->Name, "main")) {
 			DisplayError(finalString);
 			break;
 		}
@@ -156,7 +156,7 @@ dll_export void Win32FreeMemory(void* mem) {
 dll_export bool Win32FileExists(const char* path) {
 	FunctionStart(false);
   AssertInternal(path != Null);
-	AssertInternal(GetStringLength(path) + 1 <= MAX_PATH);
+	AssertInternal(GetLength(path) + 1 <= MAX_PATH);
 	
 	// @TODO - Repleace with PathFileExistsA() ?
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -235,7 +235,7 @@ dll_export memory_block Win32LoadFile(const char* path) {
 dll_export void Win32DeleteFile(const char* path) {
 	FunctionStart(;);
 	AssertInternal(path != Null);
-	AssertInternal(GetStringLength(path) <= MAX_PATH);
+	AssertInternal(GetLength(path) <= MAX_PATH);
 	
 	BOOL ret = DeleteFileA(path);
 	AssertInternalWin32(ret != 0);
@@ -308,7 +308,7 @@ dll_export char* Win32GetCurrentDirectory() {
 	
 	char* path = Win32GetCurrentDirectoryFullPath();
 	
-	char* directory = path + GetStringLength(path);
+	char* directory = path + GetLength(path);
 	do directory -= 1;
 	while(directory != path && *directory != '\\');
 	AssertInternal(*directory == '\\');

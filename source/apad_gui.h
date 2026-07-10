@@ -14,20 +14,21 @@ const ui8 TextBodyFlagLeftAligned =  1 << 3; // If not present text is assumed t
 
 struct text_body {
 	memory_stack memory;
+	rectangle    background;
 	f32          textHeight;
 	ui8          flags;
 };
 
-dll_import text_body AllocateTextBody(f32 textHeight, ui8 flags);
-dll_import void 		 ClearTextBody(text_body& tb);
-dll_import void 		 FreeTextBody(text_body& tb);
-dll_import char* 		 FindTextBodyChar(char c, ui16 pos, bool scanForward, text_body& tb);
-dll_import ui32 		 GetTextBodyLength(text_body& tb);
-dll_import char* 		 GetTextBodyText(text_body& tb);
-dll_export vector 	 GetTextBodyRenderDimensions(text_body& tb); // Will have a min height of tb.textHeight, width will be 0 if it doesn't contain any text
-dll_import ui16      InsertString(char* string, ui32 length, text_body& tb, ui32 pos); // Returns chars inserted
+dll_import text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 height, f32 textHeight, ui8 flags);
+dll_import void 		 ClearText(text_body& tb);
+dll_import void 		 FreeText(text_body& tb);
+dll_import char* 		 FindChar(char c, ui16 pos, bool scanForward, text_body& tb);
+dll_import char* 		 GetText(text_body& tb);
+dll_import ui32 		 GetTextLength(text_body& tb);
+dll_export vector 	 GetTextRenderDimensions(text_body& tb); // Will have a min height of tb.textHeight, width will be 0 if it doesn't contain any text
+dll_import ui16      Insert(char* string, ui32 length, text_body& tb, ui32 pos); // Returns chars inserted
+dll_import bool 		 IsValid(text_body& tb);
 dll_import void 		 RemoveChar(text_body& tb, ui32 pos);
-dll_import bool 		 TextBodyIsValid(text_body& tb);
 
 // ******************** Text update ******************** //
 
