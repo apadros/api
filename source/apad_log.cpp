@@ -167,7 +167,7 @@ dll_export void Log(log_file& log, const char* formatString, ...) {
 			it -= 1; // To compensate the +1 in the loop header
 		}
 		else
-			Push(&c, sizeof(c), log);
+			Push((void*)&c, sizeof(c), log);
   }
 	
 	va_end(args);

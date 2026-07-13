@@ -61,7 +61,7 @@ dll_export file_line ParseLine(file& f, ui32& readIndex) {
 				string = c + 1;
 			}
 			else {
-				Push(&string, sizeof(char*), stack);
+				Push((void*)&string, sizeof(char*), stack);
 				string = Null;
 			}
 			*c = '\0';
@@ -78,7 +78,7 @@ dll_export file_line ParseLine(file& f, ui32& readIndex) {
 			}
 		}
 		else if(readingData == false) { // Other data to be read
-		  Push(&c, sizeof(char*), stack);
+		  Push((void*)&c, sizeof(char*), stack);
 			readingData = true;
 		} 
 	}
@@ -128,6 +128,6 @@ dll_export void WriteToFile(void* data, ui32 size, file& f) {
 
 dll_export void WriteToFile(char* string, file& f) {
 	FunctionStart(;);
-	Push(string, GetLength(string), f);
+	Push(string, false, f);
 	FunctionEnd();
 }
