@@ -43,7 +43,7 @@ dll_export memory_block AllocateMemory(ui32 size) {
 	void* memory = Win32AllocateMemory(size);
 		
 	memory_block ret;
-	ClearStruct(ret);
+	ClearInstance(ret);
 	ret.memory = memory;
 	ret.size = size;
 	
@@ -54,7 +54,7 @@ dll_export memory_block AllocateMemory(ui32 size) {
 dll_export void Free(memory_block& block) {
 	FunctionStart(;);
 	Win32FreeMemory(block.memory);
-	ClearStruct(block);
+	ClearInstance(block);
 	FunctionEnd();
 }
 

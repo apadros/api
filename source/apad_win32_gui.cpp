@@ -216,7 +216,7 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 	ret.lastFrameTime = Dt;
 	
 	MSG msg;
-  ClearStruct(msg);
+  ClearInstance(msg);
   while (PeekMessageA(&msg, Null, 0, 0, PM_REMOVE)) {
 		bool exit = false;
 		

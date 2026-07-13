@@ -12,9 +12,8 @@
 
 const ui16 MaxStringLength = UI16Max;
 
-// @TODO - Replace stack functionality with pool allocation ?
 // Array of memory_blocks containing dynamically-allocated memory pointers allocated on the heap.
-memory_stack stringTable; 
+memory_block stringTable; 
 
 program_local void ExitStringAPI() {
 	FunctionStart(;);
@@ -39,11 +38,31 @@ program_local void AddToStringTable(memory_block& block) {
 	FunctionStart(;);
 	
   if(IsValid(stringTable) == false) { // Init table
-	  stringTable = AllocateStack(KiB(1));
+	  stringTable = AllocateMemory(KiB(1));
 		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
 	}
 	
-	PushInstance(block, stringTable);
+	bool added = false;
+	{
+		ui32  blocks = stringTable.size / sizeof(memory_block);
+		auto* table = (memory_block*)stringTable.memory;
+		ForAll(blocks) {
+			auto* b = table + it;
+			if(IsValid(*b) == false) {
+				*b = block;
+				added = true;
+				break;
+			}
+		}
+	}
+	if(added == false) {
+		auto oldSize = stringTable.size;
+		auto newTable = AllocateMemory(oldSize * 2);
+		Copy(stringTable.memory, oldSize, newTable.memory);
+		Free(stringTable);
+		stringTable = newTable;
+		Copy(&block, sizeof(block), (ui8*)stringTable.memory + oldSize);
+	}
 	
 	FunctionEnd();
 }
@@ -51,7 +70,7 @@ program_local void AddToStringTable(memory_block& block) {
 program_local void PushNullChar(memory_stack& stack) {
 	FunctionStart(;);
 	
-	Push("\0", 1, stack);
+	Push((void*)"\0", 1, stack);
 	
 	FunctionEnd();
 }
@@ -407,7 +426,7 @@ dll_export void Free(char* string) {
 		auto* block = table + it;
 		if(block->memory == string) {
 			Free(*block);
-			// @TODO - Reset the block when pool allocation functionality implemented
+			SetInvalid(*block);
 			break;
 		}
 	}

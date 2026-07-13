@@ -314,7 +314,10 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 	
 	f32 bottom = tb.container.bottom + tb.container.height - tb.textBorderOffset - size.y;
 	
-	auto ret = CreateRectangle(left, bottom, size.x, size.y);
+	// Avoid using CreateRectangle() since it won't allow width == 0
+	rectangle ret = {};
+	ret.pos = CreateVector(left, bottom);
+	ret.size = size;
 	
 	FunctionEnd();
 	return ret;
@@ -765,7 +768,7 @@ dll_export program_external char* FindChar(char c, ui16 pos, bool scanForward, t
 dll_export program_external void EndTextUpdate() {
 	CurrentTextBody = Null;
 	CursorBlinkTimeElapsed = 0;
-	ClearStruct(CursorPos);
+	ClearInstance(CursorPos);
 	CursorCharOffset = 0;
 }
 
