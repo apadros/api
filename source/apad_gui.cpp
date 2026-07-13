@@ -348,6 +348,16 @@ dll_export program_external vector GetTextRenderDimensions(char* text, ui32 leng
 	return ret;
 }
 
+program_external dll_export void Render(text_body& tb) {
+	auto length = GetTextLength(tb);
+	if(length > 0) {
+		if((tb.flags & TextBodyFlagLeftAligned) > 0)
+			RenderText(GetText(tb), length, tb.container.left + tb.textBorderOffset, tb.container.bottom + tb.textBorderOffset, tb.textHeight, false);
+		else
+			RenderText(GetText(tb), length, GetCenter(tb.container).x, tb.container.bottom + tb.textBorderOffset, tb.textHeight, true);
+	}
+}
+
 program_local void RenderTextLineHor(ui16 x, ui16 y, ui8 height) {
 	glVertex2f(x, y);
 	glVertex2f(x + height, y);
