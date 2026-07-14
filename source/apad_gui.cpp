@@ -304,7 +304,7 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 	vector size = CreateVector(Null, tb.textHeight);
 	auto length = GetTextLength(tb);
 	if(length > 0)
-		size = GetTextRenderDimensions(GetText(tb), length, tb.textHeight);
+		size = GetTextRenderSize(GetText(tb), length, tb.textHeight);
 	
 	f32 left = Null;
 	if((tb.flags & TextBodyFlagLeftAligned) > 0)
@@ -323,7 +323,7 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 	return ret;
 }
 
-dll_export program_external vector GetTextRenderDimensions(char* text, ui32 length, f32 height) {
+dll_export program_external vector GetTextRenderSize(char* text, ui32 length, f32 height) {
 	FunctionStart(vector());
 	AssertInternal(text != Null);
 	AssertInternal(height > 0);
@@ -331,6 +331,8 @@ dll_export program_external vector GetTextRenderDimensions(char* text, ui32 leng
 	vector ret = CreateVector(Null, height);
 
 	f32 xOffset = 0;
+	if(length == 0)
+		length = GetLength(text);
 	ForAll(length) {
 		if(text[it] == NewlineChar) {
 			xOffset = 0;
@@ -372,7 +374,9 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 	FunctionStart(rectangle());
 
 	AssertInternal(text != Null);
-	AssertInternal(length > 0);
+	
+	if(length == 0)
+		length = GetLength(text);
 
 	rectangle ret = {};
 	ret.left = x;
@@ -380,7 +384,7 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 
 	f32 xOffset = 0;
 	if(center == true)
-		xOffset = -GetTextRenderDimensions(text, length, height).x / 2;
+		xOffset = -GetTextRenderSize(text, length, height).x / 2;
 
 	f32 nextX = x + xOffset;
 	f32 nextY = y;
@@ -401,6 +405,13 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 			case(BulletPointChar): {
 				RenderTextLineVert(nextX + height / 2, nextY + height / 4, height / 2);
 				RenderTextLineHor(nextX + height / 4, nextY + height / 2, height / 2);
+			} break;
+			
+			case('#'): {
+				RenderTextLineHor(nextX, nextY + height / 3, height);
+				RenderTextLineHor(nextX, nextY + height * 2 / 3, height);
+				RenderTextLineVert(nextX + height / 3, nextY, height);
+				RenderTextLineVert(nextX + height * 2 / 3, nextY, height);
 			} break;
 
 			case('a'):
