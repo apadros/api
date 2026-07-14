@@ -18,6 +18,7 @@ program_local time_marker LastLoopMarker = Null;
 program_local f32         Dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 program_local time_marker LastLeftClickMarker = GetTimeMarker(); // GetTimeElapsedMilli() will hit an assertion if this == 0
 program_local f32  				DoubleClickTime = 0.5; // Seconds
+program_local bool  		  MouseLeftDownThisFrame = false;
 
 // No need to export this, only used in apad_error.cpp
 dll_export program_external void Win32DisplayInfoBox(const char* string, bool error) {
@@ -91,7 +92,7 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	return ret;
 }
 
-dll_export vector Win32GetProgramWindowClientSize() {
+dll_export program_external vector Win32GetProgramWindowClientSize() {
 	FunctionStart(vector());
 	AssertInternal(windowHandle != NULL);
 	RECT r = {};
@@ -105,7 +106,7 @@ dll_export vector Win32GetProgramWindowClientSize() {
 	return ret;
 }
 
-dll_export void DisplayLastWin32Error() {
+dll_export program_external void DisplayLastWin32Error() {
 	FunctionStart(;);
 	
 	auto error = GetLastError();
@@ -136,7 +137,7 @@ program_local void Win32Exit() { // Called within ExitProgram()
 
 // ******************** Internal API end ******************** //
 
-dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
+dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	FunctionStart(;);
 	
 	extern bool GUIApp;
@@ -207,13 +208,19 @@ dll_export void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	FunctionEnd();
 }
 
+dll_export program_external bool Win32MouseLeftClickedThisFrame(win32_state& state) {
+	return state.mouseLeftDownLastFrame == false && state.mouseLeftDown == true;
+}
+
 #include <windowsx.h>
 #include "apad_time.h"
-dll_export win32_state Win32BeginGUIUpdateLoop() {
+dll_export program_external win32_state Win32BeginGUIUpdateLoop() {
 	FunctionStart(win32_state());
 	
 	win32_state ret = {};
 	ret.lastFrameTime = Dt;
+	ret.mouseLeftDownLastFrame = MouseLeftDownThisFrame;	
+	MouseLeftDownThisFrame = false;
 	
 	MSG msg;
   ClearInstance(msg);
@@ -235,28 +242,29 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 				if(GetTimeElapsedMilli(LastLeftClickMarker, newMarker) / 1000 <= DoubleClickTime)
 					ret.mouseLeftDoubleClick = true;
 				LastLeftClickMarker = newMarker;
-				ret.mouseLeftClickDown = true;
+				MouseLeftDownThisFrame = true;
+				ret.mouseLeftDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_LBUTTONUP: {
-				ret.mouseLeftClickUp = true;
+				ret.mouseLeftUp = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_RBUTTONDOWN: {
-				ret.mouseRightClickDown = true;
+				ret.mouseRightDown = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_RBUTTONUP: {
-				ret.mouseRightClickUp = true;
+				ret.mouseRightUp = true;
 				ret.mouseX = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
 				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
@@ -337,7 +345,7 @@ dll_export win32_state Win32BeginGUIUpdateLoop() {
 	return ret;
 }
 
-dll_export void Win32EndGUIUpdateLoop() {
+dll_export program_external void Win32EndGUIUpdateLoop() {
 	FunctionStart(;);
 	
 	if(LastLoopMarker == Null) {
@@ -376,7 +384,7 @@ dll_export void Win32EndGUIUpdateLoop() {
 }
 
 #include "apad_maths.h"
-dll_export vector Win32GetMousePosWithinClient() {
+dll_export program_external vector Win32GetMousePosWithinClient() {
 	FunctionStart(vector());
 	
 	POINT p = {};
@@ -398,7 +406,7 @@ dll_export vector Win32GetMousePosWithinClient() {
 	return ret;
 }
 
-dll_export char* Win32OpenFileGUI(const char* directory, const char* filters) {
+dll_export program_external char* Win32OpenFileGUI(const char* directory, const char* filters) {
 	FunctionStart(Null);
 	AssertInternal(filters != Null);
 	
@@ -425,7 +433,7 @@ dll_export char* Win32OpenFileGUI(const char* directory, const char* filters) {
 	return ret;
 }
 
-dll_export char* Win32SaveFileAsGUI(const char* directory, const char* filters) {
+dll_export program_external char* Win32SaveFileAsGUI(const char* directory, const char* filters) {
 	FunctionStart(Null);
 	AssertInternal(filters != Null);
 	

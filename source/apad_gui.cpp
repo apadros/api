@@ -8,6 +8,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
+#include "apad_win32_gui.h"
 
 program_local 			text_body* CurrentTextBody;
 program_local 			ui16       CursorCharOffset; // 0-based from the start of CurrentTextBody text
@@ -350,7 +351,7 @@ dll_export program_external vector GetTextRenderSize(char* text, ui32 length, f3
 	return ret;
 }
 
-program_external dll_export void Render(text_body& tb) {
+dll_export program_external void Render(text_body& tb) {
 	auto length = GetTextLength(tb);
 	if(length > 0) {
 		if((tb.flags & TextBodyFlagLeftAligned) > 0)
@@ -876,4 +877,34 @@ dll_export program_external f32 UI8ColourToF32(ui8 u) {
 
 dll_export program_external f32 GetCursorAlphaValue() {
 	return CursorAlpha;
+}
+
+dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight) {
+	FunctionStart(button());
+	AssertInternal(text != Null);
+	AssertInternal(textHeight != Null);
+	
+	button ret;
+	ret.rectangle = CreateRectangle(left, bottom, width, height);
+	ret.text = AllocateString(text);
+	ret.textHeight = textHeight;
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export program_external void FreeButtonText(button& b) {
+	FunctionStart(;);
+	Free(b.text);
+	FunctionEnd();
+}
+
+dll_export program_external bool ButtonClicked(button& b, win32_state& state) {
+	return Win32MouseLeftClickedThisFrame(state) == true && Overlap(state.mouseX, state.mouseY, UnpackRectangle(b.rectangle)) == true;
+}
+
+dll_export program_external void Render(button& b) {
+	FunctionStart(;);
+	RenderText(b.text, Null, GetCenter(b.rectangle).x, GetCenter(b.rectangle).y - b.textHeight / 2, b.textHeight, true);
+	FunctionEnd();
 }
