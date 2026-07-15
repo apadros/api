@@ -5,18 +5,36 @@
 #include "apad_memory.h"
 #include "apad_maths.h"
 
+// ******************** Colours ******************** //
+
+struct colour {
+	f32 red;
+	f32 green;
+	f32 blue;
+};
+
+dll_import colour CreateColour(ui8 r, ui8 g, ui8 b);
+#define           UnpackColourUI8(_colour) (ui8)((_colour).red * 255), (ui8)((_colour).green * 255), (ui8)((_colour).blue * 255)
+#define           UnpackColourF32(_colour) (_colour).red, (_colour).green, (_colour).blue
+dll_import f32    UI8ColourToF32(ui8 u);
+
+
 // ******************** Buttons ******************** //
 
 struct button {
 	char* 		text;
 	f32       textHeight;
 	rectangle rectangle;
+	colour    highlightColour;
+	f32       highlightAlpha;
 };
 
-dll_import button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight);
+dll_import button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, 
+																 char* text, f32 textHeight, 
+																 ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha);
 dll_import bool 	ButtonClicked(button& b, win32_state& state);
 dll_import void 	FreeButtonText(button& b);
-dll_import void 	Render(button& b); // Will only render the text
+dll_import void 	Render(button& b,  f32 mouseX, f32 mouseY); // Will render the text and highlight background colour
 
 // ******************** Text body ******************** //
 
@@ -86,8 +104,10 @@ dll_import void      DrawRectangleBorder(f32 left, f32 bottom, f32 width, f32 he
 dll_import void      DrawCircleBorder(f32 centerX, f32 centerY, f32 radius, 
 																			ui8 lineWidth, 
 																			ui8 r, ui8 g, ui8 b);
+dll_import void 		 DrawCircleFull(f32 centerX, f32 centerY, f32 radius,
+																		ui8 r, ui8 g, ui8 b, f32 a);
 dll_import void      DrawRectangleFull(f32 left, f32 bottom, f32 width, f32 height, 
-																			 ui8 r, ui8 g, ui8 b);
+																			 ui8 r, ui8 g, ui8 b, f32 a);
 dll_import vector    GetTextRenderSize( // Will return a minimum y of height even if no text present, but x will equal 0
 									   									 char* text, 
 																			 ui32 length, // Set to Null to read the entire string
@@ -98,6 +118,5 @@ dll_import rectangle RenderText(char* text,
 																f32   y, 
 																f32 	height, 
 																bool  center);
-dll_import f32       UI8ColourToF32(ui8 u);
 
 #endif

@@ -355,9 +355,9 @@ dll_export program_external void Render(text_body& tb) {
 	auto length = GetTextLength(tb);
 	if(length > 0) {
 		if((tb.flags & TextBodyFlagLeftAligned) > 0)
-			RenderText(GetText(tb), length, tb.container.left + tb.textBorderOffset, tb.container.bottom + tb.textBorderOffset, tb.textHeight, false);
+			RenderText(GetText(tb), length, tb.container.left + tb.textBorderOffset, GetTopRight(tb.container).y - tb.textBorderOffset - tb.textHeight, tb.textHeight, false);
 		else
-			RenderText(GetText(tb), length, GetCenter(tb.container).x, tb.container.bottom + tb.textBorderOffset, tb.textHeight, true);
+			RenderText(GetText(tb), length, GetCenter(tb.container).x, GetTopRight(tb.container).y - tb.textBorderOffset - tb.textHeight, tb.textHeight, true);
 	}
 }
 
@@ -855,13 +855,30 @@ dll_export program_external void DrawCircleBorder(f32 centerX, f32 centerY, f32 
 		glVertex2f(x, y);
 	}
 	glEnd();
+	AssertInternalGL();
 	FunctionEnd();
 }
 
-dll_export program_external void DrawRectangleFull(f32 left, f32 bottom, f32 width, f32 height, ui8 r, ui8 g, ui8 b) {
+dll_export program_external void DrawCircleFull(f32 centerX, f32 centerY, f32 radius, ui8 r, ui8 g, ui8 b, f32 a) {
+	FunctionStart(;);
+	glBegin(GL_TRIANGLE_FAN);
+	glColor4f(UI8ColourToF32(r), UI8ColourToF32(g), UI8ColourToF32(b), a);
+	ui8 vertices = 72;
+	FromToInc(0, vertices + 1) {
+		f32 angle = it * 360 / vertices;
+		f32 x = centerX - Sine(angle) * radius;
+		f32 y = centerY + Cos(angle) * radius;
+		glVertex2f(x, y);
+	}
+	glEnd();
+	AssertInternalGL();
+	FunctionEnd();
+}
+
+dll_export program_external void DrawRectangleFull(f32 left, f32 bottom, f32 width, f32 height, ui8 r, ui8 g, ui8 b, f32 a) {
 	FunctionStart(;);
 	glBegin(GL_QUADS);
-	glColor3f(UI8ColourToF32(r), UI8ColourToF32(g), UI8ColourToF32(b));
+	glColor4f(UI8ColourToF32(r), UI8ColourToF32(g), UI8ColourToF32(b), a);
 	glVertex2f(left, bottom);
 	glVertex2f(left + width, bottom);
 	glVertex2f(left + width, bottom + height);
@@ -879,7 +896,7 @@ dll_export program_external f32 GetCursorAlphaValue() {
 	return CursorAlpha;
 }
 
-dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight) {
+dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight, ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha) {
 	FunctionStart(button());
 	AssertInternal(text != Null);
 	AssertInternal(textHeight != Null);
@@ -888,6 +905,8 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
 	ret.text = AllocateString(text);
 	ret.textHeight = textHeight;
+	ret.highlightColour = CreateColour(highlightRed, highlightGreen, highlightBlue);
+	ret.highlightAlpha = highlightAlpha;
 	
 	FunctionEnd();
 	return ret;
@@ -903,8 +922,18 @@ dll_export program_external bool ButtonClicked(button& b, win32_state& state) {
 	return Win32MouseLeftClickedThisFrame(state) == true && Overlap(state.mouseX, state.mouseY, UnpackRectangle(b.rectangle)) == true;
 }
 
-dll_export program_external void Render(button& b) {
+dll_export program_external void Render(button& b, f32 mouseX, f32 mouseY) {
 	FunctionStart(;);
+	if(b.highlightAlpha > 0 && Overlap(mouseX, mouseY, UnpackRectangle(b.rectangle)) == true)
+		DrawRectangleFull(UnpackRectangle(b.rectangle), UnpackColourUI8(b.highlightColour), b.highlightAlpha);
 	RenderText(b.text, Null, GetCenter(b.rectangle).x, GetCenter(b.rectangle).y - b.textHeight / 2, b.textHeight, true);
 	FunctionEnd();
+}
+
+dll_export program_external colour CreateColour(ui8 r, ui8 g, ui8 b) {
+	colour ret;
+	ret.red = (f32)r / 255;
+	ret.green = (f32)g / 255;
+	ret.blue = (f32)b / 255;
+	return ret;
 }
