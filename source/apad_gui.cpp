@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <gl\gl.h>
+#include <stdarg.h> // For varargs
 #include "apad_base_types.h"
 #include "apad_error_internal.h"
 #include "apad_gui.h"
@@ -936,4 +937,49 @@ dll_export program_external colour CreateColour(ui8 r, ui8 g, ui8 b) {
 	ret.green = (f32)g / 255;
 	ret.blue = (f32)b / 255;
 	return ret;
+}
+
+dll_export program_external ui_element_layout* GetUIElementLayouts(f32 start, f32 end, ui8 count, ...) {
+	FunctionStart(Null);
+	AssertInternal(count > 0);
+	
+	ui_element_layout* layouts = (ui_element_layout*)Win32AllocateMemory(sizeof(ui_element_layout) * count);
+	AssertInternal(layouts != Null);
+	
+	va_list list;
+	va_start(list, count);
+	
+	f32 totalSize = 0;
+	ForAll(count) {
+		f32 size = va_arg(list, f64);
+		layouts[it].size = size;
+		totalSize += size;
+	}
+	
+	f32 range = end - start;
+	AssertInternal(Magnitude(totalSize) <= Magnitude(range));
+	
+	AssertInternal(count >= 1);
+	f32 offset = (range - totalSize) / (count - 1);
+	
+	f32 nextStart = start;
+	ForAll(count) {
+		auto* l = layouts + it;
+		l->start = nextStart;
+		l->end = l->start + l->size;
+		l->center = l->start + l->size / 2;
+		nextStart += l->size + offset;
+	}
+	
+	va_end(list);
+	
+	FunctionEnd();
+	return layouts;
+}
+
+dll_export program_external void FreeUIElementLayouts(ui_element_layout* layouts) {
+		FunctionStart(;);
+		AssertInternal(layouts != Null);
+		Win32FreeMemory((void*)layouts);
+		FunctionEnd();
 }
