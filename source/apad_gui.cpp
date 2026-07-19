@@ -816,9 +816,11 @@ dll_export void SetCursorCharOffset(ui16 offset) {
 }
 
 dll_export program_external void BeginTextUpdate(text_body& text) {
+	EndTextUpdate();
 	CurrentTextBody = &text;
 	CursorCharOffset = GetTextLength(text);
 	CursorBlinkTimeElapsed = 0;
+	ClearInstance(CursorPos);
 }
 
 dll_export program_external void DrawRectangleBorder(f32 left, f32 bottom, f32 width, f32 height, f32 lineWidth, ui8 r, ui8 g, ui8 b) {
@@ -920,12 +922,12 @@ dll_export program_external void FreeButtonText(button& b) {
 }
 
 dll_export program_external bool ButtonClicked(button& b, win32_state& state) {
-	return Win32MouseLeftClickedThisFrame(state) == true && Overlap(state.mouseX, state.mouseY, UnpackRectangle(b.rectangle)) == true;
+	return Win32MouseLeftDownThisFrame(state) == true && Overlap(UnpackVector(state.mousePos), UnpackRectangle(b.rectangle)) == true;
 }
 
-dll_export program_external void Render(button& b, f32 mouseX, f32 mouseY) {
+dll_export program_external void Render(button& b, vector mousePos) {
 	FunctionStart(;);
-	if(b.highlightAlpha > 0 && Overlap(mouseX, mouseY, UnpackRectangle(b.rectangle)) == true)
+	if(b.highlightAlpha > 0 && Overlap(UnpackVector(mousePos), UnpackRectangle(b.rectangle)) == true)
 		DrawRectangleFull(UnpackRectangle(b.rectangle), UnpackColourUI8(b.highlightColour), b.highlightAlpha);
 	RenderText(b.text, Null, GetCenter(b.rectangle).x, GetCenter(b.rectangle).y - b.textHeight / 2, b.textHeight, true);
 	FunctionEnd();

@@ -50,7 +50,7 @@ dll_import button AllocateButton(f32 left, f32 bottom, f32 width, f32 height,
 																 ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha);
 dll_import bool 	ButtonClicked(button& b, win32_state& state);
 dll_import void 	FreeButtonText(button& b);
-dll_import void 	Render(button& b,  f32 mouseX, f32 mouseY); // Will render the text and highlight background colour
+dll_import void 	Render(button& b, vector mousePos); // Will render the text and highlight background colour
 
 // ******************** Text body ******************** //
 
@@ -85,7 +85,7 @@ dll_import void 		 Render(text_body& tb);
 const ui8 BulletPointChar = '\b';
 const ui8 NewlineChar = 		'\n';
 
-dll_import void  BeginTextUpdate(text_body& text); // Will place the cursor at the end of the text body
+dll_import void  BeginTextUpdate(text_body& text); // Calls EndTextUpdate() first, will place the cursor at the end of the text body
 dll_import void  EndTextUpdate();
 dll_import f32 	 GetTextLineHeight(f32 textHeight);
 dll_import bool  TextIsBeingUpdated();

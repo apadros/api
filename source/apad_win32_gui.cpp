@@ -18,7 +18,12 @@ program_local time_marker LastLoopMarker = Null;
 program_local f32         Dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 program_local time_marker LastLeftClickMarker = GetTimeMarker(); // GetTimeElapsedMilli() will hit an assertion if this == 0
 program_local f32  				DoubleClickTime = 0.5; // Seconds
-program_local bool  		  MouseLeftDownThisFrame = false;
+program_local bool        MouseLeftDownCurrently = false;
+program_local bool        MouseRightDownCurrently = false;
+program_local bool  		  MouseLeftDownLastFrame = false;
+program_local bool  		  MouseRightDownLastFrame = false;
+program_local vector      MousePos = {};
+program_local vector      LastMousePos = {};
 
 // No need to export this, only used in apad_error.cpp
 dll_export program_external void Win32DisplayInfoBox(const char* string, bool error) {
@@ -208,8 +213,12 @@ dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE
 	FunctionEnd();
 }
 
-dll_export program_external bool Win32MouseLeftClickedThisFrame(win32_state& state) {
-	return state.mouseLeftDownLastFrame == false && state.mouseLeftDown == true;
+dll_export program_external bool Win32MouseLeftDownThisFrame(win32_state& state) {
+	return MouseLeftDownLastFrame == false && state.mouseLeftDown == true;
+}
+
+dll_export program_external bool Win32MouseLeftUpThisFrame(win32_state& state) {
+	return MouseLeftDownLastFrame == true && state.mouseLeftDown == false;
 }
 
 #include <windowsx.h>
@@ -219,8 +228,6 @@ dll_export program_external win32_state Win32BeginGUIUpdateLoop() {
 	
 	win32_state ret = {};
 	ret.lastFrameTime = Dt;
-	ret.mouseLeftDownLastFrame = MouseLeftDownThisFrame;	
-	MouseLeftDownThisFrame = false;
 	
 	MSG msg;
   ClearInstance(msg);
@@ -242,39 +249,38 @@ dll_export program_external win32_state Win32BeginGUIUpdateLoop() {
 				if(GetTimeElapsedMilli(LastLeftClickMarker, newMarker) / 1000 <= DoubleClickTime)
 					ret.mouseLeftDoubleClick = true;
 				LastLeftClickMarker = newMarker;
-				MouseLeftDownThisFrame = true;
-				ret.mouseLeftDown = true;
-				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				MouseLeftDownCurrently = true;
+				MousePos.x = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
-				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+				MousePos.y = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_LBUTTONUP: {
-				ret.mouseLeftUp = true;
-				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				MouseLeftDownCurrently = false;
+				MousePos.x = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
-				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+				MousePos.y = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_RBUTTONDOWN: {
-				ret.mouseRightDown = true;
-				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				MouseRightDownCurrently = true;
+				MousePos.x = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
-				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+				MousePos.y = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_RBUTTONUP: {
-				ret.mouseRightUp = true;
-				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				MouseRightDownCurrently = false;
+				MousePos.x = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
-				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+				MousePos.y = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			case WM_MOUSEMOVE: {
 				ret.mouseMoved = true;
-				ret.mouseX = GET_X_LPARAM(msg.lParam);
+				MousePos.x = GET_X_LPARAM(msg.lParam);
 				ui16 height = Win32GetProgramWindowClientSize().height;
-				ret.mouseY = height - GET_Y_LPARAM(msg.lParam);
+				MousePos.y = height - GET_Y_LPARAM(msg.lParam);
 			} break;
 			
 			// @TODO - Test with freely-rotating mouse wheel
@@ -319,6 +325,10 @@ dll_export program_external win32_state Win32BeginGUIUpdateLoop() {
 		if(exit == true)
 			ExitProgram(false);
 	}
+	ret.mouseLeftDown = MouseLeftDownCurrently;
+	ret.mouseRightDown = MouseRightDownCurrently;
+	ret.mousePos = MousePos;
+	ret.mouseTranslation = ret.mousePos - LastMousePos;
 	
 	// Keyboard state
 	{
@@ -345,7 +355,7 @@ dll_export program_external win32_state Win32BeginGUIUpdateLoop() {
 	return ret;
 }
 
-dll_export program_external void Win32EndGUIUpdateLoop() {
+dll_export program_external void Win32EndGUIUpdateLoop(win32_state& state) {
 	FunctionStart(;);
 	
 	if(LastLoopMarker == Null) {
@@ -379,6 +389,9 @@ dll_export program_external void Win32EndGUIUpdateLoop() {
 	LastLoopMarker = GetTimeMarker();
 		
 	ReleaseDC(windowHandle, dc);
+	MouseLeftDownLastFrame = state.mouseLeftDown;
+	MouseRightDownLastFrame = state.mouseRightDown;
+	LastMousePos = MousePos;
 	
 	FunctionEnd();
 }
