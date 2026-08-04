@@ -939,9 +939,33 @@ dll_export program_external void Render(button& b, vector mousePos) {
 
 dll_export program_external colour CreateColour(ui8 r, ui8 g, ui8 b) {
 	colour ret;
-	ret.red = (f32)r / 255;
-	ret.green = (f32)g / 255;
-	ret.blue = (f32)b / 255;
+	ret.red.i = r;
+	ret.red.f = (f32)r / 255;
+	ret.green.i = g;
+	ret.green.f = (f32)g / 255;
+	ret.blue.i = b;
+	ret.blue.f = (f32)b / 255;
+	return ret;
+}
+
+dll_export program_external colour CreateColour(ui32 r, ui32 g, ui32 b) {
+	FunctionStart(colour());
+	AssertInternal(r <= 255);
+	AssertInternal(g <= 255);
+	AssertInternal(b <= 255);
+	auto ret = CreateColour((ui8)r, (ui8)g, (ui8)b);
+	FunctionEnd();
+	return ret;
+}
+
+dll_export program_external colour CreateColour(f32 r, f32 g, f32 b) {
+	colour ret;
+	ret.red.i = r * 255;
+	ret.red.f = r;
+	ret.green.i = g * 255;
+	ret.green.f = g;
+	ret.blue.i = b * 255;
+	ret.blue.f = b;
 	return ret;
 }
 
