@@ -710,6 +710,10 @@ dll_export program_external bool TextIsBeingUpdated() {
 	return CurrentTextBody != Null;
 }
 
+dll_export program_external bool IsBeingUpdated(text_body& tb) {
+	return TextIsBeingUpdated() == true && CurrentTextBody == &tb;
+}
+
 dll_export program_external void MoveCursor(si8 charOffset) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);

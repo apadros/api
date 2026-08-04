@@ -17,7 +17,7 @@ program_local UINT 				SleepPeriod = Null;
 program_local time_marker LastLoopMarker = Null;
 program_local f32         Dt = Null; //Delta time since last frame, used for anything which will change over time (e.g. animations)
 program_local time_marker LastLeftClickMarker = GetTimeMarker(); // GetTimeElapsedMilli() will hit an assertion if this == 0
-program_local f32  				DoubleClickTime = 0.5; // Seconds
+program_local f32  				DoubleClickTime = 0.25; // Seconds
 program_local bool        MouseLeftDownCurrently = false;
 program_local bool        MouseRightDownCurrently = false;
 program_local bool  		  MouseLeftDownLastFrame = false;
