@@ -3,6 +3,7 @@
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
+#include "apad_win32.h"
 
 program_local f32 PI = 3.14159265359f;
 
@@ -171,4 +172,19 @@ dll_export program_external f32 ArcSine(f32 f) {
 dll_export program_external f32 ArcCos(f32 f) {
 	auto ret = acosf(f);
 	return RadiansToDegrees(ret);
+}
+
+dll_export f32* GenerateCircularCoords(ui8 count, f32 centerX, f32 centerY, f32 radius) {
+	FunctionStart(Null);
+	AssertInternal(count > 0);
+	
+	f32* ret = (f32*)Win32AllocateMemory(count* sizeof(f32) * 2);
+	ForAll(count) {
+		f32 angle = it * 360 / count;
+		ret[it * 2] = centerX - Sine(angle) * radius;
+		ret[it * 2 + 1] = centerY + Cos(angle) * radius;
+	}
+	
+	FunctionEnd();
+	return ret;
 }

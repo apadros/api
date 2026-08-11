@@ -41,9 +41,8 @@ struct colour {
 	} blue;
 };
 
-dll_import colour CreateColour(ui8 r, ui8 g, ui8 b);
-dll_import colour CreateColour(ui32 r, ui32 g, ui32 b); // For ease-of-use with integer literals. Accepted values: 0 -> 255
-dll_import colour CreateColour(f32 r, f32 g, f32 b);
+dll_import colour CreateColourUI8(ui8 r, ui8 g, ui8 b);
+dll_import colour CreateColourF32(f32 r, f32 g, f32 b);
 #define           UnpackColourUI8(_colour) (_colour).red.i, (_colour).green.i, (_colour).blue.i
 #define           UnpackColourF32(_colour) (_colour).red.f, (_colour).green.f, (_colour).blue.f
 dll_import f32    UI8ColourToF32(ui8 u);
@@ -131,6 +130,8 @@ dll_import void 	_SetCursorPos(f32 x, f32 y); // Coords are relative to text_bod
 dll_import void      DrawRectangleBorder(f32 left, f32 bottom, f32 width, f32 height, 
 																				 f32 lineWidth, 
 																				 ui8 r, ui8 g, ui8 b);
+dll_import void 		 DrawRectangleFull(f32 left, f32 bottom, f32 width, f32 height, 
+																			 ui8 r, ui8 g, ui8 b);
 dll_import void      DrawCircleBorder(f32 centerX, f32 centerY, f32 radius, 
 																			ui8 lineWidth, 
 																			ui8 r, ui8 g, ui8 b);

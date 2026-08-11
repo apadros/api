@@ -9,6 +9,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
+#include "apad_win32.h" 
 #include "apad_win32_gui.h"
 
 program_local 			text_body* CurrentTextBody;
@@ -849,20 +850,45 @@ dll_export program_external void DrawRectangleBorder(f32 left, f32 bottom, f32 w
 	FunctionEnd();
 }
 
+dll_export program_external void DrawRectangleFull(f32 left, f32 bottom, f32 width, f32 height, ui8 r, ui8 g, ui8 b) {
+	FunctionStart(;);
+	glBegin(GL_QUADS);
+	glColor3f(UI8ColourToF32(r), UI8ColourToF32(g), UI8ColourToF32(b));
+
+	glVertex2f(left, bottom);
+	glVertex2f(left, bottom + height);
+
+	glVertex2f(left, bottom + height);
+	glVertex2f(left + width, bottom + height);
+
+	glVertex2f(left + width, bottom + height);
+	glVertex2f(left + width, bottom);
+
+	glVertex2f(left + width, bottom);
+	glVertex2f(left, bottom);
+	glEnd();
+	AssertInternalGL();
+	FunctionEnd();
+}
+
 dll_export program_external void DrawCircleBorder(f32 centerX, f32 centerY, f32 radius, ui8 lineWidth, ui8 r, ui8 g, ui8 b) {
 	FunctionStart(;);
 	glLineWidth(lineWidth);
 	glBegin(GL_LINE_LOOP);
 	glColor3f(UI8ColourToF32(r), UI8ColourToF32(g), UI8ColourToF32(b));
-	ui8 vertices = 72;
-	FromToInc(0, vertices + 1) {
-		f32 angle = it * 360 / vertices;
-		f32 x = centerX - Sine(angle) * radius;
-		f32 y = centerY + Cos(angle) * radius;
+	
+	ui8  count = 72;
+	f32* vertices = GenerateCircularCoords(count, centerX, centerY, radius);
+	ForAll(count) {
+		f32 x = vertices[it * 2];
+		f32 y = vertices[it * 2 + 1];
 		glVertex2f(x, y);
 	}
+	glVertex2f(vertices[0], vertices[1]); // Join with the starting point
 	glEnd();
+	Win32FreeMemory((void*)vertices);
 	AssertInternalGL();
+	
 	FunctionEnd();
 }
 
@@ -912,7 +938,7 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
 	ret.text = AllocateString(text);
 	ret.textHeight = textHeight;
-	ret.highlightColour = CreateColour(highlightRed, highlightGreen, highlightBlue);
+	ret.highlightColour = CreateColourUI8(highlightRed, highlightGreen, highlightBlue);
 	ret.highlightAlpha = highlightAlpha;
 	
 	FunctionEnd();
@@ -937,7 +963,7 @@ dll_export program_external void Render(button& b, vector mousePos) {
 	FunctionEnd();
 }
 
-dll_export program_external colour CreateColour(ui8 r, ui8 g, ui8 b) {
+dll_export program_external colour CreateColourUI8(ui8 r, ui8 g, ui8 b) {
 	colour ret;
 	ret.red.i = r;
 	ret.red.f = (f32)r / 255;
@@ -948,17 +974,7 @@ dll_export program_external colour CreateColour(ui8 r, ui8 g, ui8 b) {
 	return ret;
 }
 
-dll_export program_external colour CreateColour(ui32 r, ui32 g, ui32 b) {
-	FunctionStart(colour());
-	AssertInternal(r <= 255);
-	AssertInternal(g <= 255);
-	AssertInternal(b <= 255);
-	auto ret = CreateColour((ui8)r, (ui8)g, (ui8)b);
-	FunctionEnd();
-	return ret;
-}
-
-dll_export program_external colour CreateColour(f32 r, f32 g, f32 b) {
+dll_export program_external colour CreateColourF32(f32 r, f32 g, f32 b) {
 	colour ret;
 	ret.red.i = r * 255;
 	ret.red.f = r;
