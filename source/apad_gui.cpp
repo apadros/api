@@ -62,7 +62,7 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	return ret;
 }
 
-dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 textBorderOffset, f32 textHeight, ui8 flags) {
+dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 textBorderOffset, f32 textHeight, ui16 maxLength, ui8 flags) {
 	FunctionStart(text_body());
 	AssertInternal(width > 0);
 	AssertInternal(textBorderOffset > 0);
@@ -73,6 +73,7 @@ dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32
 	ret.container = CreateRectangle(left, bottom, width, textHeight + textBorderOffset * 2);
 	ret.textBorderOffset = textBorderOffset;
 	ret.textHeight = textHeight;
+	ret.maxLength = maxLength;
 	ret.flags = flags;
 
 	FunctionEnd();
@@ -93,7 +94,7 @@ dll_export program_external ui16 Insert(char* string, ui32 length, text_body& tb
 	AssertInternal(length > 0);
 	AssertInternal(IsValid(tb) == true);
 
-	if(pos > GetTextLength(tb))
+	if(pos > GetTextLength(tb) || tb.maxLength != Null && GetTextLength(tb) == tb.maxLength)
 		return Null;
 
 	ui16 added = 0;
@@ -198,13 +199,17 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			if(bulletPoint == true)
 				InsertCharAtCursor(BulletPointChar);
 		}
-		else
+		else {
+			ret.bodyBeingUpdatedThisFrame = GetCurrentTextBody();
 			EndTextUpdate();
+		}
 	}
 	else if(CursorCharOffset >= 1 && GetText(*CurrentTextBody)[CursorCharOffset - 1] == BulletPointChar && osState.tabPressed == true) // Remove bullet point if tab is pressed after it
 		GetText(*CurrentTextBody)[CursorCharOffset - 1] = ' ';
-	else if(osState.escapePressed == true) // Esc hit
+	else if(osState.escapePressed == true) { // Esc hit
+		ret.bodyBeingUpdatedThisFrame = GetCurrentTextBody();
 		EndTextUpdate();
+	}
 	else if(osState.leftPressed == true && CursorCharOffset >= 1)
 		MoveCursor(-1);
 	else if(osState.rightPressed == true && CursorCharOffset < GetTextLength(*CurrentTextBody))
@@ -253,6 +258,9 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 	if(TextIsBeingUpdated() == true) { // In case esc is hit before this point
 		vector pos = { 0, -CurrentTextBody->textHeight };
 		AssertInternal(CursorCharOffset <= GetTextLength(*CurrentTextBody));
+		if(CurrentTextBody->maxLength != Null) {
+			AssertInternal(CursorCharOffset <= CurrentTextBody->maxLength);
+		}
 		auto* text = GetText(*CurrentTextBody);
 		ForAll(CursorCharOffset) {
 			if(text[it] == NewlineChar) {
