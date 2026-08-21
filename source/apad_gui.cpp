@@ -245,7 +245,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			if(previousLineIsLonger == true) { // Just move cursor up
 				ui16 cursorCharOffset = CursorCharOffset - GetCharOffsetFromStart(start + 1);
 				ui16 lineStartIndex = previousLineStart == Null ? 0 : GetCharOffsetFromStart(previousLineStart + 1);
-				CursorCharOffset = lineStartIndex + cursorCharOffset;
+				SetCursorCharOffset(lineStartIndex + cursorCharOffset);
 			}
 			else // Place cursor at the end of the previous line
 				MoveCursor(GetCharOffsetFromStart(start) - CursorCharOffset);
@@ -306,6 +306,7 @@ dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	AssertInternal(IsValid(tb) == true);
 	if(pos < GetTextLength(tb))
 		Remove(sizeof(char), pos, tb.memory);
+	SetCursorCharOffset(pos); // In case we removed the very last char
 	FunctionEnd();
 }
 
@@ -831,7 +832,7 @@ dll_export void SetCursorCharOffset(ui16 offset) {
 dll_export program_external void BeginTextUpdate(text_body& text) {
 	EndTextUpdate();
 	CurrentTextBody = &text;
-	CursorCharOffset = GetTextLength(text);
+	SetCursorCharOffset(GetTextLength(text));
 	CursorBlinkTimeElapsed = 0;
 	ClearInstance(CursorPos);
 }

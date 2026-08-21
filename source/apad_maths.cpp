@@ -188,3 +188,24 @@ dll_export f32* GenerateCircularCoords(ui8 count, f32 centerX, f32 centerY, f32 
 	FunctionEnd();
 	return ret;
 }
+
+#include "apad_string.h"
+dll_export ui32 ConvertHexToUI32(char* hex) {
+	FunctionStart(Null);
+	
+	auto string = AllocateString(hex);
+	ConvertStringToLowerCase(string);
+	
+	ui32 ret = 0;
+	auto length = GetLength(string);
+	AssertInternal(length <= 8);
+	ForAll(length) {
+		char c = string[it];
+		ui8  value = (c >= '0' && c <= '9') ? (c - '0') : (c - 'a' + 10);
+		ret += value * pow(16, length - 1 - it);
+	}
+	Free(string);
+	
+	FunctionEnd();
+	return ret;
+}
