@@ -10,7 +10,7 @@
 
 // ******************** Internal API start ******************** //
 
-program_local HWND windowHandle = NULL;
+program_local HWND WindowHandle = NULL;
 
 #include "apad_time.h"
 program_local UINT 				SleepPeriod = Null;
@@ -40,7 +40,7 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	if(msg == WM_CREATE) {
 		// Init OpenGL
 		
-		windowHandle = window;
+		WindowHandle = window;
 		
     PIXELFORMATDESCRIPTOR pfd = {};
 		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -99,9 +99,9 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 
 dll_export program_external vector Win32GetProgramWindowClientSize() {
 	FunctionStart(vector());
-	AssertInternal(windowHandle != NULL);
+	AssertInternal(WindowHandle != NULL);
 	RECT r = {};
-	AssertInternalWin32(GetClientRect(windowHandle, &r) != 0);
+	AssertInternalWin32(GetClientRect(WindowHandle, &r) != 0);
 	vector ret = {};
 	ret.width = r.right - r.left;
 	AssertInternal(ret.width != 0);
@@ -141,6 +141,10 @@ program_local void Win32Exit() { // Called within ExitProgram()
 }
 
 // ******************** Internal API end ******************** //
+
+dll_export program_external HWND Win32GetGUIWindowHandle() {
+	return WindowHandle;
+}
 
 dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
 	FunctionStart(;);
@@ -204,11 +208,11 @@ dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE
 	
 	AssertInternalWin32(RegisterClassA(&wndclass) != 0);
 	
-	windowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
+	WindowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
 															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
 															 0, 0, width, height, 
 															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
-  AssertInternalWin32(windowHandle != NULL);
+  AssertInternalWin32(WindowHandle != NULL);
 	
 	FunctionEnd();
 }
@@ -364,14 +368,14 @@ dll_export program_external void Win32EndGUIUpdateLoop(win32_state& state) {
 		return;
 	}
 
-	AssertInternalWin32(windowHandle != NULL);
-	if(windowHandle == NULL)
+	AssertInternalWin32(WindowHandle != NULL);
+	if(WindowHandle == NULL)
 		ExitProgram(true);
 	
 	ui8 targetFPS = 60;
 	f32 targetFrameTimeMilli = 1000.0f / targetFPS;
 
-	auto dc = GetDC(windowHandle);
+	auto dc = GetDC(WindowHandle);
 	
 	f32 currentFrameTimeMilli = GetTimeElapsedMilli(LastLoopMarker, GetTimeMarker());
 	if (currentFrameTimeMilli + 1 < targetFrameTimeMilli) { // Allow a 1ms threshold for Sleep() timing inaccuracy
@@ -388,7 +392,7 @@ dll_export program_external void Win32EndGUIUpdateLoop(win32_state& state) {
 
 	LastLoopMarker = GetTimeMarker();
 		
-	ReleaseDC(windowHandle, dc);
+	ReleaseDC(WindowHandle, dc);
 	MouseLeftDownLastFrame = state.mouseLeftDown;
 	MouseRightDownLastFrame = state.mouseRightDown;
 	LastMousePos = MousePos;
@@ -402,8 +406,8 @@ dll_export program_external vector Win32GetMousePosWithinClient() {
 	
 	POINT p = {};
 	AssertInternalWin32(GetCursorPos(&p) != 0); // Will return screen coordinates
-	AssertInternal(windowHandle != NULL);
-	AssertInternalWin32(ScreenToClient(windowHandle, &p) != 0); // Will update p relative to the top left corner of the client area
+	AssertInternal(WindowHandle != NULL);
+	AssertInternalWin32(ScreenToClient(WindowHandle, &p) != 0); // Will update p relative to the top left corner of the client area
 	
 	auto client = Win32GetProgramWindowClientSize();
 	
