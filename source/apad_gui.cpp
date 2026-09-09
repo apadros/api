@@ -940,13 +940,13 @@ dll_export program_external f32 GetCursorAlphaValue() {
 
 dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight, ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha) {
 	FunctionStart(button());
-	AssertInternal(text != Null);
-	AssertInternal(textHeight != Null);
 	
-	button ret;
+	button ret = {};
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
-	ret.text = AllocateString(text);
-	ret.textHeight = textHeight;
+	if(text != Null) {
+		ret.text = AllocateString(text);
+		ret.textHeight = textHeight;
+	}
 	ret.highlightColour = CreateColourUI8(highlightRed, highlightGreen, highlightBlue);
 	ret.highlightAlpha = highlightAlpha;
 	
@@ -956,7 +956,8 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 
 dll_export program_external void FreeButtonText(button& b) {
 	FunctionStart(;);
-	Free(b.text);
+	if(b.text != Null)
+		Free(b.text);
 	FunctionEnd();
 }
 
@@ -964,11 +965,14 @@ dll_export program_external bool ButtonClicked(button& b, win32_state& state) {
 	return Win32MouseLeftDownThisFrame(state) == true && Overlap(UnpackVector(state.mousePos), UnpackRectangle(b.rectangle)) == true;
 }
 
-dll_export program_external void Render(button& b, vector mousePos) {
+dll_export program_external void Render(button& b, ui8 borderThickness, vector mousePos) {
 	FunctionStart(;);
 	if(b.highlightAlpha > 0 && Overlap(UnpackVector(mousePos), UnpackRectangle(b.rectangle)) == true)
 		DrawRectangleFull(UnpackRectangle(b.rectangle), UnpackColourUI8(b.highlightColour), b.highlightAlpha);
-	RenderText(b.text, Null, GetCenter(b.rectangle).x, GetCenter(b.rectangle).y - b.textHeight / 2, b.textHeight, true);
+	if(borderThickness > 0)
+		DrawRectangleBorder(UnpackRectangle(b.rectangle), borderThickness, 0, 0, 0);
+	if(b.text != Null)
+		RenderText(b.text, Null, GetCenter(b.rectangle).x, GetCenter(b.rectangle).y - b.textHeight / 2, b.textHeight, true);
 	FunctionEnd();
 }
 
