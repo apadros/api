@@ -7,6 +7,12 @@
 
 // ******************** Internal API start ******************** //
 
+memory_block AllocatedBlocks; // Pool allocation
+#define 		 BeginAllocatedBlocksLoop(_blockPtrID) { ForAll(AllocatedBlocks.size / sizeof(memory_block)) { \
+						 																					memory_block* _blockPtrID = (memory_block*)AllocatedBlocks.memory + it;
+#define 		 BreakAllocatedBlocksLoop() 					    break
+#define 		 EndAllocatedBlocksLoop()   					 } }
+
 // ******************** Internal API end ******************** //
 
 dll_export void Reset(memory_block& stack) {
@@ -47,14 +53,77 @@ dll_export memory_block AllocateMemory(ui32 size) {
 	ret.memory = memory;
 	ret.size = size;
 	
+	// Init global table
+	if(IsValid(AllocatedBlocks) == false) {
+		AllocatedBlocks.size = sizeof(memory_block) * 1;
+		AllocatedBlocks.memory = Win32AllocateMemory(AllocatedBlocks.size);
+	}
+	
+	// Add block to global table
+	bool added = false;
+	BeginAllocatedBlocksLoop(block) {
+		if(IsValid(*block) == false) {
+			CopyInstance(ret, block);
+			added = true;
+			BreakAllocatedBlocksLoop();
+		}
+	}
+	EndAllocatedBlocksLoop();
+	
+	// Expand global table if needed
+	// Avoid calling Expand() since the latter calls into this function
+	if(added == false) {
+		ui32 oldSize = AllocatedBlocks.size;
+		
+		// Expand table and copy over old memory
+		ui32  newSize = oldSize * 2;
+		void* newMemory = Win32AllocateMemory(newSize);
+		Copy(AllocatedBlocks.memory, AllocatedBlocks.size, newMemory);
+		Win32FreeMemory(AllocatedBlocks.memory);
+		AllocatedBlocks.memory = newMemory;
+		AllocatedBlocks.size = newSize;
+		
+		// Copy new block onto the end of the previous memory
+		auto* newBlock = (ui8*)AllocatedBlocks.memory + oldSize;
+		CopyInstance(ret, newBlock);
+	}
+	
 	FunctionEnd();
 	return ret;
 }
 
+dll_export void Expand(memory_block& b) {
+	FunctionStart(;);
+	
+	memory_block newBlock = {};
+	if(b.capacity != Null)
+		newBlock = AllocateMemory(b.capacity * 2);
+	else
+		newBlock = AllocateMemory(b.size * 2);
+	
+	Copy(b.memory, b.size, newBlock.memory);
+	Free(b);
+	b = newBlock;
+	
+	FunctionEnd();
+}
+
 dll_export void Free(memory_block& block) {
 	FunctionStart(;);
+	
 	Win32FreeMemory(block.memory);
+	
+	// Remove from global table
+	BeginAllocatedBlocksLoop(b) {
+		if(IsValid(*b) == true && b->memory == block.memory) {
+			Clear(b, sizeof(memory_block));
+			BreakAllocatedBlocksLoop();
+		}
+	}
+	EndAllocatedBlocksLoop();
+	
 	ClearInstance(block);
+	
 	FunctionEnd();
 }
 

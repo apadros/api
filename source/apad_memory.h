@@ -17,11 +17,14 @@
 dll_import void Clear(void* memory, ui32 size);
 #define 				ClearInstance(_s) Clear(&(_s), sizeof(_s))
 dll_import void Copy(void* source, ui32 size, void* destination);
+#define         CopyInstance(_s, _destination) Copy(&(_s), sizeof(_s), _destination)
 
 // ******************** Memory blocks ******************** //
 
+typedef ui16 memory_handle;
+
 struct memory_block {
-  void* memory;
+  void* memory; // Never store this! Store the whole memory_block
   ui32  size;
 	ui32  capacity; // Stack functionality, will == 0 if not used this way
 };
@@ -30,6 +33,7 @@ struct memory_block {
 typedef memory_block memory_stack;
 
 dll_import memory_block AllocateMemory(ui32 size);
+dll_export void 			  Expand(memory_block& b); // Will allocate new block with size/capacity * 2
 dll_import void*        GetMemory(memory_block block);
 dll_import void         Free(memory_block& block); // Clears block afterwards
 dll_import bool         IsValid(memory_block block);

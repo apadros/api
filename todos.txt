@@ -36,6 +36,7 @@ Memory
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
 	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
+	- Need to add an automatic exit function to clear the AllocatedBlocks array @WIP
 		
 Misc
 	- Various @TODO in code files
