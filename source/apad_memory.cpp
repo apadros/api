@@ -13,6 +13,19 @@ memory_block AllocatedBlocks; // Pool allocation
 #define 		 BreakAllocatedBlocksLoop() 					    break
 #define 		 EndAllocatedBlocksLoop()   					 } }
 
+program_local void ExitMemoryAPI() {
+	FunctionStart(;);
+	
+	BeginAllocatedBlocksLoop(block) {
+		if(IsValid(*block) == true)
+			Free(*block);
+	}
+	EndAllocatedBlocksLoop();
+	Win32FreeMemory(AllocatedBlocks.memory); // Avoid calling Free() since it'll check the AllocatedBlocks array within
+	
+	FunctionEnd();
+}
+
 // ******************** Internal API end ******************** //
 
 dll_export void Reset(memory_block& stack) {
@@ -55,8 +68,9 @@ dll_export memory_block AllocateMemory(ui32 size) {
 	
 	// Init global table
 	if(IsValid(AllocatedBlocks) == false) {
-		AllocatedBlocks.size = sizeof(memory_block) * 1;
+		AllocatedBlocks.size = sizeof(memory_block) * 64;
 		AllocatedBlocks.memory = Win32AllocateMemory(AllocatedBlocks.size);
+		RegisterExitFunction(ExitMemoryAPI);
 	}
 	
 	// Add block to global table
@@ -123,6 +137,22 @@ dll_export void Free(memory_block& block) {
 	EndAllocatedBlocksLoop();
 	
 	ClearInstance(block);
+	
+	FunctionEnd();
+}
+
+dll_export void Free(void* memory) {
+	FunctionStart(;);
+	
+	Win32FreeMemory(memory);
+	
+	BeginAllocatedBlocksLoop(block) {
+		if(IsValid(*block) == true && memory == block->memory) {
+			SetInvalid(*block);
+			BreakAllocatedBlocksLoop();
+		}
+	}
+	EndAllocatedBlocksLoop();
 	
 	FunctionEnd();
 }

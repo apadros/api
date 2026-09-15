@@ -36,6 +36,7 @@ dll_import memory_block AllocateMemory(ui32 size);
 dll_export void 			  Expand(memory_block& b); // Will allocate new block with size/capacity * 2
 dll_import void*        GetMemory(memory_block block);
 dll_import void         Free(memory_block& block); // Clears block afterwards
+dll_import void         Free(void* memory); // Only for memory allocated with AllocateMemory() or Win32AllocateMemory()
 dll_import bool         IsValid(memory_block block);
 dll_import void         SetInvalid(memory_block& block);
 

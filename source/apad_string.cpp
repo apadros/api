@@ -10,63 +10,6 @@
 
 // ******************** Internal API start ******************** //
 
-const ui16 MaxStringLength = UI16Max;
-
-// Array of memory_blocks containing dynamically-allocated memory pointers allocated on the heap.
-memory_block stringTable; 
-
-program_local void ExitStringAPI() {
-	FunctionStart(;);
-	
-	if(IsValid(stringTable) == true) {
-		// Free all memory blocks contained within the table
-		ui32  blocks = stringTable.size / sizeof(memory_block);
-		auto* table = (memory_block*)stringTable.memory;
-		ForAll(blocks) {
-			auto* block = table + it;
-			if(IsValid(*block) == true)
-				Free(*block);
-		}
-		
-		Free(stringTable);
-	}
-	
-	FunctionEnd();
-}
-
-program_local void AddToStringTable(memory_block& block) {
-	FunctionStart(;);
-	
-  if(IsValid(stringTable) == false) { // Init table
-	  stringTable = AllocateMemory(KiB(1));
-		atexit(ExitStringAPI); // @TODO - Returns 0 for no error. What to do if it doesn't?
-	}
-	
-	bool added = false;
-	{
-		ui32  blocks = stringTable.size / sizeof(memory_block);
-		auto* table = (memory_block*)stringTable.memory;
-		ForAll(blocks) {
-			auto* b = table + it;
-			if(IsValid(*b) == false) {
-				*b = block;
-				added = true;
-				break;
-			}
-		}
-	}
-	if(added == false) {
-		auto oldSize = stringTable.size;
-		auto newTable = AllocateMemory(oldSize * 2);
-		Copy(stringTable.memory, oldSize, newTable.memory);
-		Free(stringTable);
-		stringTable = newTable;
-		Copy(&block, sizeof(block), (ui8*)stringTable.memory + oldSize);
-	}
-	
-	FunctionEnd();
-}
-
 program_local void PushNullChar(memory_stack& stack) {
 	FunctionStart(;);
 	
@@ -134,8 +77,6 @@ dll_export char* Concatenate(ui8 count, ...) {
 	
 	va_end(list);
 	
-	AddToStringTable(stack);
-	
 	FunctionEnd();
 	return (char*)stack.memory;
 }
@@ -155,8 +96,6 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	auto stack = AllocateStack(copyLength + 1);
 	Push((void*)s, copyLength, stack);
 	PushNullChar(stack);
-	
-	AddToStringTable(stack);
 	
 	FunctionEnd();
 	return (char*)stack.memory;
@@ -410,28 +349,8 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	void* mem = Push((void*)s, copyLength, stack); 
 	PushNullChar(stack);
 	
-	AddToStringTable(stack);
-	
 	FunctionEnd();
 	return (char*)stack.memory;
-}
-
-dll_export void Free(char* string) {
-	FunctionStart(;);
-	AssertInternal(string != Null);
-	
-	ui32  blocks = stringTable.size / sizeof(memory_block);
-	auto* table = (memory_block*)stringTable.memory;
-	ForAll(blocks) {
-		auto* block = table + it;
-		if(block->memory == string) {
-			Free(*block);
-			SetInvalid(*block);
-			break;
-		}
-	}
-	
-	FunctionEnd();
 }
 
 dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {
