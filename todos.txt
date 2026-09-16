@@ -36,6 +36,7 @@ Memory
 	- Allow client code to set a global maximum for memory allocation
 		(i.e. I don't want my program to allocate more than X globally)
 	- PopStack() - have it clear all popped memory to 0 - requested memory should always be 0
+	- Memory block offsets - allow storage of 'handles' into a memory block in case the latter gets expanded
 		
 Misc
 	- Various @TODO in code files

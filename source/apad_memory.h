@@ -21,8 +21,6 @@ dll_import void Copy(void* source, ui32 size, void* destination);
 
 // ******************** Memory blocks ******************** //
 
-typedef ui16 memory_handle;
-
 struct memory_block {
   void* memory; // Never store this! Store the whole memory_block
   ui32  size;
@@ -32,13 +30,17 @@ struct memory_block {
 
 typedef memory_block memory_stack;
 
-dll_import memory_block AllocateMemory(ui32 size);
-dll_export void 			  Expand(memory_block& b); // Will allocate new block with size/capacity * 2
-dll_import void*        GetMemory(memory_block block);
+struct memory_block_offset {
+	memory_block* block;
+	ui32          offset;
+};
+
+dll_import memory_block AllocateMemory(ui32 size); // Pointer to block in global API memory
+dll_export void 			  Expand(memory_block& b); // Works for memory_stacks too. Will allocate new block with size or capacity * 2
 dll_import void         Free(memory_block& block); // Clears block afterwards
-dll_import void         Free(void* memory); // Only for memory allocated with AllocateMemory() or Win32AllocateMemory()
+dll_import void         Free(void* memory); // Only for memory allocated through this API or at the OS level
 dll_import bool         IsValid(memory_block block);
-dll_import void         SetInvalid(memory_block& block);
+dll_import void         SetInvalid(memory_block& block); // Will not free memory
 
 // ******************** Stack functionality ******************** //
 
