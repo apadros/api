@@ -150,6 +150,7 @@ dll_export void Free(void* memory) {
 }
 
 dll_export bool IsValid(memory_block block) {
+	FunctionStart(false);
 	if(block.memory == Null)
 		return false;
 	
@@ -158,13 +159,16 @@ dll_export bool IsValid(memory_block block) {
 	else
 		return block.size > 0;
 	
+	FunctionEnd();
 	return true;
 }
 
 dll_export void SetInvalid(memory_block& block) {
+	FunctionStart(;);
 	block.memory = Null;
 	block.size = 0;
 	block.capacity = 0;
+	FunctionEnd();
 }
 
 dll_export memory_block AllocateStack(ui32 capacity) {
@@ -262,4 +266,48 @@ dll_export void* Push(void* data, ui32 size, memory_block& stack) {
 	Copy(data, size, mem);
 	FunctionEnd();
 	return mem;
+}
+
+dll_export memory_offset GetOffset(void* memory, memory_block& block) {
+	FunctionStart(memory_offset());
+	AssertInternal(IsValid(block) == true);
+	AssertInternal(memory >= block.memory);
+	if(block.capacity != Null)
+		AssertInternal(memory < (ui8*)block.memory + block.capacity)
+	else
+		AssertInternal(memory < (ui8*)block.memory + block.size);
+	
+	memory_offset ret = {};
+	ret.block = &block;
+	ret.offset = (ui8*)memory - (ui8*)block.memory;
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void* GetMemory(memory_offset offset) {
+	FunctionStart(Null);
+	AssertInternal(offset.block != Null);
+	
+	void* mem = (ui8*)offset.block->memory + offset.offset;
+	
+	FunctionEnd();
+	return mem;
+}
+
+dll_export bool IsValid(memory_offset offset) {
+	FunctionStart(false);
+	
+	bool ret = true;
+	if(offset.block == Null)
+		ret = false;
+	else if(IsValid(*offset.block) == false)
+		ret = false;
+	else if(offset.block->capacity != Null && offset.offset >= offset.block->capacity)
+		ret = false;
+	else
+		ret = offset.offset < offset.block->size;
+	
+	FunctionEnd();
+	return ret;
 }
