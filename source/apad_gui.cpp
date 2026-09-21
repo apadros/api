@@ -210,11 +210,11 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		ret.bodyBeingUpdatedThisFrame = GetCurrentTextBody();
 		EndTextUpdate();
 	}
-	else if(osState.leftPressed == true && CursorCharOffset >= 1)
+	else if(osState.leftPressed == true && CursorCharOffset >= 1) // Move cursor left
 		MoveCursor(-1);
-	else if(osState.rightPressed == true && CursorCharOffset < GetTextLength(*CurrentTextBody))
+	else if(osState.rightPressed == true && CursorCharOffset < GetTextLength(*CurrentTextBody)) // Move cursor right
 		MoveCursor(1);
-	else if(osState.downPressed == true) { // Move down one line within text body if possible
+	else if(osState.downPressed == true) { // Move cursor down
 		// Need to scan behind and in front of the cursor to determine the bounds of the current line
 		char* end = FindChar(NewlineChar, CursorCharOffset, true, *CurrentTextBody);
 		if(end != Null) {
@@ -229,7 +229,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 		else
 			ret.wantToLeaveTextBodyDown = true;
 	}
-	else if(osState.upPressed == true) {
+	else if(osState.upPressed == true) { // Move cursor up
 		char* start = FindChar(NewlineChar, CursorCharOffset, false, *CurrentTextBody);
 		if(start != Null) { // Move up one line within text body
 			// Need to scan behind and in front of the cursor to determine the bounds of the current line
@@ -829,11 +829,15 @@ dll_export void SetCursorCharOffset(ui16 offset) {
 	FunctionEnd();
 }
 
-dll_export program_external void BeginTextUpdate(text_body& text) {
+dll_export program_external void BeginTextUpdate(text_body& text, vector mousePos) {
 	EndTextUpdate();
 	CurrentTextBody = &text;
 	SetCursorCharOffset(GetTextLength(text));
 	CursorBlinkTimeElapsed = 0;
+	if(mousePos == NullVector || Overlap(UnpackVector(mousePos), UnpackRectangle(text.container)) == false) // If don't care about cursor pos or mouse not within container boundaries
+		SetCursorPos(text.container.left, GetTopRight(text.container).y);
+	else
+		SetCursorPos(mousePos.x - text.container.left, mousePos.y - text.container.bottom);
 	ClearInstance(CursorPos);
 }
 

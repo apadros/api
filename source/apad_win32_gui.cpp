@@ -2,6 +2,7 @@
 #include <gl\gl.h>
 
 #include "apad_intrinsics.h"
+#include "apad_file.h"
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
@@ -39,7 +40,6 @@ program_local LRESULT CALLBACK WindowProc(HWND window, UINT msg, WPARAM wparam, 
 	
 	if(msg == WM_CREATE) {
 		// Init OpenGL
-		
 		WindowHandle = window;
 		
     PIXELFORMATDESCRIPTOR pfd = {};

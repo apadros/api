@@ -8,7 +8,7 @@
 #ifdef APAD_DEBUGGER_ASSERTIONS
 
 #define AssertInternalGL() \
-	Assert(glGetError == GL_NO_ERROR)
+	Assert(glGetError() == GL_NO_ERROR)
 
 #else
 

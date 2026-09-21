@@ -1,5 +1,11 @@
 @echo off
 
+if %1.==. ( 
+	echo:
+	echo Usage: %0 [build.bat without the path]
+	exit /b 
+)
+
 if exist release (rmdir release /s /q)
 mkdir release
 mkdir release\bin
@@ -7,7 +13,7 @@ mkdir release\source
 
 pushd source\
 if exist build (del build /q)
-call build_dll_debug.bat
+call %1
 popd
 
 echo:

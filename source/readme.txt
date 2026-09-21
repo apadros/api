@@ -1,5 +1,6 @@
 Compilation macros:
-	APAD_DEBUGGER_ASSERTIONS - Enable assertions breaking in a debugger
+	APAD_DEBUGGER_ASSERTIONS  - Enable assertions breaking in a debugger
+	APAD_ASSERTIONS_BACKTRACE - Enable printing of assertion call stack
 	
 Linkage
 	- user32.lib for basic Windows operation

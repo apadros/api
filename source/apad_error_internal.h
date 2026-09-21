@@ -7,6 +7,7 @@
 #ifdef APAD_DEBUGGER_ASSERTIONS
 
 #define FunctionStart(_return) ;
+#define FunctionEnd() ;
 
 #define AssertInternal(_condition) \
 	Assert(_condition)

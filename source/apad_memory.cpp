@@ -286,13 +286,10 @@ dll_export memory_offset GetOffset(void* memory, memory_block& block) {
 }
 
 dll_export void* GetMemory(memory_offset offset) {
-	FunctionStart(Null);
-	AssertInternal(offset.block != Null);
-	
-	void* mem = (ui8*)offset.block->memory + offset.offset;
-	
-	FunctionEnd();
-	return mem;
+	if(IsValid(offset) == false)
+		return Null;
+	else
+		return (ui8*)offset.block->memory + offset.offset;
 }
 
 dll_export bool IsValid(memory_offset offset) {
