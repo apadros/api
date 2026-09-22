@@ -245,7 +245,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			if(previousLineIsLonger == true) { // Just move cursor up
 				ui16 cursorCharOffset = CursorCharOffset - GetCharOffsetFromStart(start + 1);
 				ui16 lineStartIndex = previousLineStart == Null ? 0 : GetCharOffsetFromStart(previousLineStart + 1);
-				SetCursorCharOffset(lineStartIndex + cursorCharOffset);
+				SetCursorPos(lineStartIndex + cursorCharOffset);
 			}
 			else // Place cursor at the end of the previous line
 				MoveCursor(GetCharOffsetFromStart(start) - CursorCharOffset);
@@ -306,7 +306,7 @@ dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	AssertInternal(IsValid(tb) == true);
 	if(pos < GetTextLength(tb))
 		Remove(sizeof(char), pos, tb.memory);
-	SetCursorCharOffset(pos); // In case we removed the very last char
+	SetCursorPos(pos); // In case we removed the very last char
 	FunctionEnd();
 }
 
@@ -731,7 +731,7 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 	si32 finalOffset = (si32)CursorCharOffset + charOffset;
 	if(finalOffset < 0)
 		finalOffset = 0;
-	SetCursorCharOffset(finalOffset); // Will clamp to text_body length
+	SetCursorPos(finalOffset); // Will clamp to text_body length
 
 	FunctionEnd();
 }
@@ -739,36 +739,46 @@ dll_export program_external void MoveCursor(si8 charOffset) {
 dll_export program_external void _SetCursorPos(f32 x, f32 y) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
-	auto size = GetTextRectangle(*CurrentTextBody).size;
-	Clamp(x, 0, size.width);
-	Clamp(y, 0, size.height);
-
-	ui16 lineNumber = (size.height - y) / GetTextLineHeight(CurrentTextBody->textHeight); // 0-based
-
-	// Get the char offset to correct line first
-	ui16 charOffset = 0;
-	ForAll(lineNumber) {
-		auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
-		charOffset += line.charLength;
-		if(lineNumber > 0)
-			charOffset += 1; // Newline char
+	
+	if(x == Null && y == Null) {
+		auto length = GetTextLength(*CurrentTextBody);
+		SetCursorPos(length);
 	}
-
-	// Then check where target x is in current line
-	{
-		auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
-		f32  glyphWidth = GetGlyphWidth(CurrentTextBody->textHeight);
-		f32  glyphSpace = GetGlyphSpaceWidth(CurrentTextBody->textHeight);
-		f32  pixelLength = (glyphWidth + glyphSpace) * line.charLength - glyphSpace;
-		if(pixelLength < 0) // This can happen if the target line is the very last and is empty (i.e. enter was just hit at the end of the text body)
-			pixelLength = 0;
-		if(x == 0)
-			SetCursorCharOffset(charOffset);
-		else if(x >= pixelLength)
-			SetCursorCharOffset(charOffset + line.charLength);
-		else {
-			ui16 offset = x / (glyphWidth + glyphSpace); // Not completely accurate but close enough for now
-			SetCursorCharOffset(charOffset + offset + 1); // Place to the right of selected glyph
+	else {
+		// Make x and y relative to text rectangle and clamp within it
+		auto rec = GetTextRectangle(*CurrentTextBody);
+		x -= rec.left;
+		y -= rec.bottom;
+		Clamp(x, 0, rec.width);
+		Clamp(y, 0, rec.height);
+		
+		ui16 lineNumber = (rec.height - y) / GetTextLineHeight(CurrentTextBody->textHeight); // 0-based
+	
+		// Get the char offset to correct line first
+		ui16 charOffset = 0;
+		ForAll(lineNumber) {
+			auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
+			charOffset += line.charLength;
+			if(lineNumber > 0)
+				charOffset += 1; // Newline char
+		}
+	
+		// Then check where target x is in current line
+		{
+			auto line = GetTextBodyLine(charOffset, *CurrentTextBody);
+			f32  glyphWidth = GetGlyphWidth(CurrentTextBody->textHeight);
+			f32  glyphSpace = GetGlyphSpaceWidth(CurrentTextBody->textHeight);
+			f32  pixelLength = (glyphWidth + glyphSpace) * line.charLength - glyphSpace;
+			if(pixelLength < 0) // This can happen if the target line is the very last and is empty (i.e. enter was just hit at the end of the text body)
+				pixelLength = 0;
+			if(x == 0)
+				SetCursorPos(charOffset);
+			else if(x >= pixelLength)
+				SetCursorPos(charOffset + line.charLength);
+			else {
+				ui16 offset = x / (glyphWidth + glyphSpace); // Not completely accurate but close enough for now
+				SetCursorPos(charOffset + offset + 1); // Place to the right of selected glyph
+			}
 		}
 	}
 
@@ -816,29 +826,29 @@ dll_export program_external text_body* GetCurrentTextBody() {
 	return CurrentTextBody;
 }
 
-dll_export void SetCursorCharOffset(ui16 offset) {
+dll_export void _SetCursorPos(si16 offset) {
 	FunctionStart(;);
 	AssertInternal(TextIsBeingUpdated() == true);
-
+	
 	auto length = GetTextLength(*CurrentTextBody);
-	if(offset > length)
-		offset = length;
-	CursorCharOffset = offset;
+	if(offset == -1 || offset > length)
+		CursorCharOffset = length;
+	else
+		CursorCharOffset = offset;
+	
 	CursorBlinkTimeElapsed = 0;
 
 	FunctionEnd();
 }
 
 dll_export program_external void BeginTextUpdate(text_body& text, vector mousePos) {
-	EndTextUpdate();
+	// Call EndTextUpdate() only if desired text_body isn't currently being updated
+	if(TextIsBeingUpdated() == true && CurrentTextBody != &text)
+		EndTextUpdate();
+	
 	CurrentTextBody = &text;
-	SetCursorCharOffset(GetTextLength(text));
 	CursorBlinkTimeElapsed = 0;
-	if(mousePos == NullVector || Overlap(UnpackVector(mousePos), UnpackRectangle(text.container)) == false) // If don't care about cursor pos or mouse not within container boundaries
-		SetCursorPos(text.container.left, GetTopRight(text.container).y);
-	else
-		SetCursorPos(mousePos.x - text.container.left, mousePos.y - text.container.bottom);
-	ClearInstance(CursorPos);
+	SetCursorPos(UnpackVector(mousePos));
 }
 
 dll_export program_external void DrawRectangleBorder(f32 left, f32 bottom, f32 width, f32 height, f32 lineWidth, ui8 r, ui8 g, ui8 b) {
