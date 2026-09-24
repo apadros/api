@@ -91,6 +91,14 @@ dll_export program_external bool Overlap(f32 x0, f32 y0, f32 x1, f32 y1, f32 tes
 	return ret;
 }
 
+dll_export program_external bool Overlap(f32 left1, f32 bottom1, f32 width1, f32 height1, f32 left2, f32 bottom2, f32 width2, f32 height2) {
+	f32 right1 = left1 + width1;
+	f32 right2 = left2 + width2;
+	f32 top1 = bottom1 + height1;
+	f32 top2 = bottom2 + height2;
+	return right1 >= left2 && left1 <= right2 && bottom1 <= top2 && top1 >= bottom2;
+}
+
 dll_export program_external vector GetCenter(rectangle r) {
 	vector ret = {};
 	ret.width = r.left + r.width / 2;

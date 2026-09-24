@@ -308,3 +308,7 @@ dll_export bool IsValid(memory_offset offset) {
 	FunctionEnd();
 	return ret;
 }
+
+dll_export void SetInvalid(memory_offset& offset) {
+	ClearInstance(offset);
+}

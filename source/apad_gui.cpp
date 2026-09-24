@@ -62,15 +62,15 @@ program_local text_body_line GetTextBodyLine(ui16 charOffset, text_body& tb) {
 	return ret;
 }
 
-dll_export program_external text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 textBorderOffset, f32 textHeight, ui16 maxLength, ui8 flags) {
+dll_export program_external text_body AllocateTextBody(f32 containerLeft, f32 containerBottom, f32 containerWidth, f32 textBorderOffset, f32 textHeight, ui16 maxLength, ui8 flags) {
 	FunctionStart(text_body());
-	AssertInternal(width > 0);
+	AssertInternal(containerWidth > 0);
 	AssertInternal(textBorderOffset > 0);
 	AssertInternal(textHeight > 0);
 
 	text_body ret = {};
 	ret.memory = AllocateStack();
-	ret.container = CreateRectangle(left, bottom, width, textHeight + textBorderOffset * 2);
+	ret.container = CreateRectangle(containerLeft, containerBottom, containerWidth, textHeight + textBorderOffset * 2);
 	ret.textBorderOffset = textBorderOffset;
 	ret.textHeight = textHeight;
 	ret.maxLength = maxLength;
@@ -180,7 +180,7 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 			RemoveChar(*CurrentTextBody, CursorCharOffset);
 	}
 	else if(osState.enterPressed == true) { // Jump to next line if allowed, otherwise end writing
-	  if(CurrentTextBody->flags & TextBodyFlagNewlines > 0) {
+	  if((CurrentTextBody->flags & TextBodyFlagNewlines) > 0) {
 			// Scan back to see if the current line contains a bullet point
 			bool  bulletPoint = false;
 			char* text = GetText(*CurrentTextBody);
