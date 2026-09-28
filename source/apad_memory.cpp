@@ -7,7 +7,7 @@
 
 // ******************** Internal API start ******************** //
 
-program_local void* AllocatedMemory; // Pool allocation of void pointers allocated as the OS level
+program_local void* AllocatedMemory; // Pool allocation of void pointers allocated at the OS level
 program_local ui32  AllocatedMemoryLength;
 #define 						BeginAllocatedMemoryLoop(_varID) { ForAll(AllocatedMemoryLength) { \
 																											   void** _varID = (void**)AllocatedMemory + it;
@@ -151,16 +151,18 @@ dll_export void Free(void* memory) {
 
 dll_export bool IsValid(memory_block block) {
 	FunctionStart(false);
-	if(block.memory == Null)
-		return false;
 	
-	if(block.capacity > 0)
-		return block.size <= block.capacity;
+	bool ret = true;
+	
+	if(block.memory == Null)
+		ret = false;
+	else if(block.capacity > 0)
+		ret = block.size <= block.capacity;
 	else
-		return block.size > 0;
+		ret = block.size > 0;
 	
 	FunctionEnd();
-	return true;
+	return ret;
 }
 
 dll_export void SetInvalid(memory_block& block) {
@@ -230,8 +232,11 @@ dll_export void Remove(ui32 size, ui32 offset, memory_stack& stack) {
 
 dll_export void* Push(ui32 size, memory_block& stack) {
 	FunctionStart(Null);
-	AssertInternal(IsValid(stack));
 	AssertInternal(size > 0);
+	
+	// Init if needed
+	if(IsValid(stack) == false)
+		stack = AllocateStack(size);
 	
 	if(stack.size + size <= stack.capacity) { // If allocating within stack capacity
 		void* ret = (ui8*)stack.memory + stack.size;
@@ -241,7 +246,7 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 		return ret;
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
-		ui32 	newCapacity = stack.capacity;
+		ui32  newCapacity = stack.capacity;
 		do 		newCapacity *= 2;
 		while(stack.size + size > newCapacity);
 	
@@ -312,3 +317,32 @@ dll_export bool IsValid(memory_offset offset) {
 dll_export void SetInvalid(memory_offset& offset) {
 	ClearInstance(offset);
 }
+
+dll_export void Pop(ui32 size, memory_stack& stack) {
+	FunctionStart(;);
+	
+	AssertInternal(stack.capacity > 0);
+	AssertInternal(IsValid(stack) == true);
+	if(size > 0) {
+		if(size < stack.size)
+			stack.size -= size;
+		else
+			stack.size = 0;
+	}
+	
+	FunctionEnd();
+}
+
+// @WIP - Need to allocate with specific size and have header indicating whether the space has been allocated
+#if 0
+dll_export void* AddToPool(void* memory, ui32 size, memory_block& block) {
+	FunctionStart(Null);
+	
+	if(IsValid(block) == false)
+		memory == AllocateMemory(size);
+	
+	
+	
+	FunctionEnd();
+}
+#endif
