@@ -25,11 +25,12 @@ struct memory_block {
   void* memory; // Never store this! Store the whole memory_block
   ui32  size;
 	ui32  capacity; // Stack functionality, will == 0 if not used this way
+	ui16  elementSize; // Pool functionality, will == 0 if not used this way
 };
 #define NullMemoryBlock memory_block()
 
 dll_import memory_block AllocateMemory(ui32 size); // No need to call as Push() will call it on first use unless strict memory capacity is required
-dll_import void 			  Expand(memory_block& b); // Works for memory_stacks too. Will allocate new block with size or capacity * 2
+dll_import void 			  Expand(memory_block& b); // Works for memory_stacks and memory_pools too. Will allocate new block with size or capacity * 2
 dll_import void         Free(memory_block& block); // Clears block afterwards
 dll_import void         Free(void* memory); // Only for memory allocated through this API or at the OS level
 dll_import bool         IsValid(memory_block block);
@@ -46,7 +47,16 @@ dll_import void* 	 			 GetMemory(memory_offset offset); // Will return Null if o
 dll_import bool 				 IsValid(memory_offset offset);
 dll_import void 				 SetInvalid(memory_offset& offset);
 
-// ******************** Stack functionality ******************** //
+// ******************** Stack allocator ******************** //
+
+// @TODO
+#if 0
+struct memory_stack {
+	memory_block memory; // memory.size treated as stack capacity
+	ui32         size;
+};
+
+#endif
 
 typedef memory_block memory_stack;
 
@@ -68,5 +78,17 @@ dll_import void*			  Push(void* memory, ui32 size, memory_stack& stack); // Will
 
 dll_import void  				Remove(ui32 size, ui32 offset, memory_stack& stack); // Will move contents beyond offset + size down to offset
 dll_import void 				Reset(memory_stack& stack);
+
+// ******************** Pool allocator ******************** //
+
+// Do not store raw pointers into its memory, use GetOffset(void*, pool.memory) instead
+struct memory_pool {
+	memory_block memory;
+	ui16         elementSize;
+};
+
+dll_import memory_pool AllocatePool(ui16 elementSize, ui16 count = Null); // Can leave count == Null to initialise
+dll_import void* 			 Allocate(void* memory, ui16 size, memory_pool& pool); // AllocatePool() with valid elementSize must have been called beforehand
+dll_export void 			 Deallocate(void* memory, memory_pool& pool);
 
 #endif

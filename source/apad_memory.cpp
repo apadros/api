@@ -26,6 +26,14 @@ program_local void ExitMemoryAPI() {
 	FunctionEnd();
 }
 
+program_local void* GetEnd(memory_block block) {
+	FunctionStart(Null);
+	AssertInternal(IsValid(block) == true);
+	void* ret = (ui8*)block.memory + block.size;
+	FunctionEnd();
+	return ret;
+}
+
 // ******************** Internal API end ******************** //
 
 dll_export void Reset(memory_block& stack) {
@@ -333,16 +341,74 @@ dll_export void Pop(ui32 size, memory_stack& stack) {
 	FunctionEnd();
 }
 
-// @WIP - Need to allocate with specific size and have header indicating whether the space has been allocated
-#if 0
-dll_export void* AddToPool(void* memory, ui32 size, memory_block& block) {
+dll_export memory_pool AllocatePool(ui16 elementSize, ui16 count) {
+	FunctionStart(memory_pool());
+	
+	AssertInternal(elementSize > 0);
+	
+	if(count == 0)
+		count = 1;
+	
+	memory_pool ret = {};
+	ret.memory = AllocateMemory((sizeof(b8) + elementSize) * count);
+	ret.elementSize = elementSize;
+	
+	FunctionEnd();
+	return ret;
+}
+
+program_local bool IsValid(memory_pool& pool) {
+	FunctionStart(false);
+	bool ret = IsValid(pool.memory) && pool.elementSize > 0;
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void* Allocate(void* memory, ui16 size, memory_pool& pool) {
 	FunctionStart(Null);
 	
-	if(IsValid(block) == false)
-		memory == AllocateMemory(size);
+	AssertInternal(IsValid(pool) == true);
+	AssertInternal(size == pool.elementSize);
 	
+	void* ret = Null;
+	ui16 count = pool.memory.size / pool.elementSize;
+	ForAll(count) {
+		void* mem = (ui8*)pool.memory.memory + (sizeof(b8) + pool.elementSize) * it;
+		b8*   initted = (b8*)mem;
+		if(*initted == false) {
+			*initted = true;
+			MovePtr(mem, sizeof(b8));
+			ret = mem;
+			break;
+		}
+	}
 	
+	// If we get here, we didn't find space
+	if(ret == Null) {
+		ui32 previousSize = pool.memory.size;
+		Expand(pool.memory);
+		void* mem = (ui8*)pool.memory.memory + previousSize;
+		*((b8*)mem) = true;
+		MovePtr(mem, sizeof(b8));
+		ret = mem;
+	}
+	
+	Copy(memory, size, ret);
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void Deallocate(void* memory, memory_pool& pool) {
+	FunctionStart(;);
+	
+	AssertInternal(IsValid(pool) == true);
+	AssertInternal((ui8*)memory >= (ui8*)pool.memory.memory + sizeof(b8));
+	AssertInternal((ui8*)memory <= GetEnd(pool.memory));
+	
+	void* mem = (ui8*)memory - sizeof(b8);
+	*((b8*)mem) = false;
+	Clear(memory, pool.elementSize);	
 	
 	FunctionEnd();
 }
-#endif
