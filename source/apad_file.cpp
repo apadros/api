@@ -8,7 +8,7 @@
 dll_export void SaveFile(file& f, const char* path) {
 	FunctionStart(;);
 	AssertInternal(path != Null);
-	SaveFile(f.memory, f.size, path);
+	SaveFile(f.memory.memory, f.size, path);
 	FunctionEnd();
 }
 
@@ -107,7 +107,7 @@ dll_export char* GetLineDataElement(file_line& line, ui8 index) {
 	AssertInternal(line.data.size % sizeof(char*) == 0);
 	AssertInternal(index < line.data.size / sizeof(char*));
 	
-	auto ret = ((char**)line.data.memory)[index];
+	auto ret = ((char**)line.data.memory.memory)[index];
 	
 	FunctionEnd();
 	return ret;

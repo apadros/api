@@ -34,12 +34,18 @@ program_local void* GetEnd(memory_block block) {
 	return ret;
 }
 
+program_local bool IsValid(memory_stack& stack) {
+	FunctionStart(false);
+	bool ret = IsValid(stack.memory);
+	FunctionEnd();
+}
+
 // ******************** Internal API end ******************** //
 
-dll_export void Reset(memory_block& stack) {
+dll_export void Reset(memory_stack& stack) {
 	FunctionStart(;);
 	if(stack.size > 0)
-		Clear(stack.memory, stack.size);
+		Clear(stack.memory.memory, stack.size);
   stack.size = 0;
 	FunctionEnd();
 }
@@ -160,14 +166,7 @@ dll_export void Free(void* memory) {
 dll_export bool IsValid(memory_block block) {
 	FunctionStart(false);
 	
-	bool ret = true;
-	
-	if(block.memory == Null)
-		ret = false;
-	else if(block.capacity > 0)
-		ret = block.size <= block.capacity;
-	else
-		ret = block.size > 0;
+	bool ret = block.memory != Null && block.size > 0;
 	
 	FunctionEnd();
 	return ret;
@@ -181,23 +180,26 @@ dll_export void SetInvalid(memory_block& block) {
 	FunctionEnd();
 }
 
-dll_export memory_block AllocateStack(ui32 capacity) {
-	FunctionStart(memory_block());
+dll_export memory_stack AllocateStack(ui32 capacity) {
+	FunctionStart(memory_stack());
 	
 	if(capacity == Null)
 		capacity = 1;
-	auto block = AllocateMemory(capacity);
-	block.capacity = block.size;
-	block.size = 0;
+	auto memory = AllocateMemory(capacity);
+	
+	memory_stack ret = {};
+	ret.memory = memory;
+	ret.size = 0;
 	
 	FunctionEnd();
-	return block;
+	return ret;
 }
 
 dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	FunctionStart(Null);
 	AssertInternal(size > 0);
 	AssertInternal(offset <= stack.size);
+	AssertInternal(IsValid(stack) == true);
 	
 	// Push at the end in case stack needs to be reallocated
 	Push(size, stack);
@@ -205,12 +207,12 @@ dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	// Move everything from offset up up by size
 	// Do so manually since we're modifying the same memory we're reading from
 	FromTo(stack.size - size, offset) {
-		ui8* src  = (ui8*)stack.memory + it - 1;
-		ui8* dest = (ui8*)stack.memory + it;
+		ui8* src  = (ui8*)stack.memory.memory + it - 1;
+		ui8* dest = (ui8*)stack.memory.memory + it;
 		*dest = *src;
 	}
 	
-	void* ret = (ui8*)stack.memory + offset;
+	void* ret = (ui8*)stack.memory.memory + offset;
 	Clear(ret, size);
 	
 	FunctionEnd();
@@ -227,18 +229,18 @@ dll_export void Remove(ui32 size, ui32 offset, memory_stack& stack) {
 	ui32 sizeToMove = stack.size - (offset + size);
 	
 	ForAll(sizeToMove) { // Move manually since we're reading from and writing to the same memory block
-		ui8* src = (ui8*)stack.memory + offset + size + it;
-	  ui8* dest = (ui8*)stack.memory + offset + it;
+		ui8* src = (ui8*)stack.memory.memory + offset + size + it;
+	  ui8* dest = (ui8*)stack.memory.memory + offset + it;
 		*dest = *src;
 	}
 	
-	Clear((ui8*)stack.memory + stack.size - size, size);
+	Clear((ui8*)stack.memory.memory + stack.size - size, size);
 	stack.size -= size;
 	
 	FunctionEnd();
 }
 
-dll_export void* Push(ui32 size, memory_block& stack) {
+dll_export void* Push(ui32 size, memory_stack& stack) {
 	FunctionStart(Null);
 	AssertInternal(size > 0);
 	
@@ -246,22 +248,22 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 	if(IsValid(stack) == false)
 		stack = AllocateStack(size);
 	
-	if(stack.size + size <= stack.capacity) { // If allocating within stack capacity
-		void* ret = (ui8*)stack.memory + stack.size;
+	if(stack.size + size <= stack.memory.size) { // If allocating within stack capacity
+		void* ret = (ui8*)stack.memory.memory + stack.size;
 		stack.size += size;
 		
 		FunctionEnd();
 		return ret;
 	}
 	else { // Else allocate new stack, copy contents over, then free old stack
-		ui32  newCapacity = stack.capacity;
+		ui32  newCapacity = stack.memory.size;
 		do 		newCapacity *= 2;
 		while(stack.size + size > newCapacity);
 	
 		auto newStack = AllocateStack(newCapacity);
 		
 		if(stack.size > 0) // If == 0 it will trigger an error
-			Push(stack.memory, stack.size, newStack);
+			Push(stack.memory.memory, stack.size, newStack);
 		
 		Free(stack);
 		stack = newStack;
@@ -273,7 +275,7 @@ dll_export void* Push(ui32 size, memory_block& stack) {
 	FunctionEnd();
 }
 
-dll_export void* Push(void* data, ui32 size, memory_block& stack) {
+dll_export void* Push(void* data, ui32 size, memory_stack& stack) {
 	FunctionStart(Null);
   void* mem = Push(size, stack);
 	Copy(data, size, mem);
@@ -329,7 +331,6 @@ dll_export void SetInvalid(memory_offset& offset) {
 dll_export void Pop(ui32 size, memory_stack& stack) {
 	FunctionStart(;);
 	
-	AssertInternal(stack.capacity > 0);
 	AssertInternal(IsValid(stack) == true);
 	if(size > 0) {
 		if(size < stack.size)
@@ -365,7 +366,7 @@ program_local bool IsValid(memory_pool& pool) {
 }
 
 dll_export void* Allocate(memory_pool& pool) {
-	FunctionStart(memory_offset());
+	FunctionStart(Null);
 	
 	AssertInternal(IsValid(pool) == true);
 	
@@ -430,5 +431,14 @@ dll_export void Deallocate(void* memory, memory_pool& pool) {
 	*((b8*)mem) = false;
 	Clear(memory, pool.elementSize);	
 
+	FunctionEnd();
+}
+
+dll_export void Free(memory_stack& stack) {
+	FunctionStart(;);
+	
+	AssertInternal(IsValid(stack) == true);
+	Free(stack.memory);
+	
 	FunctionEnd();
 }
