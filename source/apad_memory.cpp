@@ -364,17 +364,16 @@ program_local bool IsValid(memory_pool& pool) {
 	return ret;
 }
 
-dll_export void* Allocate(void* memory, ui16 size, memory_pool& pool) {
-	FunctionStart(Null);
+dll_export void* Allocate(memory_pool& pool) {
+	FunctionStart(memory_offset());
 	
 	AssertInternal(IsValid(pool) == true);
-	AssertInternal(size == pool.elementSize);
 	
 	void* ret = Null;
-	ui16 count = pool.memory.size / pool.elementSize;
+	ui16 count = pool.memory.size / (sizeof(b8) + pool.elementSize);
 	ForAll(count) {
 		void* mem = (ui8*)pool.memory.memory + (sizeof(b8) + pool.elementSize) * it;
-		b8*   initted = (b8*)mem;
+		b8* initted = (b8*)mem;
 		if(*initted == false) {
 			*initted = true;
 			MovePtr(mem, sizeof(b8));
@@ -387,28 +386,49 @@ dll_export void* Allocate(void* memory, ui16 size, memory_pool& pool) {
 	if(ret == Null) {
 		ui32 previousSize = pool.memory.size;
 		Expand(pool.memory);
-		void* mem = (ui8*)pool.memory.memory + previousSize;
-		*((b8*)mem) = true;
-		MovePtr(mem, sizeof(b8));
-		ret = mem;
+		ret = (ui8*)pool.memory.memory + previousSize;
+		*((b8*)ret) = true;
+		MovePtr(ret, sizeof(b8));
 	}
-	
-	Copy(memory, size, ret);
 	
 	FunctionEnd();
 	return ret;
+}
+
+dll_export memory_offset Allocate(void* memory, ui16 size, memory_pool& pool) {
+	FunctionStart(memory_offset());
+	
+	AssertInternal(size == pool.elementSize);
+	
+	auto* mem = Allocate(pool);
+	Copy(memory, size, mem);
+	
+	auto ret = GetOffset(mem, pool.memory);
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void Deallocate(memory_offset offset, memory_pool& pool) {
+	FunctionStart(;);
+	
+	auto* memory = GetMemory(offset);
+	Deallocate(memory, pool);
+	
+	FunctionEnd();
 }
 
 dll_export void Deallocate(void* memory, memory_pool& pool) {
 	FunctionStart(;);
 	
 	AssertInternal(IsValid(pool) == true);
+	AssertInternal(memory != Null);
 	AssertInternal((ui8*)memory >= (ui8*)pool.memory.memory + sizeof(b8));
 	AssertInternal((ui8*)memory <= GetEnd(pool.memory));
 	
 	void* mem = (ui8*)memory - sizeof(b8);
 	*((b8*)mem) = false;
 	Clear(memory, pool.elementSize);	
-	
+
 	FunctionEnd();
 }
