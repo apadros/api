@@ -49,15 +49,17 @@ dll_import void 				 SetInvalid(memory_offset& offset);
 // ******************** Stack allocator ******************** //
 
 struct memory_stack {
-	memory_block memory; // memory.size treated as stack capacity
+	memory_block memory; // memory.size treated as stack capacity.
 	ui32         size;
 };
 
+// All @TO_TEST
 dll_import memory_stack AllocateStack(ui32 capacity = Null);
-dll_import void 				Free(memory_stack& stack);
-dll_import void* 				Insert(ui32 size, ui32 offset, memory_stack& stack);
+dll_import void 				Free(memory_stack&);
+dll_import void* 				Insert(ui32 size, ui32 offset, memory_stack&);
+dll_import bool 				IsValid(memory_stack&);
+dll_import void 				Pop(ui32 size, memory_stack&); // If size >= stack.size, stack.size will be set to 0
 
-dll_import void 				Pop(ui32 size, memory_stack& stack); // If size >= stack.size, stack.size will be set to 0
 												// All of these will allocate a new stack with a minimum of 2x capacity if not enough space is available for the push.
 												// As such it is strongly discouraged to store pointers into stack memory and to treat it as a single block.
 dll_import void*  			Push(ui32 size, memory_stack& stack); // Will initialise stack on first use

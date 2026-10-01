@@ -61,7 +61,7 @@ dll_import 			 ui16  GetLength(const char* s); // Will return the length wihtout
 dll_import 			 char* Push( // If only a \0 is wanted, set string to Null and addEOS to true.
 														const char* 	string, 
 														bool 				  addEOS, 
-														memory_block& stack);
+														memory_stack& stack);
 dll_import 			 bool  StringIsEqualToAny(const char*  string, 
 																					const char** strings, 
 																					ui8 				 count);

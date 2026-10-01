@@ -34,10 +34,11 @@ program_local void* GetEnd(memory_block block) {
 	return ret;
 }
 
-program_local bool IsValid(memory_stack& stack) {
+program_local bool IsValid(memory_pool& pool) {
 	FunctionStart(false);
-	bool ret = IsValid(stack.memory);
+	bool ret = IsValid(pool.memory) && pool.elementSize > 0;
 	FunctionEnd();
+	return ret;
 }
 
 // ******************** Internal API end ******************** //
@@ -358,13 +359,6 @@ dll_export memory_pool AllocatePool(ui16 elementSize, ui16 count) {
 	return ret;
 }
 
-program_local bool IsValid(memory_pool& pool) {
-	FunctionStart(false);
-	bool ret = IsValid(pool.memory) && pool.elementSize > 0;
-	FunctionEnd();
-	return ret;
-}
-
 dll_export void* Allocate(memory_pool& pool) {
 	FunctionStart(Null);
 	
@@ -439,6 +433,14 @@ dll_export void Free(memory_stack& stack) {
 	
 	AssertInternal(IsValid(stack) == true);
 	Free(stack.memory);
+	stack.size = Null;
 	
 	FunctionEnd();
+}
+
+dll_export bool IsValid(memory_stack& stack) {
+	FunctionStart(false);
+	bool ret = IsValid(stack.memory);
+	FunctionEnd();
+	return ret;
 }

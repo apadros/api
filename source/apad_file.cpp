@@ -8,7 +8,8 @@
 dll_export void SaveFile(file& f, const char* path) {
 	FunctionStart(;);
 	AssertInternal(path != Null);
-	SaveFile(f.memory.memory, f.size, path);
+	auto size = GetSize(f);
+	SaveFile(f.memory.memory, size, path);
 	FunctionEnd();
 }
 
@@ -45,18 +46,19 @@ dll_export const char* GetFileExtension(const char* path) {
 dll_export file_line ParseLine(file& f, ui32& readIndex) {
 	FunctionStart(file_line());
 	
-	if(readIndex >= f.size)
+	auto fileSize = GetSize(f);
+	if(readIndex >= fileSize)
 		return file_line();
 	
 	char*        string = Null;
 	bool         readingData = false;
 	memory_stack stack = AllocateStack();
-	for(char* c = ((char*)f.memory) + readIndex; readIndex < f.size; c = ((char*)f.memory) + ++readIndex) {
+	for(char* c = ((char*)f.memory.memory) + readIndex; readIndex < fileSize; c = ((char*)f.memory.memory) + ++readIndex) {
 		if(*c == '"') { // Read / store string between quotation marks
 			AssertInternal(readingData == false); // In case a white space is missing between the end of data and the start of a string
 			
 			if(string == Null) {
-				if(readIndex + 1 >= f.size) // If, for whatever reason, we're at the very end of the file
+				if(readIndex + 1 >= fileSize) // If, for whatever reason, we're at the very end of the file
 					break;
 				string = c + 1;
 			}
@@ -114,7 +116,7 @@ dll_export char* GetLineDataElement(file_line& line, ui8 index) {
 }
 
 dll_export file CreateFile() {
-	FunctionStart(file(););
+	FunctionStart(file());
 	auto ret = AllocateStack();
 	FunctionEnd();
 	return ret;
@@ -130,4 +132,44 @@ dll_export void WriteToFile(char* string, file& f) {
 	FunctionStart(;);
 	Push(string, false, f);
 	FunctionEnd();
+}
+
+dll_export void* GetMemory(file& f) {
+	FunctionStart(Null);
+	auto ret = f.memory.memory;
+	FunctionEnd();
+	return ret;
+}
+
+dll_export ui32 GetSize(file& f) {
+	FunctionStart(Null);
+	
+	ui32 ret = Null;
+	if(f.memory.size == 0) { // Opened for reading, capacity == 0
+		AssertInternal(IsValid(f.memory) == true);
+		ret = f.memory.size;
+	}
+	else {
+		AssertInternal(IsValid(f) == true);
+		ret = f.memory.size;
+	}
+	
+	FunctionEnd();
+	return ret;
+}
+
+dll_export file LoadFile(const char* path) {
+	FunctionStart(file());
+	AssertInternal(path != Null);
+	
+	file ret = {};
+	
+	auto memory = Win32LoadFile(path);
+	if(IsValid(memory) == true) { // File load successful
+		ret.memory = memory;
+		ret.size = 0;
+	}
+	
+	FunctionEnd();
+	return ret;
 }

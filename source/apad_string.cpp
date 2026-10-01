@@ -19,11 +19,11 @@ program_local void PushNullChar(memory_stack& stack) {
 }
 
 // Also used in log.cpp
-dll_export char* Push(const char* string, bool addEOS, memory_block& stack) {
+dll_export char* Push(const char* string, bool addEOS, memory_stack& stack) {
   FunctionStart(Null);
 	AssertInternal(string != Null || addEOS == true);
 	
-	void* ret = (ui8*)stack.memory + stack.size;
+	void* ret = (ui8*)stack.memory.memory + stack.size;
 	if(string != Null) {
 		auto length = GetLength(string);
 		if(length > 0)
@@ -78,7 +78,7 @@ dll_export char* Concatenate(ui8 count, ...) {
 	va_end(list);
 	
 	FunctionEnd();
-	return (char*)stack.memory;
+	return (char*)stack.memory.memory;
 }
 
 dll_export char* AllocateString(const char* s, ui16 length) {
@@ -98,7 +98,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	PushNullChar(stack);
 	
 	FunctionEnd();
-	return (char*)stack.memory;
+	return (char*)stack.memory.memory;
 }
 
 dll_export ui16 GetLength(const char* s) {
@@ -350,7 +350,7 @@ dll_export char* ExtractSubstring(const char* s, ui16 length) {
 	PushNullChar(stack);
 	
 	FunctionEnd();
-	return (char*)stack.memory;
+	return (char*)stack.memory.memory;
 }
 
 dll_export bool StringIsEqualToAny(const char* string, const char** strings, ui8 count) {

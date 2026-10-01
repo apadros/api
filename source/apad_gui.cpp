@@ -146,7 +146,7 @@ dll_export program_external ui32 GetTextLength(text_body& tb) {
 dll_export program_external char* GetText(text_body& tb) {
 	FunctionStart(Null);
 	AssertInternal(IsValid(tb) == true);
-	auto ret = (char*)tb.memory.memory;
+	auto ret = (char*)tb.memory.memory.memory;
 	FunctionEnd();
 	return ret;
 }
