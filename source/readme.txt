@@ -1,4 +1,5 @@
 Compilation macros:
+	APAD_TESTING 							- Use only for automated testing, exposes program_local variables & functions
 	APAD_DEBUGGER_ASSERTIONS  - Enable assertions breaking in a debugger
 	APAD_ASSERTIONS_BACKTRACE - Enable printing of assertion call stack
 	

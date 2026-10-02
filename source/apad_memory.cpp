@@ -122,19 +122,13 @@ dll_export void Expand(memory_block& b) {
 	FunctionStart(;);
 	
 	void* newMemory = Null;
-	if(b.capacity != Null) {
-		b.capacity *= 2;
-		newMemory = Win32AllocateMemory(b.capacity);
-		Copy(b.memory, b.size, newMemory);
-	}
-	else {
-		b.size *= 2;
-		newMemory = Win32AllocateMemory(b.size);
-		Copy(b.memory, b.size / 2, newMemory);
-	}
+	ui32 newSize = b.size * 2;
+	newMemory = Win32AllocateMemory(newSize);
+	Copy(b.memory, b.size, newMemory);
 	
 	Win32FreeMemory(b.memory);
 	b.memory = newMemory;
+	b.size = newSize;
 	
 	FunctionEnd();
 }
@@ -177,7 +171,6 @@ dll_export void SetInvalid(memory_block& block) {
 	FunctionStart(;);
 	block.memory = Null;
 	block.size = 0;
-	block.capacity = 0;
 	FunctionEnd();
 }
 
@@ -288,10 +281,7 @@ dll_export memory_offset GetOffset(void* memory, memory_block& block) {
 	FunctionStart(memory_offset());
 	AssertInternal(IsValid(block) == true);
 	AssertInternal(memory >= block.memory);
-	if(block.capacity != Null)
-		AssertInternal(memory < (ui8*)block.memory + block.capacity)
-	else
-		AssertInternal(memory < (ui8*)block.memory + block.size);
+	AssertInternal(memory < (ui8*)block.memory + block.size);
 	
 	memory_offset ret = {};
 	ret.block = &block;
@@ -316,8 +306,6 @@ dll_export bool IsValid(memory_offset offset) {
 		ret = false;
 	else if(IsValid(*offset.block) == false)
 		ret = false;
-	else if(offset.block->capacity != Null && offset.offset >= offset.block->capacity)
-		ret = false;
 	else
 		ret = offset.offset < offset.block->size;
 	
@@ -338,6 +326,10 @@ dll_export void Pop(ui32 size, memory_stack& stack) {
 			stack.size -= size;
 		else
 			stack.size = 0;
+		
+		void* mem = GetMemory(stack);
+		MovePtr(mem, stack.size);
+		Clear(mem, size);
 	}
 	
 	FunctionEnd();
@@ -441,6 +433,22 @@ dll_export void Free(memory_stack& stack) {
 dll_export bool IsValid(memory_stack& stack) {
 	FunctionStart(false);
 	bool ret = IsValid(stack.memory);
+	FunctionEnd();
+	return ret;
+}
+
+dll_export ui32 GetCapacity(memory_stack stack) {
+	FunctionStart(Null);
+	AssertInternal(IsValid(stack) == true);
+	auto ret = stack.memory.size;
+	FunctionEnd();
+	return ret;
+}
+
+dll_export void* GetMemory(memory_stack stack) {
+	FunctionStart(Null);
+	AssertInternal(IsValid(stack) == true);
+	void* ret = stack.memory.memory;
 	FunctionEnd();
 	return ret;
 }

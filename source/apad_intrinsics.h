@@ -8,8 +8,13 @@
 // Linkage refers to wether data is accessible or has already been declared elsewhere (e.g. other translation units).
 // Data can also have no linkage whatsoever, meaning it can only be referred to in its current scope.
 
-				// Local variable or translation unit variable with program duration.
+				// Local variable or translation unit variable with program duration, with the
+				// possibility of exposing it during testing
+#ifdef APAD_TESTING
+#define program_local extern
+#else
 #define program_local static
+#endif
 				// Program duration, external linkage.
 				// Can only be used in global scope
 				// Need to be initialised in a translation unit, otherwise there'll be a multiple symbols error.

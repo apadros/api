@@ -24,7 +24,6 @@ dll_import void Copy(void* source, ui32 size, void* destination);
 struct memory_block {
   void* memory; // Never store this! Store the whole memory_block
   ui32  size;
-	ui32  capacity; // Stack functionality, will == 0 if not used this way
 };
 #define NullMemoryBlock memory_block()
 
@@ -56,6 +55,8 @@ struct memory_stack {
 // All @TO_TEST
 dll_import memory_stack AllocateStack(ui32 capacity = Null);
 dll_import void 				Free(memory_stack&);
+dll_import ui32 				GetCapacity(memory_stack stack);
+dll_import void* 				GetMemory(memory_stack stack);
 dll_import void* 				Insert(ui32 size, ui32 offset, memory_stack&);
 dll_import bool 				IsValid(memory_stack&);
 dll_import void 				Pop(ui32 size, memory_stack&); // If size >= stack.size, stack.size will be set to 0
