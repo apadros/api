@@ -134,13 +134,6 @@ dll_export void WriteToFile(char* string, file& f) {
 	FunctionEnd();
 }
 
-dll_export void* GetMemory(file& f) {
-	FunctionStart(Null);
-	auto ret = f.memory.memory;
-	FunctionEnd();
-	return ret;
-}
-
 dll_export ui32 GetSize(file& f) {
 	FunctionStart(Null);
 	

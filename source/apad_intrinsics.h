@@ -11,7 +11,7 @@
 				// Local variable or translation unit variable with program duration, with the
 				// possibility of exposing it during testing
 #ifdef APAD_TESTING
-#define program_local extern
+#define program_local dll_export
 #else
 #define program_local static
 #endif

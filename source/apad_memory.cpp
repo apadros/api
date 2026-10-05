@@ -202,7 +202,7 @@ dll_export void* Insert(ui32 size, ui32 offset, memory_stack& stack) {
 	// Do so manually since we're modifying the same memory we're reading from
 	FromTo(stack.size - size, offset) {
 		ui8* src  = (ui8*)stack.memory.memory + it - 1;
-		ui8* dest = (ui8*)stack.memory.memory + it;
+		ui8* dest = (ui8*)stack.memory.memory + it + size - 1;
 		*dest = *src;
 	}
 	

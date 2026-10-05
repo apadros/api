@@ -20,7 +20,7 @@ typedef memory_stack file;
 // For some reason can't declare the function pointers as dll_import
 
 // File properties & info
-dll_import 		 void* 				GetMemory(file& f); // @TO_TEST
+dll_import 		 void* 				GetMemory(file f); // Calls into apad_memory API
 dll_import 		 ui32  				GetSize(file& f); // @TO_TEST
 dll_import 		 bool   			IsValid(file& f);
 dll_import 		 const char*  GetFileNameAndExtension(const char* path); // Does not allocate a new string
