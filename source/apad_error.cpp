@@ -10,8 +10,8 @@
 
 					 program_external bool GUIApp = false;
 					 
-dll_export program_external bool AssertionHit = false; //Declared as an export since it is used in external assertions
-dll_export program_external bool CallExitInExternalAssertion = true; //Declared as an export since it is used in external assertions
+dll_export program_external bool AssertionHit = false; // Declared as an export since it is used in external assertions
+dll_export program_external bool CallExitInExternalAssertion = true; // Declared as an export since it is used in external assertions
 
 					 program_external bool DisplayAPIAssertions = true;
 					 program_external bool CallExitInAPIAssertions = true;
@@ -59,7 +59,7 @@ dll_export void SetCallExitInAPIAssertions(bool b) {
 }
 
 #include <stdio.h>
-dll_export program_external void DisplayError(const char* string) {
+dll_export void DisplayError(const char* string) {
 	FunctionStart(;);
 	AssertInternal(string != Null);
 	

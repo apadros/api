@@ -121,14 +121,13 @@ dll_export memory_block AllocateMemory(ui32 size) {
 dll_export void Expand(memory_block& b) {
 	FunctionStart(;);
 	
-	void* newMemory = Null;
+	// Do this instead of directly replaced b.memory & b.size since
+	// this approach takes global memory into consideration
 	ui32 newSize = b.size * 2;
-	newMemory = Win32AllocateMemory(newSize);
-	Copy(b.memory, b.size, newMemory);
-	
-	Win32FreeMemory(b.memory);
-	b.memory = newMemory;
-	b.size = newSize;
+	auto newBlock = AllocateMemory(newSize);
+	Copy(b.memory, b.size, newBlock.memory);
+	Free(b);
+	b = newBlock;
 	
 	FunctionEnd();
 }
@@ -451,4 +450,12 @@ dll_export void* GetMemory(memory_stack stack) {
 	void* ret = stack.memory.memory;
 	FunctionEnd();
 	return ret;
+}
+
+dll_export void Free(memory_pool& pool) {
+	FunctionStart(;);
+	Assert(IsValid(pool.memory) == true);
+	Free(pool.memory);
+	pool.elementSize = Null;
+	FunctionEnd();
 }

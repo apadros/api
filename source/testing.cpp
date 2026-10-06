@@ -1,10 +1,12 @@
 #include <assert.h>
+#include <stdio.h>
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
-dll_import void* AllocatedMemory;
-dll_import ui32  AllocatedMemoryLength;
 	
 void RunMemoryTest() {
+	dll_import void* AllocatedMemory;
+	dll_import ui32  AllocatedMemoryLength;
+	
 	// KiB(), MiB() & GiB()
 	{
 		ui32 value1 = KiB(2);
@@ -92,8 +94,11 @@ void RunMemoryTest() {
 		assert(offset.block == Null && offset.offset == Null);
 	}
 	
+	// At this piont AllocatedMemory[0] != Null
+	
 	// memory_stack API
 	{
+		// AllocateStack()
 		auto stack = AllocateStack();
 		assert(stack.memory.memory != Null);
 		assert(stack.memory.size == 1); // Stack capacity
@@ -200,6 +205,7 @@ void RunMemoryTest() {
 		ui32 capacity = pool.memory.size;
 		assert(capacity == (sizeof(b8) + sizeof(element)) * count);
 		assert(IsValid(pool.memory) == true);
+		assert(((void**)AllocatedMemory)[1] == pool.memory.memory);
 		
 		// Allocate()
 		void* mem = Allocate(pool);
@@ -219,8 +225,11 @@ void RunMemoryTest() {
 		assert(mem == (ui8*)pool.memory.memory + (sizeof(b8) + sizeof(element)) * 2 + sizeof(b8));
 		mem = (ui8*)mem - sizeof(b8);
 		assert(*((b8*)mem) == true);
+		// At this point we've expanded inner memory and thus allocated a new block globally
+		assert(((void**)AllocatedMemory)[1] == Null);
+		assert(((void**)AllocatedMemory)[2] == pool.memory.memory);
 		
-		// Deallocate() & reallocation of freed memory
+		// Deallocate() & reallocation of deallocated memory
 		mem = (ui8*)pool.memory.memory + sizeof(b8) + sizeof(element) + sizeof(b8);
 		Deallocate(mem, pool);
 		mem = (ui8*)mem - sizeof(b8);
@@ -243,7 +252,13 @@ void RunMemoryTest() {
 		// Deallocate(memory_offset, memory_pool)
 		Deallocate(offset, pool);
 		assert(*((b8*)mem) == false);
+		
+		// Free()
+		Free(pool);
+		assert(IsValid(pool.memory) == false);
+		assert(pool.elementSize == Null);
+		assert(((void**)AllocatedMemory)[2] == Null);
 	}
-	
-	 // @WIP - Run into issues at the very end with ExitMemoryAPI() in apad_memory.cpp
+		
+	printf("\nMemory API testing OK\n");
 }

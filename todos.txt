@@ -21,6 +21,9 @@ Bitmaps / Images
 			
 Error
 	- Debug dll version with debugger assertions @PRIORITY
+	
+File
+	- @WIP - Recent changes to memory API require testing, check functions marked as @TO_TEST in apad_file.h
 		
 GUI
 	- Custom window icon
@@ -51,8 +54,8 @@ String
 Time
 	- Check for dates not available on the calendar (e.g. 30th feb)
 	
-Testbenches
-	- Either as cpp or bat files 
+Testing
+	- @WIP - Develop test for the remaing API
 	
 Text
 	- Investigate ttf file loading and usage through Windows API

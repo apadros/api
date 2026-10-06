@@ -52,7 +52,6 @@ struct memory_stack {
 	ui32         size;
 };
 
-// All @TO_TEST
 dll_import memory_stack AllocateStack(ui32 capacity = Null);
 dll_import void 				Free(memory_stack&);
 dll_import ui32 				GetCapacity(memory_stack stack);
@@ -87,5 +86,6 @@ dll_import void* 				 Allocate( // Do NOT store the returned raw pointer, call G
 dll_import memory_offset Allocate(void* memory, ui16 size, memory_pool&); // AllocatePool() with valid elementSize must have been called beforehand
 dll_import void 				 Deallocate(void* memory, memory_pool& pool); // Must be called before any other pool API call after respective Allocate() call to avoid internal memory reallocation
 dll_import void 			 	 Deallocate(memory_offset offset, memory_pool& pool);
+dll_import void 				 Free(memory_pool& pool);
 
 #endif
