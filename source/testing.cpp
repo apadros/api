@@ -1,9 +1,142 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h> // For system()
 #include "apad_intrinsics.h"
+#include "apad_file.h"
 #include "apad_memory.h"
+
+void RunFileAPITest() {
+	// Create new file and add sample string
+	system("if exist temp ( rmdir temp /s /q )");
+	system("mkdir temp");
+	system("echo hello>> temp/test_file.txt");
 	
-void RunMemoryTest() {
+	const char* path = "temp/test_file.txt";
+	
+	// GetFileNameAndExtension(), GetFileExtension
+	{
+		const char* nameExtension = GetFileNameAndExtension(path);
+		ui16 pathLength = 18;
+		for(ui8 i = 0; i < pathLength - 5; i++)
+			assert(nameExtension[i] == path[i + 5]);
+		
+		const char* extension = GetFileExtension(path);
+		for(ui8 i = 0; i < 3; i++)
+			assert(extension[i] == path[i + 15]);
+		
+		// Test without the slash
+		const char* path2 = "new_test_file.txt";
+		nameExtension = GetFileNameAndExtension(path2);
+		for(ui8 i = 0; i < 17; i++)
+			assert(nameExtension[i] == path2[i]);
+	}
+		
+	// FileExists(), LoadFile(), IsValid()
+	assert(FileExists(path) == true);
+	auto f = LoadFile(path);
+	assert(IsValid(f) == true);
+	
+	// GetSize(), GetMemory()
+	{
+		ui32 size = GetSize(f);
+		assert(size == 7); // Cause echo >> .txt will add a newline
+		void* mem = GetMemory(f);
+		const char* string = (const char*)mem;
+		assert(string[0] == 'h' && string[1] == 'e' && string[2] == 'l' && 
+					 string[3] == 'l' && string[4] == 'o');
+	}
+	
+	// FreeFile(), DeleteFile()
+	FreeFile(f);
+	assert(IsValid(f) == false);
+	DeleteFile(path);
+	assert(FileExists(path) == false);
+	
+	// SaveFile() + overload
+	{
+		const char* string = "world2";
+		SaveFile((void*)string, 6, path);
+		assert(FileExists(path) == true);
+		f = LoadFile(path);
+		assert(IsValid(f) == true);
+		const char* mem = (const char*)GetMemory(f);
+		assert(GetSize(f) == 6);
+		assert(mem[0] == 'w' && mem[1] == 'o' && mem[2] == 'r' && 
+					 mem[3] == 'l' && mem[4] == 'd' && mem[5] == '2');
+					 
+		const char* newPath = "test_file_2.txt";
+		assert(FileExists(newPath) == false);
+		SaveFile(f, newPath);
+		assert(FileExists(newPath) == true);
+				
+		FreeFile(f);
+		DeleteFile(newPath);
+	}
+	
+	// ParseLine(), IsValid(), GetDataElement() & Free()
+	{
+		const char* string = "56 hello 8.9\n\"more data\" 77";
+		ui8 				length = 28;
+		SaveFile((void*)string, length, path);
+		assert(FileExists(path) == true);
+		file f = LoadFile(path);
+		assert(IsValid(f) == true);
+		assert(GetSize(f) == length);
+		
+		ui32 readIndex = 0;
+		auto line = ParseLine(f, readIndex);
+		assert(line.count == 3);
+		assert(IsValid(line) == true);
+		char* element = GetDataElement(line, 2);
+		assert(element[0] == '8' && element[1] == '.' && element[2] == '9' && element[3] == '\0');
+		Free(line);
+		assert(IsValid(line) == false);
+		assert(line.count == Null);
+		
+		// Test parsing of multiple lines
+		line = ParseLine(f, readIndex);
+		assert(line.count == 2);
+		element = GetDataElement(line, 1);
+		assert(element[0] == '7' && element[1] == '7');
+		Free(line);
+		assert(IsValid(line) == false);
+		assert(line.count == Null);
+		
+		Free(f);
+		DeleteFile(path);
+	}
+	
+	// CreateFile(), Free(), WriteToFile() & overload
+	{
+		auto file = CreateFile();
+		assert(IsValid(file) == true);
+		
+		const char* string = "hello world ";
+		WriteToFile((char*)string, file);
+		
+		string = "\"new string\"";
+		WriteToFile((char*)string, file);
+		
+		ui32 i = 90;
+		WriteToFile(&i, sizeof(i), file);
+		
+		ui32 readIndex = 0;
+		auto line = ParseLine(file, readIndex);
+		assert(line.count == 4); // Hello and world will be considered 2 separate data elements
+		char* element = GetDataElement(line, 2);
+		assert(element[0] == 'n' && element[1] == 'e' && element[2] == 'w' && 
+					 element[3] == ' ' && element[4] == 's');
+		Free(line);
+		
+		Free(file);
+	}
+	
+	system("rmdir temp /s /q");
+	
+	printf("\nFile API testing OK\n");
+}
+	
+void RunMemoryAPITest() {
 	dll_import void* AllocatedMemory;
 	dll_import ui32  AllocatedMemoryLength;
 	

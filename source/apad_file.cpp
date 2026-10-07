@@ -24,11 +24,16 @@ dll_export const char* GetFileNameAndExtension(const char* path) {
 	AssertInternal(path != Null);
   
   const char* fileName = path + GetLength(path);
+	const char* ret = Null;
   do 		 fileName -= 1;
-  while (fileName[0] != '\\' && fileName[0] != '/');
-  return fileName + 1;
+  while (fileName[0] != '\\' && fileName[0] != '/' && fileName > path); // The latter in case there is no \ or /
+	if(fileName == path) // No \ or / found
+		ret = fileName;
+	else
+		ret = fileName + 1;
 	
 	FunctionEnd();
+	return ret;
 }
 
 dll_export const char* GetFileExtension(const char* path) {
@@ -93,23 +98,24 @@ dll_export file_line ParseLine(file& f, ui32& readIndex) {
 	return ret;
 }
 
-dll_export bool LineIsValid(file_line& f) {
-	return f.data.size > 0 && f.count > 0;
+dll_export bool IsValid(file_line& f) {
+	return IsValid(f.data) && f.count > 0;
 }
 
-dll_export void FreeLine(file_line& line) {
+dll_export void Free(file_line& line) {
 	FunctionStart(;);
 	Free(line.data);
+	line.count = Null;
 	FunctionEnd();
 }
 
-dll_export char* GetLineDataElement(file_line& line, ui8 index) {
+dll_export char* GetDataElement(file_line& line, ui8 index) {
 	FunctionStart(Null);
 	AssertInternal(line.data.size > 0);
 	AssertInternal(line.data.size % sizeof(char*) == 0);
 	AssertInternal(index < line.data.size / sizeof(char*));
 	
-	auto ret = ((char**)line.data.memory.memory)[index];
+	auto ret = ((char**)GetMemory(line.data))[index];
 	
 	FunctionEnd();
 	return ret;

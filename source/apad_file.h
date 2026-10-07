@@ -21,16 +21,16 @@ typedef memory_stack file;
 
 // File properties & info
 dll_import 		 void* 				GetMemory(file f); // Calls into apad_memory API
-dll_import 		 ui32  				GetSize(file& f); // @TO_TEST
+dll_import 		 ui32  				GetSize(file& f);
 dll_import 		 bool   			IsValid(file& f);
 dll_import 		 const char*  GetFileNameAndExtension(const char* path); // Does not allocate a new string
-dll_import 		 const char*  GetFileExtension(const char* path); // Does not allocate a new string @TO_TEST
+dll_import 		 const char*  GetFileExtension(const char* path); // Does not allocate a new string
 
 // I/O
 program_unique void 			(*DeleteFile)(const char* path) = Win32DeleteFile; // FileExists(path) must be called first
 program_unique bool 			(*FileExists)(const char* path) = Win32FileExists;
 program_unique void 			(*FreeFile)(file& f) = Free;
-dll_export     file 			  LoadFile(const char* path); // FileExists(path) must be called first @TO_TEST
+dll_export     file 			  LoadFile(const char* path); // FileExists(path) must be called first
 program_unique char*      (*OpenFileGUI)(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
 																				 const char* filters)   // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0" 
 																				 = Win32OpenFileGUI; 
@@ -47,16 +47,14 @@ struct file_line {
 	ui8          count; // Number of individual data elements in the line, each separated by null terminators
 };
 
-#define              LineReadLoopHeader(_readIndexID, _file) for(ui32 _readIndexID = 0; _readIndexID < (_file).size; )
 dll_import file_line ParseLine(file& f, ui32& readIndex); // Will treat any data between quotation marks as a single string
-dll_import bool      LineIsValid(file_line& f);
-dll_import char* 		 GetLineDataElement(file_line& line, ui8 index);
-dll_import void 		 FreeLine(file_line& line); // Must be called after every call to ReadLine() once data is not needed
+dll_import bool      IsValid(file_line& f);
+dll_import char* 		 GetDataElement(file_line& line, ui8 index /* 0 based */);
+dll_import void 		 Free(file_line& line); // Must be called after every call to ReadLine() once data is not needed
 
 // ******************** Writing ******************** //
 
-// Cause Windows
-#ifdef CreateFile
+#ifdef CreateFile // Windows API
 #undef CreateFile
 #endif
 
