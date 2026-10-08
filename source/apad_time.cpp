@@ -26,12 +26,11 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 
 // ******************** Local API end ******************** //
 
-dll_export bool IsDateAndValid(const char* s) {
+dll_export bool IsDateAndValid(const char* s, ui16 length) {
 	FunctionStart(false);
 	AssertInternal(s != Null);
 	
-	char* stringCopy = AllocateString(s, Null);
-	ConvertStringToLowerCase(stringCopy);
+	char* stringCopy = ConvertStringToLowerCase(s, length);
 	
 	// Need to potentially divide the string into 2 parts if an offset is present
 	char* offset = (char*)FindSubstring("+", stringCopy);
@@ -45,14 +44,17 @@ dll_export bool IsDateAndValid(const char* s) {
 	if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == false && AreEqual(stringCopy, "today") == false) { // Check against allowed formats if not a day of the week or "today"
 		auto length = GetLength(stringCopy); // Modded length in case of presence of offsets
 		if(length != GetLength(DateFormatShort) && length != GetLength(DateFormatMedium) && length != GetLength(DateFormatLong)) {
+			Free(stringCopy);
 			FunctionEnd();
 			return false;
 		}
 		if(stringCopy[2] != '/') {
+			Free(stringCopy);
 			FunctionEnd();
 			return false;
 		}
 		if(length >= GetLength(DateFormatMedium) && stringCopy[5] != '/') {
+			Free(stringCopy);
 			FunctionEnd();
 			return false;
 		}
@@ -61,6 +63,7 @@ dll_export bool IsDateAndValid(const char* s) {
 		{
 			auto day = StringToInt(stringCopy, 2);
 			if(day < 0 || day > 31) {
+				Free(stringCopy);
 				FunctionEnd();
 				return false;
 			}
@@ -70,6 +73,7 @@ dll_export bool IsDateAndValid(const char* s) {
 		{
 			auto month = StringToInt(stringCopy + 3, 2);
 			if(month < 0 || month > 12) {
+				Free(stringCopy);
 				FunctionEnd();
 				return false;
 			}
@@ -80,22 +84,23 @@ dll_export bool IsDateAndValid(const char* s) {
 	
 	// At this point the date pre offset is correct
 	// In the case of an offset, check whether the remaining string is a number
-	if(offset != Null && IsNumber(offset + 1) == false) {
+	if(offset != Null && IsNumber(offset + 1, Null) == false) {
+		Free(stringCopy);
 		FunctionEnd();
 		return false;
 	}
 	
 	// Otherwise it's all correct
+	Free(stringCopy);
 	FunctionEnd();
 	return true;
 }
 
-dll_export date StringToDate(const char* s) {
+dll_export date StringToDate(const char* s, ui16 length) {
 	FunctionStart(date());
 	AssertInternal(s != Null);
 	
-	char* stringCopy = AllocateString(s, Null);
-	ConvertStringToLowerCase(stringCopy);
+	char* stringCopy = ConvertStringToLowerCase(s, length);
 	
 	// Determine if any offset present and, if so, split the string into 2 parts
 	si16 offset = 0;
@@ -104,7 +109,7 @@ dll_export date StringToDate(const char* s) {
 		bool  offsetPlus = offsetStart != Null;
 		if(offsetStart == Null)
 			offsetStart = (char*)FindSubstring("-", stringCopy);
-		if(offsetStart != Null && IsNumber(offsetStart + 1) == true) {
+		if(offsetStart != Null && IsNumber(offsetStart + 1, Null) == true) {
 			*offsetStart = '\0';
 			offset = StringToInt(offsetStart + 1, Null);
 			if(offsetPlus == false)
@@ -115,6 +120,7 @@ dll_export date StringToDate(const char* s) {
 	// Work out the date
 	if(AreEqual(stringCopy, "today") == true) {
 		auto ret = GetDate(offset);
+		Free(stringCopy);
 		FunctionEnd();
 		return ret;
 	}
@@ -132,6 +138,7 @@ dll_export date StringToDate(const char* s) {
 			dayOffset += 7;
 		
 		auto ret = GetDate(dayOffset + offset);
+		Free(stringCopy);
 		FunctionEnd();
 		return ret;
 	}
@@ -169,11 +176,13 @@ dll_export date StringToDate(const char* s) {
 			// Convert and return
 			mktime(time); // Will set w_day
 			
+			Free(stringCopy);
 			FunctionEnd();
 			return ConvertCSLTimeToDate(time);
 		}
 	}
 	
+	Free(stringCopy);
 	AssertInternal(false); // We shouldn't have reached this line
 	FunctionEnd();
 	return date();

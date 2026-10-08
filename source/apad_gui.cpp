@@ -958,7 +958,7 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 	button ret = {};
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
 	if(text != Null && textHeight != Null) {
-		ret.text = AllocateString(text);
+		ret.text = AllocateString(text, Null);
 		ret.textHeight = textHeight;
 	}
 	ret.highlightColour = CreateColourUI8(highlightRed, highlightGreen, highlightBlue);

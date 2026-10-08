@@ -4,6 +4,98 @@
 #include "apad_intrinsics.h"
 #include "apad_file.h"
 #include "apad_memory.h"
+#include "apad_string.h"
+
+void RunStringAPITest() {
+	// GetLength(), ConvertStringToLowerCase() & Free()
+	{
+		char* string = "HeL_Lo1";
+		assert(GetLength(string) == 7);
+		string = ConvertStringToLowerCase(string, Null);
+		assert(string[0] == 'h' && string[1] == 'e' && string[2] == 'l' && 
+					 string[3] == '_' && string[4] == 'l' && string[5] == 'o' && string[6] == '1');
+		assert(AreEqual(string, "hel_lo1") == true);
+		Free(string);
+	}
+	
+	// All ToString() overloads, StringToInt()
+	{
+		si8 s8 = -5;
+		char* string = ToString(s8);
+		assert(GetLength(string) == 2);
+		assert(string[0] == '-' && string[1] == '5');
+		assert(AreEqual(string, "-5") == true);
+		Free(string);
+		
+		ui8 u8 = 10;
+		string = ToString(u8);
+		assert(GetLength(string) == 2);
+		assert(AreEqual(string, "10") == true);
+		Free(string);
+		
+		si16 s16 = -908;
+		string = ToString(s16);
+		assert(GetLength(string) == 4);
+		assert(AreEqual(string, "-908") == true);
+		Free(string);
+		
+		ui16 u16 = 407;
+		string = ToString(u16);
+		assert(GetLength(string) == 3);
+		assert(AreEqual(string, "407") == true);
+		Free(string);
+		
+		si32 s32 = -68575;
+		string = ToString(s32);
+		assert(GetLength(string) == 6);
+		assert(AreEqual(string, "-68575") == true);
+		Free(string);
+		
+		ui32 u32 = 71420;
+		string = ToString(u32);
+		assert(GetLength(string) == 5);
+		assert(AreEqual(string, "71420") == true);
+		Free(string);
+		
+		si64 s64 = -55'765'819'430;
+		string = ToString(s64);
+		assert(GetLength(string) == 12);
+		assert(AreEqual(string, "-55765819430") == true);
+		Free(string);
+		
+		ui64 u64 = 102'698'610'058;
+		string = ToString(u64);
+		assert(GetLength(string) == 12);
+		assert(AreEqual(string, "102698610058") == true);
+		Free(string);
+		
+		f32  f   = 3.218;
+		string = ToString(f);
+		assert(GetLength(string) == 4);
+		assert(AreEqual(string, "3.22") == true);
+		Free(string);
+		
+		f64  d   = 6.159;
+		string = ToString(d);
+		assert(GetLength(string) == 4);
+		assert(AreEqual(string, "6.16") == true);
+		Free(string);
+		
+		auto i = StringToInt("-3812", Null);
+		assert(i == -3812);
+	}
+	
+	// IsLetter(), IsWord(), IsNumber() & IsNumber()
+	{
+		assert(IsLetter('t') == true);
+		assert(IsNumber('7') == true);
+		assert(IsWord("hello", Null) == true);
+		assert(IsNumber("27", Null) == true);
+	}
+	
+	
+	printf("\nString API testing OK\n");
+}
 
 void RunFileAPITest() {
 	// Create new file and add sample string

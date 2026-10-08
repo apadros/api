@@ -7,7 +7,7 @@
 
 // ******************** Conversions ******************** //
 
-dll_import void 	ConvertStringToLowerCase(const char* s);
+dll_import char* ConvertStringToLowerCase(const char* s, ui16 length /* Set to Null to convert until the end of string char */); // Return string must be freed with Free()
 
 // All ToString() functions return a string allocated on global API memory.
 dll_import char* ToString(si8 i);
@@ -18,26 +18,25 @@ dll_import char* ToString(si32 i);
 dll_import char* ToString(ui32 i);
 dll_import char* ToString(si64 i);
 dll_import char* ToString(ui64 i);
-dll_import char* ToString(f32 f); // Return limited to 2 decimal places without rounding
-dll_import char* ToString(f64 f); // Return limited to 2 decimal places without rounding
+dll_import char* ToString(f32 f); // Return limited to 2 decimal places with rounding
+dll_import char* ToString(f64 f); // Return limited to 2 decimal places with rounding
 dll_import si32  StringToInt(const char* s,
 														 ui16        length); // Set to Null to convert up to the null-char, must be supplied if string doesn't have one.
 
 // ******************** Others ******************** //
 
 dll_import bool IsLetter(char c);
-dll_import bool IsWord(char* string);
+dll_import bool IsWord(char* string, ui16 length /* Set to Null to scan until the EOS char */);
 dll_import bool IsNumber(char c);
-dll_import bool IsNumber(char* string);
+dll_import bool IsNumber(char* string, ui16 length /* Set to Null to scan until the EOS char */);
 
 dll_import bool IsWhitespace(char c); // Space, horizontal & vertical tabs, carriage return, newline & feed
 
 											 
 											 
-dll_import 			 char* AllocateString( // Allocates string on API global memory
-																			 // Will automatically add a null-char if target length does not contain one
-																			const char* s, 
-																			ui16        length = Null); // Leave as Null to copy until and including the null-char
+dll_import 			 char* // Will always contain a null char at the end. Must be freed.
+											 AllocateString( const char* s, 
+																			 ui16        length); // Set to Null to copy until and including the null-char
 dll_import 			 bool  AreEqual(const char* s1, 
 																const char* s2);
 dll_import 			 char* Concatenate( // Allocates string on API global memory

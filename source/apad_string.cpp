@@ -43,17 +43,22 @@ dll_export bool IsWhitespace(char c) {
 	return isspace(c) != 0;
 }
 
-dll_export void ConvertStringToLowerCase(const char* s) {
-	FunctionStart(;);
+dll_export char* ConvertStringToLowerCase(const char* s, ui16 length) {
+	FunctionStart(Null);
 	AssertInternal(s != Null);
 	
-	auto length = GetLength(s);
+	char* ret = AllocateString(s, length);
+	
+	if(length == Null)
+		length = GetLength(s);
+	
 	ForAll(length) {
-    if(s[it] >= 'A' && s[it] <= 'Z')
-			((char*)s)[it] += 'a' - 'A';
+    if(ret[it] >= 'A' && ret[it] <= 'Z')
+			ret[it] += 'a' - 'A';
 	}
 	
 	FunctionEnd();
+	return ret;
 }
 
 #include <stdarg.h>
@@ -84,21 +89,19 @@ dll_export char* Concatenate(ui8 count, ...) {
 dll_export char* AllocateString(const char* s, ui16 length) {
 	FunctionStart(Null);
 	AssertInternal(s != Null);
-	
-	auto sLength = GetLength(s);
-	
-	ui16 copyLength = 0;
+
+	// Set the real lenght without the EOS char
 	if(length == Null)
-		copyLength = sLength;
-	else
-		copyLength = GetMin(length, sLength);
+		length = GetLength(s);
+	else if(s[length - 1] == '\0')
+		length -= 1;
 	
-	auto stack = AllocateStack(copyLength + 1);
-	Push((void*)s, copyLength, stack);
+	auto stack = AllocateStack(length + 1);
+	Push((void*)s, length, stack);
 	PushNullChar(stack);
 	
 	FunctionEnd();
-	return (char*)stack.memory.memory;
+	return (char*)GetMemory(stack);
 }
 
 dll_export ui16 GetLength(const char* s) {
@@ -279,11 +282,12 @@ dll_export bool IsLetter(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
 }
 
-dll_export bool IsWord(char* string) {
+dll_export bool IsWord(char* string, ui16 length) {
 	FunctionStart(false);
 	AssertInternal(string != Null);
 	
-	auto length = GetLength(string);
+	if(length == Null)
+		length = GetLength(string);
 	ForAll(length) {
 		if(IsLetter(string[it]) == false)
 			return false;
@@ -297,11 +301,12 @@ dll_export bool IsNumber(char c) {
 	return c >= '0' && c <= '9';
 }
 
-dll_export bool IsNumber(char* string) {
+dll_export bool IsNumber(char* string, ui16 length) {
 	FunctionStart(false);
 	AssertInternal(string != Null);
 	
-	auto length = GetLength(string);
+	if(length == Null)
+		length = GetLength(string);
 	ForAll(length) {
 		if(IsNumber(string[it]) == false)
 			return false;

@@ -22,9 +22,6 @@ Bitmaps / Images
 Error
 	- Debug dll version with debugger assertions @PRIORITY
 	
-File
-	- @WIP - Recent changes to memory API require testing, check functions marked as @TO_TEST in apad_file.h
-		
 GUI
 	- Custom window icon
 	- Custom taskbar icon
