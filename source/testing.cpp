@@ -14,85 +14,145 @@ void RunStringAPITest() {
 		string = ConvertStringToLowerCase(string, Null);
 		assert(string[0] == 'h' && string[1] == 'e' && string[2] == 'l' && 
 					 string[3] == '_' && string[4] == 'l' && string[5] == 'o' && string[6] == '1');
-		assert(AreEqual(string, "hel_lo1") == true);
+		assert(AreEqual(string, Null, "hel_lo1", Null) == true);
 		Free(string);
 	}
 	
-	// All ToString() overloads, StringToInt()
+	// AreEqual(), all ToString() overloads, StringToInt()
 	{
 		si8 s8 = -5;
 		char* string = ToString(s8);
 		assert(GetLength(string) == 2);
 		assert(string[0] == '-' && string[1] == '5');
-		assert(AreEqual(string, "-5") == true);
+		assert(AreEqual(string, Null, "-5", Null) == true);
 		Free(string);
 		
 		ui8 u8 = 10;
 		string = ToString(u8);
 		assert(GetLength(string) == 2);
-		assert(AreEqual(string, "10") == true);
+		assert(AreEqual(string, Null, "10", Null) == true);
 		Free(string);
 		
 		si16 s16 = -908;
 		string = ToString(s16);
 		assert(GetLength(string) == 4);
-		assert(AreEqual(string, "-908") == true);
+		assert(AreEqual(string, Null, "-908", Null) == true);
 		Free(string);
 		
 		ui16 u16 = 407;
 		string = ToString(u16);
 		assert(GetLength(string) == 3);
-		assert(AreEqual(string, "407") == true);
+		assert(AreEqual(string, Null, "407", Null) == true);
 		Free(string);
 		
 		si32 s32 = -68575;
 		string = ToString(s32);
 		assert(GetLength(string) == 6);
-		assert(AreEqual(string, "-68575") == true);
+		assert(AreEqual(string, Null, "-68575", Null) == true);
 		Free(string);
 		
 		ui32 u32 = 71420;
 		string = ToString(u32);
 		assert(GetLength(string) == 5);
-		assert(AreEqual(string, "71420") == true);
+		assert(AreEqual(string, Null, "71420", Null) == true);
 		Free(string);
 		
 		si64 s64 = -55'765'819'430;
 		string = ToString(s64);
 		assert(GetLength(string) == 12);
-		assert(AreEqual(string, "-55765819430") == true);
+		assert(AreEqual(string, Null, "-55765819430", Null) == true);
 		Free(string);
 		
 		ui64 u64 = 102'698'610'058;
 		string = ToString(u64);
 		assert(GetLength(string) == 12);
-		assert(AreEqual(string, "102698610058") == true);
+		assert(AreEqual(string, Null, "102698610058", Null) == true);
 		Free(string);
 		
 		f32  f   = 3.218;
 		string = ToString(f);
 		assert(GetLength(string) == 4);
-		assert(AreEqual(string, "3.22") == true);
+		assert(AreEqual(string, Null, "3.22", Null) == true);
 		Free(string);
 		
 		f64  d   = 6.159;
 		string = ToString(d);
 		assert(GetLength(string) == 4);
-		assert(AreEqual(string, "6.16") == true);
+		assert(AreEqual(string, Null, "6.16", Null) == true);
 		Free(string);
 		
 		auto i = StringToInt("-3812", Null);
 		assert(i == -3812);
 	}
 	
-	// IsLetter(), IsWord(), IsNumber() & IsNumber()
+	// IsLetter(), IsWord(), IsNumber(), IsNumber() & IsWhitespace()
 	{
 		assert(IsLetter('t') == true);
 		assert(IsNumber('7') == true);
 		assert(IsWord("hello", Null) == true);
 		assert(IsNumber("27", Null) == true);
+		assert(IsWhitespace(' ') == true);
+		assert(IsWhitespace('\r') == true);
+		assert(IsWhitespace('\n') == true);
+		assert(IsWhitespace('\t') == true);
 	}
 	
+	// AllocateString(), Concatenate()
+	{
+		char* string = AllocateString("hello world", 7);
+		assert(GetLength(string) == 7);
+		assert(AreEqual(string, Null, "hello w", Null) == true);
+		Free(string);
+		
+		char* text1 = "sample text";
+		string = AllocateString(text1, Null);
+		assert(GetLength(string) == GetLength(text1));
+		assert(AreEqual(string, Null, text1, Null) == true);
+		Free(string);
+		
+					text1 = "new ";
+		char* text2 = "text";
+		string = Concatenate(2, text1, text2);
+		assert(GetLength(string) == GetLength(text1) + GetLength(text2));
+		assert(AreEqual(string, Null, "new text", Null) == true);
+		Free(string);
+	}
+	
+	// ContainsAnySubstring(), ExtractSubstring(), Copy(), FindSubstring() & StringIsEqualToAny()
+	{
+		const char* subs[] = { "sample", "hello " };
+		const char* text = "this is a sample string, hello world";
+		assert(ContainsAnySubstring(text, Null, subs, 2) == true);
+		
+		const ui8 length = 10;
+		char* string = ExtractSubstring(text + 3, length);
+		assert(GetLength(string) == length);
+		assert(AreEqual(string, Null, "s is a sam", Null) == true);
+		
+		char ar[length];
+		Copy(text + 17, length, ar, length);
+		assert(AreEqual(ar, length, "string, he", Null) == true);
+		
+		const char* sub = FindSubstring(subs[1], Null, text, Null);
+		assert(AreEqual(sub, Null, subs[1], Null) == true);
+		
+		assert(StringIsEqualToAny(subs[1], Null, subs, 2) == true);
+	}
+	
+	// Push()
+	{
+		auto stack = AllocateStack();
+		assert(IsValid(stack) == true);
+		
+		const char* string = "temp string";
+		Push(string, Null, false, stack);
+		assert(stack.size == GetLength(string));
+		
+		Push(string, Null, true, stack);
+		assert(stack.size == GetLength(string) * 2 + 1);
+		
+		Free(stack);
+	}
 	
 	printf("\nString API testing OK\n");
 }
