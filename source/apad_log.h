@@ -17,6 +17,9 @@ dll_import void 		Log( // Format strings
 												 // %f32, %f64
 												 // Floating point precision limited to 2 decimal points
 												 // Need to use standard C standard library escape sequences for certain characters, e.g. \" for quotation marks
-												 log_file& file, const char* formatString, ... );
+												 log_file&   file, 
+												 const char* formatString, 
+												 ui16 			 formatStringLength, // Set to Null to get the length up until the EOS char
+												 ... );
 
 #endif

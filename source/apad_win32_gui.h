@@ -9,7 +9,8 @@
 
 #define GUIAppEntryPoint(_instanceID) int CALLBACK WinMain(HINSTANCE _instanceID, HINSTANCE prevInstance, LPSTR commandLine, int commandShow)
 
-dll_import void Win32InitGUI(const char* windowTitle /* Can be set to Null */, HINSTANCE instance);
+dll_import void Win32InitGUI(const char*     windowTitle, // Can be set to Null. If not must contain a EOS
+																	 HINSTANCE instance);
 	
 struct win32_state {
 	bool mouseLeftDown; // If false it is up
@@ -61,14 +62,14 @@ dll_import vector Win32GetProgramWindowClientSize();
 dll_import vector Win32GetMousePosWithinClient(); // Return point will be capped to the dimensions of the client area
 
 dll_import char* // Will be Null if cancelled or an error occurs
-								 Win32OpenFileGUI(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
-								 								  const char* filters);  // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0"
+								 Win32OpenFileGUI(string_arg(directory), // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
+								 								  string_arg(filters));  // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0"
 																	
 dll_import char* // Will be Null if cancelled or an error occurs
-								 Win32SaveFileAsGUI(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
-								 									  const char* filters);  // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0"
+								 Win32SaveFileAsGUI(string_arg(directory), // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
+								 									  string_arg(filters));  // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0"
 																		
-dll_import void Win32DisplayInfoBox(const char* string, bool error);
+dll_import void Win32DisplayInfoBox(string_arg(string), bool error);
 
 dll_import bool Win32MouseLeftDownThisFrame(win32_state& state);
 dll_import bool Win32MouseLeftUpThisFrame(win32_state& state);

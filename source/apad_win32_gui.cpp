@@ -27,8 +27,9 @@ program_local vector      MousePos = {};
 program_local vector      LastMousePos = {};
 
 // No need to export this, only used in apad_error.cpp
-dll_export program_external void Win32DisplayInfoBox(const char* string, bool error) {
+dll_export program_external void Win32DisplayInfoBox(string_arg(string), bool error) {
 	FunctionStart(;);
+	AssertInternal(string != Null);
 	
 	MessageBox(NULL, string, error == true ? "Error" : "Info", MB_OK | (error == true ? MB_ICONEXCLAMATION : MB_ICONINFORMATION));
 	

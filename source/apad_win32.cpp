@@ -11,6 +11,14 @@
 
 // ******************** Local API start ******************** //
 
+program_local void CheckPath(string_arg(path)) {
+	AssertInternal(path != Null);
+	if(pathLength == Null)
+		pathLength = GetLength(path) + 1;
+	AssertInternal(path[pathLength - 1] == '\0');
+	AssertInternal(pathLength <= MAX_PATH);
+}
+
 // ******************** Local API end ******************** //
 
 #include <dbghelp.h>
@@ -103,11 +111,11 @@ dll_export void Win32PrintStackBackTrace() {
     DWORD displacement = Null;
     ret = SymGetLineFromAddr64(process, address, &displacement, &fileLine);
     if(ret == FALSE) { // This triggers multiple times through assertions in the window proc function (call stack goes through the kernel, SymGetLineFromAddr64() doesn't seem to like that)
-			if(AreEqual(pSymbol->Name, "CallWindowProcW") == true)
+			if(AreEqual(pSymbol->Name, Null, "CallWindowProcW", Null) == true)
 				ignore = true;
 			if(ignore == false)
 				finalString = Concatenate(4, finalString, "\nSymGetLineFromAddr64() failed in Win32PrintStackBackTrace(), Windows code ", ToString((ui32)GetLastError()), "\n");
-			if(AreEqual(pSymbol->Name, "CreateWindowA") == true)
+			if(AreEqual(pSymbol->Name, Null, "CreateWindowA", Null) == true)
 				ignore = false;
 			continue;
     }
@@ -153,10 +161,9 @@ dll_export void Win32FreeMemory(void* mem) {
 	FunctionEnd();
 }
 
-dll_export bool Win32FileExists(const char* path) {
+dll_export bool Win32FileExists(char* path, ui16 length) {
 	FunctionStart(false);
-  AssertInternal(path != Null);
-	AssertInternal(GetLength(path) + 1 <= MAX_PATH);
+	CheckPath(path, length);
 	
 	// @TODO - Repleace with PathFileExistsA() ?
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -182,8 +189,9 @@ dll_export bool Win32FileExists(const char* path) {
   return true;
 }
 
-dll_export memory_block Win32LoadFile(const char* path) {
+dll_export memory_block Win32LoadFile(char* path, ui16 length) {
 	FunctionStart(memory_block());
+	CheckPath(path, length);
   
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
@@ -232,10 +240,9 @@ dll_export memory_block Win32LoadFile(const char* path) {
   return allocatedMemory;
 }
 
-dll_export void Win32DeleteFile(const char* path) {
+dll_export void Win32DeleteFile(char* path, ui16 length) {
 	FunctionStart(;);
-	AssertInternal(path != Null);
-	AssertInternal(GetLength(path) <= MAX_PATH);
+	CheckPath(path, length);
 	
 	BOOL ret = DeleteFileA(path);
 	AssertInternalWin32(ret != 0);
@@ -243,10 +250,11 @@ dll_export void Win32DeleteFile(const char* path) {
 	FunctionEnd();
 }
 
-dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path) {
+dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path, ui16 pathLength) {
   FunctionStart(;);
-  AssertInternal(data != Null);
+	AssertInternal(data != Null);
 	AssertInternal(dataSize > 0);
+	CheckPath(path, pathLength);
 	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
@@ -287,8 +295,13 @@ dll_export time_marker Win32GetTimeMarker() {
 	return ret;
 }
 
-dll_export void Win32OutputDebugString(const char* string) {
+dll_export void Win32OutputDebugString(char* string, ui16 length) {
+	FunctionStart(;);
+	AssertInternal(string != Null);
+	if(length == Null)
+		length = GetLength(string);
 	OutputDebugStringA(string);
+	FunctionEnd();
 }
 
 dll_export char* Win32GetCurrentDirectoryFullPath() {
@@ -318,35 +331,37 @@ dll_export char* Win32GetCurrentDirectory() {
 	return directory;
 }
 
-dll_export void Win32SetCurrentDirectory(const char* path) {
+dll_export void Win32SetCurrentDirectory(char* path, ui16 length) {
 	FunctionStart(;);
-	AssertInternal(path != Null);
-	
+	CheckPath(path, length);
+  
 	BOOL ret = SetCurrentDirectoryA(path);
 	AssertInternalWin32(ret != 0);
 	
 	FunctionEnd();	
 }
 
-dll_export void Win32CreateDirectory(const char* path) {
+dll_export void Win32CreateDirectory(char* path, ui16 length) {
 	FunctionStart(;);
+	CheckPath(path, length);
 	BOOL ret = CreateDirectory(path, Null);
 	AssertInternalWin32(ret != 0);
 	FunctionEnd();
 }
 
-dll_export void Win32DeleteDirectory(const char* path) {
+dll_export void Win32DeleteDirectory(char* path, ui16 length) {
 	FunctionStart(;);
+	CheckPath(path, length);
 	BOOL ret = RemoveDirectory(path);
 	AssertInternalWin32(ret != 0);
 	FunctionEnd();
 }
 
 #include <shlwapi.h>
-dll_export bool Win32DirectoryExists(const char* path) {
+dll_export bool Win32DirectoryExists(char* path, ui16 length) {
 	FunctionStart(false);
-	AssertInternal(path != Null);
-	BOOL ret = PathFileExistsA(path);	
+	CheckPath(path, length);
+  BOOL ret = PathFileExistsA(path);	
 	FunctionEnd();
 	return ret == TRUE ? true : false;
 }

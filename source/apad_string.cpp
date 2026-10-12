@@ -11,7 +11,7 @@
 // ******************** Internal API start ******************** //
 
 program_local char* PushNullChar(memory_stack& stack) {
-	FunctionStart(;);
+	FunctionStart(Null);
 	
 	void* ret = Push((void*)"\0", 1, stack);
 	
@@ -22,7 +22,6 @@ program_local char* PushNullChar(memory_stack& stack) {
 // Also used in log.cpp
 dll_export char* Push(const char* string, ui16 length, bool addEOS, memory_stack& stack) {
   FunctionStart(Null);
-	AssertInternal(string != Null || addEOS == true);
 	
 	if(string == Null) {
 		AssertInternal(addEOS == true);
@@ -104,22 +103,29 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 		length -= 1;
 	
 	auto stack = AllocateStack(length + 1);
-	Push((void*)s, length, false, stack);
-	PushNullChar(stack);
+	Push(s, length, true, stack);
 	
 	FunctionEnd();
 	return (char*)GetMemory(stack);
 }
 
 dll_export ui16 GetLength(const char* s) {
-  FunctionStart(0);
+  FunctionStart(Null);
 	AssertInternal(s != Null);
   
-	auto length = strlen(s);
-	AssertInternal(length <= UI16Max);
-  
+				bool found = false;
+				ui16 length = 0;
+	const ui16 max = 300; // On Windows MAX_PATH is 255 - 260 without extended paths
+	for(; length < max; length++) {
+		if(s[length] == '\0') {
+			found = true;
+			break;
+		}
+	}
+	
 	FunctionEnd();
-  return length;
+  
+	return found == true ? length : Null;
 };
 
 dll_export char* ToString(si8 i) {
@@ -266,7 +272,7 @@ dll_export const char* FindSubstring(const char* sub, ui16 subLength, const char
   AssertInternal(sub != Null);
 	
 	if(subLength == Null)
-		subLength = GetString(sub);
+		subLength = GetLength(sub);
 	if(stringLength == Null)
 		stringLength = GetLength(string);
 	
@@ -281,7 +287,7 @@ dll_export const char* FindSubstring(const char* sub, ui16 subLength, const char
 	return Null;
 }
 
-dll_export bool ContainsAnySubstring(const char* string, ui16 length, const char** substrings, ui8 subCount) {
+dll_export bool ContainsAnySubstring(const char* string, ui16 length, const char** substrings, ui8 subsCount) {
   FunctionStart(false);
 	
 	if(length == Null)
@@ -407,7 +413,7 @@ dll_export bool StringIsEqualToAny(const char* string, ui16 length, const char**
 	ForAll(count) {
 		auto s = strings[it];
 		AssertInternal(s != Null);
-		if(AreEqual(string, length, s) == true) {
+		if(AreEqual(string, length, s, Null) == true) {
 			FunctionEnd();
 			return true;
 		}

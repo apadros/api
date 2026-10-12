@@ -4,6 +4,7 @@
 #include "apad_base_types.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
+#include "apad_string.h"
 #include "apad_win32.h"
 #include "apad_win32_gui.h"
 
@@ -23,22 +24,22 @@ typedef memory_stack file;
 dll_import 		 void* 				GetMemory(file f); // Calls into apad_memory API
 dll_import 		 ui32  				GetSize(file& f);
 dll_import 		 bool   			IsValid(file& f);
-dll_import 		 const char*  GetFileNameAndExtension(const char* path); // Does not allocate a new string
-dll_import 		 const char*  GetFileExtension(const char* path); // Does not allocate a new string
+dll_import 		 const char*  GetFileNameAndExtension(string_arg(path)); // Does not allocate a new string
+dll_import 		 const char*  GetFileExtension(string_arg(path)); // Does not allocate a new string
 
 // I/O
-program_unique void 			(*DeleteFile)(const char* path) = Win32DeleteFile; // FileExists(path) must be called first
-program_unique bool 			(*FileExists)(const char* path) = Win32FileExists;
+program_unique void 			(*DeleteFile)(string_arg(path)) = Win32DeleteFile; // FileExists(path) must be called first
+program_unique bool 			(*FileExists)(string_arg(path)) = Win32FileExists;
 program_unique void 			(*FreeFile)(file& f) = Free;
-dll_export     file 			  LoadFile(const char* path); // FileExists(path) must be called first
-program_unique char*      (*OpenFileGUI)(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
-																				 const char* filters)   // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0" 
+dll_export     file 			  LoadFile(string_arg(path)); // FileExists(path) must be called first
+program_unique char*      (*OpenFileGUI)(string_arg(directory), // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
+																				 string_arg(filters))   // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0" 
 																				 = Win32OpenFileGUI; 
-program_unique char*      (*SaveFileAsGUI)(const char* directory, // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
-																					 const char* filters)   // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0" 
+program_unique char*      (*SaveFileAsGUI)(string_arg(directory), // Directory to open the GUI at, folders must separated by '\\'. Can be Null.
+																					 string_arg(filters))   // List of file types and extensions in format [type_string]\0[*.extension]\0...\0. E.g. "All\0*.*\0Text files\0*.txt\0\0" 
 																				   = Win32SaveFileAsGUI; 
-dll_import     void 			  SaveFile(void* data, ui32 dataSize, const char* path); // Will create a new file if it doesn't exist; if it does it'll get replaced.
-dll_import     void         SaveFile(file& f, const char* path);
+dll_import     void 			  SaveFile(void* data, ui32 dataSize, string_arg(path)); // Will create a new file if it doesn't exist; if it does it'll get replaced.
+dll_import     void         SaveFile(file& f, string_arg(path));
 
 // ******************** Reading ******************** //
 
@@ -61,6 +62,6 @@ dll_import void 		 Free(file_line& line); // Must be called after every call to 
 dll_import file CreateFile(); // Needs to be freed afterwards
 dll_import void Free(file&);
 dll_import void WriteToFile(void* data, ui32 size, file& f);
-dll_import void WriteToFile(char* string, file& f);
+dll_import void WriteToFile(string_arg(string), file& f);
 
 #endif

@@ -85,7 +85,7 @@ void RunStringAPITest() {
 		assert(i == -3812);
 	}
 	
-	// IsLetter(), IsWord(), IsNumber(), IsNumber() & IsWhitespace()
+	// IsLetter(), IsWord(), IsNumber(char), IsNumber(char*) & IsWhitespace()
 	{
 		assert(IsLetter('t') == true);
 		assert(IsNumber('7') == true);
@@ -130,7 +130,7 @@ void RunStringAPITest() {
 		assert(AreEqual(string, Null, "s is a sam", Null) == true);
 		
 		char ar[length];
-		Copy(text + 17, length, ar, length);
+		Copy((void*)(text + 17), length, ar);
 		assert(AreEqual(ar, length, "string, he", Null) == true);
 		
 		const char* sub = FindSubstring(subs[1], Null, text, Null);

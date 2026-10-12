@@ -33,15 +33,15 @@ dll_export bool IsDateAndValid(const char* s, ui16 length) {
 	char* stringCopy = ConvertStringToLowerCase(s, length);
 	
 	// Need to potentially divide the string into 2 parts if an offset is present
-	char* offset = (char*)FindSubstring("+", stringCopy);
+	char* offset = (char*)FindSubstring("+", 1, stringCopy, Null);
 	if(offset == Null)
-		offset = (char*)FindSubstring("-", stringCopy);
+		offset = (char*)FindSubstring("-", 1, stringCopy, Null);
 	if(offset != Null)
 		*offset = '\0';
 	
 	// Then check the start for validity
 	// If can already tell it's false return immediately, otherwise continue to check
-	if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == false && AreEqual(stringCopy, "today") == false) { // Check against allowed formats if not a day of the week or "today"
+	if(StringIsEqualToAny(stringCopy, Null, Days, GetArrayLength(Days)) == false && AreEqual(stringCopy, Null, "today", Null) == false) { // Check against allowed formats if not a day of the week or "today"
 		auto length = GetLength(stringCopy); // Modded length in case of presence of offsets
 		if(length != GetLength(DateFormatShort) && length != GetLength(DateFormatMedium) && length != GetLength(DateFormatLong)) {
 			Free(stringCopy);
@@ -105,10 +105,10 @@ dll_export date StringToDate(const char* s, ui16 length) {
 	// Determine if any offset present and, if so, split the string into 2 parts
 	si16 offset = 0;
 	{
-		char* offsetStart = (char*)FindSubstring("+", stringCopy);
+		char* offsetStart = (char*)FindSubstring("+", 1, stringCopy, Null);
 		bool  offsetPlus = offsetStart != Null;
 		if(offsetStart == Null)
-			offsetStart = (char*)FindSubstring("-", stringCopy);
+			offsetStart = (char*)FindSubstring("-", 1, stringCopy, Null);
 		if(offsetStart != Null && IsNumber(offsetStart + 1, Null) == true) {
 			*offsetStart = '\0';
 			offset = StringToInt(offsetStart + 1, Null);
@@ -118,16 +118,16 @@ dll_export date StringToDate(const char* s, ui16 length) {
 	}
 	
 	// Work out the date
-	if(AreEqual(stringCopy, "today") == true) {
+	if(AreEqual(stringCopy, Null, "today", Null) == true) {
 		auto ret = GetDate(offset);
 		Free(stringCopy);
 		FunctionEnd();
 		return ret;
 	}
-	else if(StringIsEqualToAny(stringCopy, Days, GetArrayLength(Days)) == true) {
+	else if(StringIsEqualToAny(stringCopy, Null, Days, GetArrayLength(Days)) == true) {
 		ui8 argDay = 0; // 1 -> 7 to match the date struct
 		ForAll(GetArrayLength(Days)) {
-			if(AreEqual(stringCopy, Days[it]) == true) {
+			if(AreEqual(stringCopy, Null, Days[it], Null) == true) {
 				argDay = it + 1;
 				break;
 			}
