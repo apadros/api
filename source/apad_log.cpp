@@ -7,6 +7,7 @@
 #include "apad_memory.h"
 #include "apad_log.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 
 // ******************** Internal API start ******************** //
 
@@ -30,17 +31,14 @@ dll_export void CloseLogFile(log_file& log) {
 }
 
 // Format strings - s, si8, ui8, si16, ui16, si32, ui32, si64, ui64, f32, f64
-dll_export void Log(log_file& log, const char* formatString, ui16 formatStringLength, ...) {
+dll_export void Log(log_file& log, string_args(formatString), ...) {
 	FunctionStart(;);
-	
-  AssertInternal(formatString != Null);
+	CheckStringInternal(UnpackStringArgs(formatString));
 	
 	va_list args;
 	va_start(args, formatString);
 	
-	if(formatStringLength == Null)
-		formatStringLength = GetLength(formatString);
-  ForAll(formatStringLength) {
+	ForAll(stringArgsLength(formatString)) {
     char c = formatString[it];
 		if(c == '%') { // Formatting char
 		  it += 1;

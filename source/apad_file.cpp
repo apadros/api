@@ -4,25 +4,27 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 
-dll_export void SaveFile(file& f, const char* path) {
+dll_export void SaveFile(file& f, string_args(path)) {
 	FunctionStart(;);
-	AssertInternal(path != Null);
+	
 	auto size = GetSize(f);
-	SaveFile(f.memory.memory, size, path);
+	SaveFile(f.memory.memory, size, UnpackStringArgs(path));
+	
 	FunctionEnd();
 }
 
-dll_export void SaveFile(void* data, ui32 dataSize, const char* path) {
+dll_export void SaveFile(void* data, ui32 dataSize, string_args(path)) {
 	FunctionStart(;);
-	Win32SaveFile(data, dataSize, path); // For some reason have to call this here instead of defining SaveFile() as a pointer to Win32SaveFile() when having an overload of SaveFile()
+	Win32SaveFile(data, dataSize, UnpackStringArgs(path)); // For some reason have to call this here instead of defining SaveFile() as a pointer to Win32SaveFile() when having an overload of SaveFile()
 	FunctionEnd();
 }
 
-dll_export const char* GetFileNameAndExtension(const char* path) {
+dll_export const char* GetFileNameAndExtension(string_args(path)) {
 	FunctionStart(Null);
-	AssertInternal(path != Null);
-  
+	CheckStringInternal(UnpackStringArgs(path));
+	
   const char* fileName = path + GetLength(path);
 	const char* ret = Null;
   do 		 fileName -= 1;
@@ -36,11 +38,11 @@ dll_export const char* GetFileNameAndExtension(const char* path) {
 	return ret;
 }
 
-dll_export const char* GetFileExtension(const char* path) {
+dll_export const char* GetFileExtension(string_args(path)) {
 	FunctionStart(Null);
-	AssertInternal(path != Null);
-  
-  const char* fileName = path + GetLength(path);
+	CheckStringInternal(UnpackStringArgs(path));
+	
+  const char* fileName = path + stringArgsLength(path);
   do 		 fileName -= 1;
   while (fileName[0] != '.');
   return fileName + 1;
@@ -134,9 +136,9 @@ dll_export void WriteToFile(void* data, ui32 size, file& f) {
 	FunctionEnd();
 }
 
-dll_export void WriteToFile(char* string, file& f) {
+dll_export void WriteToFile(string_args(string), file& f) {
 	FunctionStart(;);
-	Push(string, false, f);
+	Push(UnpackStringArgs(string), false, f);
 	FunctionEnd();
 }
 
@@ -157,13 +159,13 @@ dll_export ui32 GetSize(file& f) {
 	return ret;
 }
 
-dll_export file LoadFile(const char* path) {
+dll_export file LoadFile(string_args(path)) {
 	FunctionStart(file());
 	AssertInternal(path != Null);
 	
 	file ret = {};
 	
-	auto memory = Win32LoadFile(path);
+	auto memory = Win32LoadFile(UnpackStringArgs(path));
 	if(IsValid(memory) == true) { // File load successful
 		ret.memory = memory;
 		ret.size = 0;

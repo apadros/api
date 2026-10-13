@@ -6,17 +6,17 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 #include "apad_win32.h"
 #include "apad_win32_internal.h"
 
 // ******************** Local API start ******************** //
 
-program_local void CheckPath(string_arg(path)) {
-	AssertInternal(path != Null);
-	if(pathLength == Null)
-		pathLength = GetLength(path) + 1;
-	AssertInternal(path[pathLength - 1] == '\0');
-	AssertInternal(pathLength <= MAX_PATH);
+program_local void CheckPath(string_args(path)) {
+	FunctionStart(;);
+	CheckStringInternal(UnpackStringArgs(path));
+	AssertInternal(stringArgsLength(path) + 1 <= MAX_PATH); // Include the EOS char
+	FunctionEnd();
 }
 
 // ******************** Local API end ******************** //
@@ -161,13 +161,18 @@ dll_export void Win32FreeMemory(void* mem) {
 	FunctionEnd();
 }
 
-dll_export bool Win32FileExists(char* path, ui16 length) {
+dll_export bool Win32FileExists(string_args(path)) {
 	FunctionStart(false);
-	CheckPath(path, length);
+	AssertInternal(path != Null);
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
 	
 	// @TODO - Repleace with PathFileExistsA() ?
 	HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
+		if(stringArgsLength(path) != Null)
+			Free(path);
 		FunctionEnd();
 		return false;
 	}
@@ -185,16 +190,24 @@ dll_export bool Win32FileExists(char* path, ui16 length) {
 
   CloseHandle(handle);
 	
+	if(stringArgsLength(path) != Null)
+		Free(path);
+	
 	FunctionEnd();
   return true;
 }
 
-dll_export memory_block Win32LoadFile(char* path, ui16 length) {
+dll_export memory_block Win32LoadFile(string_args(path)) {
 	FunctionStart(memory_block());
-	CheckPath(path, length);
-  
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+	
   HANDLE handle = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
 	
 	#if 0
 	if(handle == INVALID_HANDLE_VALUE) {
@@ -240,21 +253,26 @@ dll_export memory_block Win32LoadFile(char* path, ui16 length) {
   return allocatedMemory;
 }
 
-dll_export void Win32DeleteFile(char* path, ui16 length) {
+dll_export void Win32DeleteFile(string_args(path)) {
 	FunctionStart(;);
-	CheckPath(path, length);
+
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
 	
 	BOOL ret = DeleteFileA(path);
 	AssertInternalWin32(ret != 0);
 	
+	if(stringArgsLength(path) != Null)
+		Free(path);
+	
 	FunctionEnd();
 }
 
-dll_export void Win32SaveFile(void* data, ui32 dataSize, const char* path, ui16 pathLength) {
+dll_export void Win32SaveFile(void* data, ui32 dataSize, string_args(path)) {
   FunctionStart(;);
+	CheckPath(UnpackStringArgs(path));
 	AssertInternal(data != Null);
 	AssertInternal(dataSize > 0);
-	CheckPath(path, pathLength);
 	
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
@@ -295,23 +313,30 @@ dll_export time_marker Win32GetTimeMarker() {
 	return ret;
 }
 
-dll_export void Win32OutputDebugString(char* string, ui16 length) {
+dll_export void Win32OutputDebugString(string_args(string)) {
 	FunctionStart(;);
-	AssertInternal(string != Null);
-	if(length == Null)
-		length = GetLength(string);
+	
+	if(stringArgsLength(path) != Null)
+		string = AllocateString(UnpackStringArgs(string)); // Allocate null-terminated string for Win32 function
+	
 	OutputDebugStringA(string);
+	
+	if(stringArgsLength(path) != Null)
+		Free(string);
+	
 	FunctionEnd();
 }
 
 dll_export char* Win32GetCurrentDirectoryFullPath() {
 	FunctionStart(Null);
+	
 	char buffer[MAX_PATH];
 	{
 		DWORD ret = GetCurrentDirectory(MAX_PATH, (LPSTR)(&buffer));
 		AssertInternalWin32(ret > 0);
 	}
 	char* ret = AllocateString(buffer, Null);
+	
 	FunctionEnd();
 	return ret;
 }
@@ -331,37 +356,63 @@ dll_export char* Win32GetCurrentDirectory() {
 	return directory;
 }
 
-dll_export void Win32SetCurrentDirectory(char* path, ui16 length) {
+dll_export void Win32SetCurrentDirectory(string_args(path)) {
 	FunctionStart(;);
-	CheckPath(path, length);
-  
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+	
 	BOOL ret = SetCurrentDirectoryA(path);
 	AssertInternalWin32(ret != 0);
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
 	
 	FunctionEnd();	
 }
 
-dll_export void Win32CreateDirectory(char* path, ui16 length) {
+dll_export void Win32CreateDirectory(string_args(path)) {
 	FunctionStart(;);
-	CheckPath(path, length);
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+	
 	BOOL ret = CreateDirectory(path, Null);
 	AssertInternalWin32(ret != 0);
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
+	
 	FunctionEnd();
 }
 
-dll_export void Win32DeleteDirectory(char* path, ui16 length) {
+dll_export void Win32DeleteDirectory(string_args(path)) {
 	FunctionStart(;);
-	CheckPath(path, length);
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+	
 	BOOL ret = RemoveDirectory(path);
 	AssertInternalWin32(ret != 0);
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
+	
 	FunctionEnd();
 }
 
 #include <shlwapi.h>
-dll_export bool Win32DirectoryExists(char* path, ui16 length) {
+dll_export bool Win32DirectoryExists(string_args(path)) {
 	FunctionStart(false);
-	CheckPath(path, length);
-  BOOL ret = PathFileExistsA(path);	
+	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+	
+	BOOL ret = PathFileExistsA(path);	
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
+	
 	FunctionEnd();
 	return ret == TRUE ? true : false;
 }

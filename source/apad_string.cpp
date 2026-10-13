@@ -7,6 +7,7 @@
 #include "apad_maths.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 
 // ******************** Internal API start ******************** //
 
@@ -19,8 +20,9 @@ program_local char* PushNullChar(memory_stack& stack) {
 	return (char*)ret;
 }
 
-// Also used in log.cpp
-dll_export char* Push(const char* string, ui16 length, bool addEOS, memory_stack& stack) {
+// ******************** Internal API end ******************** //
+
+dll_export char* Push(char* string, ui16 length, bool addEOS, memory_stack& stack) {
   FunctionStart(Null);
 	
 	if(string == Null) {
@@ -42,21 +44,16 @@ dll_export char* Push(const char* string, ui16 length, bool addEOS, memory_stack
 	return (char*)ret;
 }
 
-// ******************** Internal API end ******************** //
-
 #include <ctype.h>
 dll_export bool IsWhitespace(char c) {
 	return isspace(c) != 0;
 }
 
-dll_export char* ConvertStringToLowerCase(const char* s, ui16 length) {
+dll_export char* ConvertStringToLowerCase(char* s, ui16 length) {
 	FunctionStart(Null);
-	AssertInternal(s != Null);
+	CheckStringInternal(s, length);
 	
 	char* ret = AllocateString(s, length);
-	
-	if(length == Null)
-		length = GetLength(s);
 	
 	ForAll(length) {
     if(ret[it] >= 'A' && ret[it] <= 'Z')
@@ -92,16 +89,10 @@ dll_export char* Concatenate(ui8 count, ...) {
 	return (char*)stack.memory.memory;
 }
 
-dll_export char* AllocateString(const char* s, ui16 length) {
+dll_export char* AllocateString(char* s, ui16 length) {
 	FunctionStart(Null);
-	AssertInternal(s != Null);
+	CheckStringInternal(s, length);
 
-	// Set the real length without the EOS char
-	if(length == Null)
-		length = GetLength(s);
-	else if(s[length - 1] == '\0')
-		length -= 1;
-	
 	auto stack = AllocateStack(length + 1);
 	Push(s, length, true, stack);
 	
@@ -109,7 +100,7 @@ dll_export char* AllocateString(const char* s, ui16 length) {
 	return (char*)GetMemory(stack);
 }
 
-dll_export ui16 GetLength(const char* s) {
+dll_export ui16 GetLength(char* s) {
   FunctionStart(Null);
 	AssertInternal(s != Null);
   
@@ -238,17 +229,17 @@ dll_export char* ToString(f64 f) {
 	return ret;
 }
 
-dll_export bool AreEqual(const char* s1, ui16 s1Length, const char* s2, ui16 s2Length) {
+dll_export bool AreEqual(char* s1, ui16 s1Length, char* s2, ui16 s2Length) {
   FunctionStart(false);
 	
-	AssertInternal(s1 != Null);
-	AssertInternal(s2 != Null);
+	if(s1 == Null || s1 == Null) {
+		FunctionEnd();
+		return false;
+	}
 	
-	if(s1Length == Null)
-		s1Length = GetLength(s1);
-	if(s2Length == Null)
-		s2Length = GetLength(s2);
-	
+	CheckStringInternal(s1, s1Length);
+	CheckStringInternal(s2, s2Length);
+		
 	if(s1Length != s2Length) {
 		FunctionEnd();
 		return false;
@@ -265,16 +256,10 @@ dll_export bool AreEqual(const char* s1, ui16 s1Length, const char* s2, ui16 s2L
 	return true;
 }
 
-dll_export const char* FindSubstring(const char* sub, ui16 subLength, const char* string, ui16 stringLength) {
+dll_export char* FindSubstring(char* sub, ui16 subLength, char* string, ui16 stringLength) {
   FunctionStart(Null);
-	
-	AssertInternal(string != Null);
-  AssertInternal(sub != Null);
-	
-	if(subLength == Null)
-		subLength = GetLength(sub);
-	if(stringLength == Null)
-		stringLength = GetLength(string);
+	CheckStringInternal(sub, subLength);
+	CheckStringInternal(string, stringLength);
 	
 	ForAll(stringLength) {
 		if(AreEqual(sub, subLength, string + it, subLength) == true) {
@@ -287,11 +272,9 @@ dll_export const char* FindSubstring(const char* sub, ui16 subLength, const char
 	return Null;
 }
 
-dll_export bool ContainsAnySubstring(const char* string, ui16 length, const char** substrings, ui8 subsCount) {
+dll_export bool ContainsAnySubstring(char* string, ui16 length, char** substrings, ui8 subsCount) {
   FunctionStart(false);
-	
-	if(length == Null)
-		length = GetLength(string);
+	CheckStringInternal(string, length);
 	
 	ForAll(subsCount) {
     auto* sub = substrings[it];
@@ -309,14 +292,8 @@ dll_export bool ContainsAnySubstring(const char* string, ui16 length, const char
 dll_export void Copy(char* source, ui16 srcLength, char* destination, ui16 destLength) {
 	FunctionStart(;);
 	
-	AssertInternal(source != Null);
-	AssertInternal(destination != Null);
-	
-	if(srcLength == Null)
-		srcLength = GetLength(source);
-	if(destLength == Null)
-		destLength = GetLength(destination);
-	
+	CheckStringInternal(source, srcLength);
+	CheckStringInternal(destination, destLength);
 	AssertInternal(srcLength >= destLength);
 	
 	Copy((void*)source, srcLength, (void*)destination);
@@ -330,10 +307,8 @@ dll_export bool IsLetter(char c) {
 
 dll_export bool IsWord(char* string, ui16 length) {
 	FunctionStart(false);
-	AssertInternal(string != Null);
+	CheckStringInternal(string, length);
 	
-	if(length == Null)
-		length = GetLength(string);
 	ForAll(length) {
 		if(IsLetter(string[it]) == false)
 			return false;
@@ -349,10 +324,8 @@ dll_export bool IsNumber(char c) {
 
 dll_export bool IsNumber(char* string, ui16 length) {
 	FunctionStart(false);
-	AssertInternal(string != Null);
+	CheckStringInternal(string, length);
 	
-	if(length == Null)
-		length = GetLength(string);
 	ForAll(length) {
 		if(IsNumber(string[it]) == false)
 			return false;
@@ -363,50 +336,31 @@ dll_export bool IsNumber(char* string, ui16 length) {
 }
 
 #include <stdlib.h>
-dll_export si32 StringToInt(const char* string, ui16 length) {
+dll_export si32 StringToInt(char* string, ui16 length) {
   FunctionStart(0);
-	AssertInternal(string != Null);
+	CheckStringInternal(string, length);
 	
-	si32 ret = Null;
-	
-	if(length == Null)
-		ret = atoi(string);
-	else { // Want to convert only part of the string or string is an array without a null char
-		auto copy = AllocateString(string, length);
-		ret = atoi(copy);
-		Free(copy);
-	}
+	// Want to convert only part of the string or string is an array without a null char
+	auto copy = AllocateString(string, length);
+	auto ret = atoi(copy);
+	Free(copy);
 	
 	FunctionEnd();
 	return ret;
 }
 
-dll_export char* ExtractSubstring(const char* s, ui16 length) {
+dll_export char* ExtractSubstring(char* s, ui16 length) {
 	FunctionStart(Null);
-	AssertInternal(s != Null);
 	
-	auto sLength = GetLength(s);
-	AssertInternal(sLength > 0);
-	
-	ui8  copyLength = 0;
-	if(length == Null || length > sLength)
-		copyLength = sLength;
-	else
-		copyLength = length;
-	
-	auto stack = AllocateStack(copyLength + 1);
-	// Use the memory versions since the string versions will push the entire string
-	// instead of just a section if that is what's wanted.
-	void* mem = Push((void*)s, copyLength, stack); 
-	PushNullChar(stack);
+	auto ret = AllocateString(s, length);
 	
 	FunctionEnd();
-	return (char*)stack.memory.memory;
+	return ret;
 }
 
-dll_export bool StringIsEqualToAny(const char* string, ui16 length, const char** strings, ui8 count) {
+dll_export bool StringIsEqualToAny(char* string, ui16 length, char** strings, ui8 count) {
 	FunctionStart(false);
-	AssertInternal(string != Null);
+	CheckStringInternal(string, length);
 	AssertInternal(strings != Null);
 	AssertInternal(count > 0);
 	

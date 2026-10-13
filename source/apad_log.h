@@ -4,6 +4,7 @@
 #include "apad_base_types.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
+#include "apad_string.h"
 
 typedef memory_stack log_file;
 
@@ -18,8 +19,7 @@ dll_import void 		Log( // Format strings
 												 // Floating point precision limited to 2 decimal points
 												 // Need to use standard C standard library escape sequences for certain characters, e.g. \" for quotation marks
 												 log_file&   file, 
-												 const char* formatString, 
-												 ui16 			 formatStringLength, // Set to Null to get the length up until the EOS char
+												 string_args(formatString),
 												 ... );
 
 #endif

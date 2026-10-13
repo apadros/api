@@ -9,6 +9,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 #include "apad_win32.h" 
 #include "apad_win32_gui.h"
 
@@ -87,18 +88,17 @@ dll_export program_external bool IsValid(text_body& tb) {
 	return ret;
 }
 
-dll_export program_external ui16 Insert(char* string, ui32 length, text_body& tb, ui32 pos) {
+dll_export program_external ui16 Insert(string_args(string), text_body& tb, ui32 pos) {
 	FunctionStart(Null);
+	CheckStringInternal(UnpackStringArgs(string));
 
-	AssertInternal(string != Null);
-	AssertInternal(length > 0);
 	AssertInternal(IsValid(tb) == true);
 
 	if(pos > GetTextLength(tb) || tb.maxLength != Null && GetTextLength(tb) == tb.maxLength)
 		return Null;
 
 	ui16 added = 0;
-	ForAll(length) {
+	ForAll(stringArgsLength(string)) {
 		char c = string[it];
 
 		bool add = true;
@@ -335,9 +335,9 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 	return ret;
 }
 
-dll_export program_external vector GetTextRenderSize(char* text, ui32 length, f32 height) {
+dll_export program_external vector GetTextRenderSize(string_args(text), f32 height) {
 	FunctionStart(vector());
-	AssertInternal(text != Null);
+	CheckStringInternal(text);
 	AssertInternal(height > 0);
 
 	vector ret = CreateVector(Null, height);
@@ -382,13 +382,9 @@ program_local void RenderTextLineVert(ui16 x, ui16 y, ui8 height) {
 	glVertex2f(x, y + height);
 }
 
-dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x, f32 y, f32 height, bool center) {
+dll_export program_external rectangle RenderText(string_args(text), f32 x, f32 y, f32 height, bool center) {
 	FunctionStart(rectangle());
-
-	AssertInternal(text != Null);
-	
-	if(length == 0)
-		length = GetLength(text);
+	CheckStringInternal(UnpackStringArgs(text));
 
 	rectangle ret = {};
 	ret.left = x;
@@ -396,14 +392,14 @@ dll_export program_external rectangle RenderText(char* text, ui32 length, f32 x,
 
 	f32 xOffset = 0;
 	if(center == true)
-		xOffset = -GetTextRenderSize(text, length, height).x / 2;
+		xOffset = -GetTextRenderSize(text, stringArgsLength(text), height).x / 2;
 
 	f32 nextX = x + xOffset;
 	f32 nextY = y;
 	glColor3f(1, 0, 0);
 	glLineWidth(3);
 	glBegin(GL_LINES);
-	ForAll(length) {
+	ForAll(stringArgsLength(text)) {
 		char c = text[it];
 		switch(c) {
 			case(' '): break;
@@ -952,13 +948,14 @@ dll_export program_external f32 GetCursorAlphaValue() {
 	return CursorAlpha;
 }
 
-dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, char* text, f32 textHeight, ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha) {
+dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, string_args(text), f32 textHeight, ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha) {
 	FunctionStart(button());
+	CheckStringInternal(UnpackStringArgs(text));
 	
 	button ret = {};
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
 	if(text != Null && textHeight != Null) {
-		ret.text = AllocateString(text, Null);
+		ret.text = AllocateString(UnpackStringArgs(text), Null);
 		ret.textHeight = textHeight;
 	}
 	ret.highlightColour = CreateColourUI8(highlightRed, highlightGreen, highlightBlue);

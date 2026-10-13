@@ -4,6 +4,7 @@
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 #include "apad_time.h"
 
 // ******************** Local API start ******************** //
@@ -26,11 +27,11 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 
 // ******************** Local API end ******************** //
 
-dll_export bool IsDateAndValid(const char* s, ui16 length) {
+dll_export bool IsDateAndValid(string_args(string)) {
 	FunctionStart(false);
-	AssertInternal(s != Null);
+	CheckStringInternal(UnpackStringArgs(string));
 	
-	char* stringCopy = ConvertStringToLowerCase(s, length);
+	char* stringCopy = ConvertStringToLowerCase(UnpackStringArgs(string));
 	
 	// Need to potentially divide the string into 2 parts if an offset is present
 	char* offset = (char*)FindSubstring("+", 1, stringCopy, Null);
@@ -96,11 +97,11 @@ dll_export bool IsDateAndValid(const char* s, ui16 length) {
 	return true;
 }
 
-dll_export date StringToDate(const char* s, ui16 length) {
+dll_export date StringToDate(string_args(string)) {
 	FunctionStart(date());
-	AssertInternal(s != Null);
+	CheckStringInternal(UnpackStringArgs(string));
 	
-	char* stringCopy = ConvertStringToLowerCase(s, length);
+	char* stringCopy = ConvertStringToLowerCase(UnpackStringArgs(string));
 	
 	// Determine if any offset present and, if so, split the string into 2 parts
 	si16 offset = 0;

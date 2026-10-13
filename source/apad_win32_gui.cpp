@@ -6,6 +6,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
+#include "apad_string_internal.h"
 #include "apad_win32_gui.h"
 #include "apad_win32_internal.h"
 
@@ -26,12 +27,16 @@ program_local bool  		  MouseRightDownLastFrame = false;
 program_local vector      MousePos = {};
 program_local vector      LastMousePos = {};
 
-// No need to export this, only used in apad_error.cpp
-dll_export program_external void Win32DisplayInfoBox(string_arg(string), bool error) {
+dll_export program_external void Win32DisplayInfoBox(string_args(string), bool error) {
 	FunctionStart(;);
-	AssertInternal(string != Null);
+
+	if(stringArgsLength(string) != Null)
+		string = AllocateString(UnpackStringArgs(string)); // Allocate null-terminated string for Win32 function
 	
 	MessageBox(NULL, string, error == true ? "Error" : "Info", MB_OK | (error == true ? MB_ICONEXCLAMATION : MB_ICONINFORMATION));
+	
+	if(stringArgsLength(path) != Null)
+		Free(string);
 	
 	FunctionEnd();
 }
@@ -147,7 +152,7 @@ dll_export program_external HWND Win32GetGUIWindowHandle() {
 	return WindowHandle;
 }
 
-dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE instance) {
+dll_export program_external void Win32InitGUI(string_args(windowTitle), HINSTANCE instance) {
 	FunctionStart(;);
 	
 	extern bool GUIApp;
@@ -209,11 +214,17 @@ dll_export program_external void Win32InitGUI(const char* windowTitle, HINSTANCE
 	
 	AssertInternalWin32(RegisterClassA(&wndclass) != 0);
 	
+	if(stringArgsLength(windowTitle) != Null)
+		windowTitle = AllocateString(UnpackStringArgs(windowTitle)); // Allocate null-terminated string to Win32 function
+	
 	WindowHandle = CreateWindowA(wndclass.lpszClassName, windowTitle,
 															 WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
 															 0, 0, width, height, 
 															 NULL, NULL, instance /* @TODO - Windows documentation says this is optional, double check */, NULL);
   AssertInternalWin32(WindowHandle != NULL);
+	
+	if(stringArgsLength(windowTitle) != Null)
+		Free(windowTitle);
 	
 	FunctionEnd();
 }
@@ -424,9 +435,15 @@ dll_export program_external vector Win32GetMousePosWithinClient() {
 	return ret;
 }
 
-dll_export program_external char* Win32OpenFileGUI(const char* directory, const char* filters) {
+dll_export program_external char* Win32OpenFileGUI(string_args(directory), string_args(filters)) {
 	FunctionStart(Null);
 	AssertInternal(filters != Null);
+	
+	if(directory != Null && stringArgsLength(directory) != Null)
+		directory = AllocateString(UnpackStringArgs(directory)); // Allocate null-terminated string to Win32 function
+	
+	if(stringArgsLength(filters) != Null)
+		filters = AllocateString(UnpackStringArgs(filters)); // Allocate null-terminated string to Win32 function
 	
 	char buffer[MAX_PATH];
 			
@@ -445,15 +462,27 @@ dll_export program_external char* Win32OpenFileGUI(const char* directory, const 
 	char* ret = Null;
 	if(success != 0) // File selected and OK clicked
 		ret = AllocateString(buffer, Null);
-	// 0 indicates cancel clicked or error occured, call  CommDlgExtendedError() to get error info
+	// 0 indicates cancel clicked or error occured, call CommDlgExtendedError() to get error info
+		
+	if(directory != Null && stringArgsLength(directory) != Null)
+		Free(directory);	
+	
+	if(stringArgsLength(filters) != Null)
+		Free(filters);	
 		
 	FunctionEnd();
 	return ret;
 }
 
-dll_export program_external char* Win32SaveFileAsGUI(const char* directory, const char* filters) {
+dll_export program_external char* Win32SaveFileAsGUI(string_args(directory), string_args(filters)) {
 	FunctionStart(Null);
 	AssertInternal(filters != Null);
+	
+	if(directory != Null && stringArgsLength(directory) != Null)
+		directory = AllocateString(UnpackStringArgs(directory)); // Allocate null-terminated string to Win32 function
+	
+	if(stringArgsLength(filters) != Null)
+		filters = AllocateString(UnpackStringArgs(filters)); // Allocate null-terminated string to Win32 function
 	
 	char buffer[MAX_PATH];
 			
@@ -468,11 +497,20 @@ dll_export program_external char* Win32SaveFileAsGUI(const char* directory, cons
 	data.Flags = OFN_ENABLESIZING | OFN_OVERWRITEPROMPT;
 	
 	BOOL success = GetSaveFileNameA(&data);
+	
+	if(directory != Null && stringArgsLength(directory) != Null)
+		Free(directory);	
+	
+	if(stringArgsLength(filters) != Null)
+		Free(filters);	
+	
 	char* ret = Null;
 	if(success != 0) // File selected and OK clicked
 		ret = AllocateString(buffer, Null);
-	else // 0 indicates cancel clicked or error occured, call CommDlgExtendedError() to get error info
+	else { // 0 indicates cancel clicked or error occured, call CommDlgExtendedError() to get error info
+		FunctionEnd();
 		return Null;
+	}
 	
 	// If the user types a file name and hits ok, the extension isn't automatically added to the path, need to do so manually
 	if(data.nFileExtension == 0) {
@@ -487,6 +525,7 @@ dll_export program_external char* Win32SaveFileAsGUI(const char* directory, cons
 		
 		ret = Concatenate(2, ret, extensionString);
 	}
+	
 	
 	FunctionEnd();
 	return ret;
