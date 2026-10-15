@@ -21,12 +21,12 @@ dll_export void SaveFile(void* data, ui32 dataSize, string_args(path)) {
 	FunctionEnd();
 }
 
-dll_export const char* GetFileNameAndExtension(string_args(path)) {
+dll_export char* GetFileNameAndExtension(string_args(path)) {
 	FunctionStart(Null);
 	CheckStringInternal(UnpackStringArgs(path));
 	
-  const char* fileName = path + GetLength(path);
-	const char* ret = Null;
+  char* fileName = path + GetLength(path);
+	char* ret = Null;
   do 		 fileName -= 1;
   while (fileName[0] != '\\' && fileName[0] != '/' && fileName > path); // The latter in case there is no \ or /
 	if(fileName == path) // No \ or / found
@@ -38,11 +38,11 @@ dll_export const char* GetFileNameAndExtension(string_args(path)) {
 	return ret;
 }
 
-dll_export const char* GetFileExtension(string_args(path)) {
+dll_export char* GetFileExtension(string_args(path)) {
 	FunctionStart(Null);
 	CheckStringInternal(UnpackStringArgs(path));
 	
-  const char* fileName = path + stringArgsLength(path);
+  char*  fileName = path + stringArgsLength(path);
   do 		 fileName -= 1;
   while (fileName[0] != '.');
   return fileName + 1;

@@ -47,7 +47,7 @@ dll_export void Log(log_file& log, string_args(formatString), ...) {
 				return;
 			}
 				
-			const char* formats[] = { "s", "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
+			char* formats[] = { "s", "si8", "ui8", "si16", "ui16", "si32", "ui32", "si64", "ui64", "f32", "f64" };
 			
 			// Find the correct format
 			si8 formatIndex = -1;
@@ -91,70 +91,70 @@ dll_export void Log(log_file& log, string_args(formatString), ...) {
 				
 				case 1: { // SI8
 					si8 i = va_arg(args, si8);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 3;
 				} break;
 				
 				case 2: { // UI8
 					ui8 i = va_arg(args, ui8);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 3;
 				} break;
 				
 				case 3: { // SI16
 					si16 i = va_arg(args, si16);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 4: { // UI16
 					ui16 i = va_arg(args, ui16);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 5: { // SI32
 					si32 i = va_arg(args, si32);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 6: { // UI32
 					ui32 i = va_arg(args, ui32);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 7: { // SI64
 					si64 i = va_arg(args, si64);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 8: { // UI64
 					ui64 i = va_arg(args, ui64);
-					const char* s = ToString(i);
+					char* s = ToString(i);
 					Push(s, Null, false, log);
 					it += 4;
 				} break;
 				
 				case 9: { // F32
 					f32 f = (f32)va_arg(args, f64);
-					const char* s = ToString(f);
+					char* s = ToString(f);
 					Push(s, Null, false, log);
 					it += 3;
 				} break;
 				
 				case 10: { // F64
 				  f64 f = va_arg(args, f64);
-					const char* s = ToString(f);
+					char* s = ToString(f);
 					Push(s, Null, false, log);
 					it += 3;
 				} break;

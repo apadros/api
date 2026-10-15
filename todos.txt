@@ -53,6 +53,7 @@ Time
 	
 Testing
 	- @WIP - Develop test for the remaing API
+	- @PRIORITY - Publish new version of APAD API after all test suites developed
 	
 Text
 	- Investigate ttf file loading and usage through Windows API

@@ -2,6 +2,7 @@
 #include "apad_error.h"
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
+#include "apad_string.h"
 
 // ******************** Imported libs ******************** //
 
@@ -59,15 +60,15 @@ dll_export void SetCallExitInAPIAssertions(bool b) {
 }
 
 #include <stdio.h>
-dll_export void DisplayError(const char* string) {
+dll_export void DisplayError(char* string) {
 	FunctionStart(;);
 	AssertInternal(string != Null);
 	
 	if(GUIApp == false)
 		printf("\n%s\n", string);
 	else {
-		program_external void Win32DisplayInfoBox(const char* string, bool error);
-		Win32DisplayInfoBox(string, false);
+		program_external void Win32DisplayInfoBox(string_args(string), bool error);
+		Win32DisplayInfoBox(string, Null, false);
 	}
 	
 	FunctionEnd();

@@ -337,15 +337,13 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 
 dll_export program_external vector GetTextRenderSize(string_args(text), f32 height) {
 	FunctionStart(vector());
-	CheckStringInternal(text);
+	CheckStringInternal(UnpackStringArgs(text));
 	AssertInternal(height > 0);
 
 	vector ret = CreateVector(Null, height);
 
 	f32 xOffset = 0;
-	if(length == 0)
-		length = GetLength(text);
-	ForAll(length) {
+	ForAll(stringArgsLength(text)) {
 		if(text[it] == NewlineChar) {
 			xOffset = 0;
 			ret.y += GetTextLineHeight(height);
@@ -955,7 +953,7 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 	button ret = {};
 	ret.rectangle = CreateRectangle(left, bottom, width, height);
 	if(text != Null && textHeight != Null) {
-		ret.text = AllocateString(UnpackStringArgs(text), Null);
+		ret.text = AllocateString(UnpackStringArgs(text));
 		ret.textHeight = textHeight;
 	}
 	ret.highlightColour = CreateColourUI8(highlightRed, highlightGreen, highlightBlue);

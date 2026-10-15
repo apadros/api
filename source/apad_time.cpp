@@ -9,12 +9,12 @@
 
 // ******************** Local API start ******************** //
 
-dll_export program_external ui64 				cpuCounterFrequencyKHz = Null;
+dll_export program_external ui64  cpuCounterFrequencyKHz = Null;
 
-					 program_local 	  const char* DateFormatShort  = "dd/mm";
-					 program_local 	  const char* DateFormatMedium = "dd/mm/yy";
-					 program_local 	  const char* DateFormatLong   = "dd/mm/yyyy"; // Default format
-					 program_local    const char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
+					 program_local 	  char* DateFormatShort  = "dd/mm";
+					 program_local 	  char* DateFormatMedium = "dd/mm/yy";
+					 program_local 	  char* DateFormatLong   = "dd/mm/yyyy"; // Default format
+					 program_local    char* Days[] 					= { "mon", "tue", "wed", "thu", "fri", "sat", "sun" };
 
 program_local date ConvertCSLTimeToDate(struct tm* time) {
 	date ret = {};

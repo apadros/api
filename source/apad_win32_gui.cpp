@@ -29,13 +29,14 @@ program_local vector      LastMousePos = {};
 
 dll_export program_external void Win32DisplayInfoBox(string_args(string), bool error) {
 	FunctionStart(;);
+	AssertInternal(string != Null);
 
 	if(stringArgsLength(string) != Null)
 		string = AllocateString(UnpackStringArgs(string)); // Allocate null-terminated string for Win32 function
 	
 	MessageBox(NULL, string, error == true ? "Error" : "Info", MB_OK | (error == true ? MB_ICONEXCLAMATION : MB_ICONINFORMATION));
 	
-	if(stringArgsLength(path) != Null)
+	if(stringArgsLength(string) != Null)
 		Free(string);
 	
 	FunctionEnd();
@@ -121,7 +122,7 @@ dll_export program_external void DisplayLastWin32Error() {
 	FunctionStart(;);
 	
 	auto error = GetLastError();
-	Win32DisplayInfoBox(ToString((ui32)error), true);
+	Win32DisplayInfoBox(ToString((ui32)error), Null, true);
 	
 	FunctionEnd();
 }
@@ -501,9 +502,6 @@ dll_export program_external char* Win32SaveFileAsGUI(string_args(directory), str
 	if(directory != Null && stringArgsLength(directory) != Null)
 		Free(directory);	
 	
-	if(stringArgsLength(filters) != Null)
-		Free(filters);	
-	
 	char* ret = Null;
 	if(success != 0) // File selected and OK clicked
 		ret = AllocateString(buffer, Null);
@@ -514,18 +512,20 @@ dll_export program_external char* Win32SaveFileAsGUI(string_args(directory), str
 	
 	// If the user types a file name and hits ok, the extension isn't automatically added to the path, need to do so manually
 	if(data.nFileExtension == 0) {
-		const char* extensionString = filters;
+		char* extensionString = filters;
 		AssertInternalWin32(data.nFilterIndex >= 1);
 		ForAll(data.nFilterIndex - 1) {
 			extensionString += GetLength(extensionString) + 1; // File type
 			extensionString += GetLength(extensionString) + 1; // File extension
 		}
 		extensionString += GetLength(extensionString) + 1; // Skip to desired extension
-		extensionString = GetFileExtension(extensionString) - 1; // Move to .extension
+		extensionString = GetFileExtension(extensionString, Null) - 1; // Move to .extension
 		
 		ret = Concatenate(2, ret, extensionString);
 	}
 	
+	if(stringArgsLength(filters) != Null)
+		Free(filters);	
 	
 	FunctionEnd();
 	return ret;

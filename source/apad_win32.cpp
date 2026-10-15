@@ -80,7 +80,7 @@ dll_export void Win32PrintStackBackTrace() {
   // Print log
   const ui8 bufferSize = UI8Max;
   char previousSymbolName[bufferSize] = {};
-	const char* finalString = Null;
+	char* finalString = Null;
 	bool ignore = false; // Ignore repeated fails of SymGetLineFromAddr64() when going through kernel functions after CreateWindow()
   ForAll(depth) {
     if(depth >= GetArrayLength(stacktrace)) {
@@ -122,14 +122,14 @@ dll_export void Win32PrintStackBackTrace() {
 
     // Log all
 		if(it == 0)
-			finalString = Concatenate(4, "  Stack back trace\n    [", GetFileNameAndExtension(fileLine.FileName), "] line ", ToString((ui32)fileLine.LineNumber));
+			finalString = Concatenate(4, "  Stack back trace\n    [", GetFileNameAndExtension(fileLine.FileName, Null), "] line ", ToString((ui32)fileLine.LineNumber));
 		else
-			finalString = Concatenate(8, finalString, "\n    [", GetFileNameAndExtension(fileLine.FileName), "] line ", ToString((ui32)fileLine.LineNumber), " -> ", previousSymbolName, "()");
+			finalString = Concatenate(8, finalString, "\n    [", GetFileNameAndExtension(fileLine.FileName, Null), "] line ", ToString((ui32)fileLine.LineNumber), " -> ", previousSymbolName, "()");
 		ClearArray(previousSymbolName);
 		Copy(pSymbol->Name, bufferSize, previousSymbolName);
 
     // Stop after WinMain
-    if(AreEqual(pSymbol->Name, "WinMain") == true || AreEqual(pSymbol->Name, "main")) {
+    if(AreEqual(pSymbol->Name, Null, "WinMain", Null) == true || AreEqual(pSymbol->Name, Null, "main", Null)) {
 			DisplayError(finalString);
 			break;
 		}
@@ -199,6 +199,7 @@ dll_export bool Win32FileExists(string_args(path)) {
 
 dll_export memory_block Win32LoadFile(string_args(path)) {
 	FunctionStart(memory_block());
+	AssertInternal(path != Null);
 	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
@@ -255,7 +256,8 @@ dll_export memory_block Win32LoadFile(string_args(path)) {
 
 dll_export void Win32DeleteFile(string_args(path)) {
 	FunctionStart(;);
-
+	AssertInternal(path != Null);
+	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
 	
@@ -270,13 +272,19 @@ dll_export void Win32DeleteFile(string_args(path)) {
 
 dll_export void Win32SaveFile(void* data, ui32 dataSize, string_args(path)) {
   FunctionStart(;);
-	CheckPath(UnpackStringArgs(path));
 	AssertInternal(data != Null);
 	AssertInternal(dataSize > 0);
+	AssertInternal(path != Null);
 	
+	if(stringArgsLength(path) != Null)
+		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
+		
   HANDLE handle = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	AssertInternalWin32(handle != INVALID_HANDLE_VALUE);
 	// @TODO - Handle this better, possibly return without an assertion to allow calling code to handle failure to save
+	
+	if(stringArgsLength(path) != Null)
+		Free(path);
 	
   DWORD written = 0;
   BOOL result = WriteFile(handle, data, dataSize, &written, NULL);
@@ -315,13 +323,14 @@ dll_export time_marker Win32GetTimeMarker() {
 
 dll_export void Win32OutputDebugString(string_args(string)) {
 	FunctionStart(;);
+	AssertInternal(string != Null);
 	
-	if(stringArgsLength(path) != Null)
+	if(stringArgsLength(string) != Null)
 		string = AllocateString(UnpackStringArgs(string)); // Allocate null-terminated string for Win32 function
 	
 	OutputDebugStringA(string);
 	
-	if(stringArgsLength(path) != Null)
+	if(stringArgsLength(string) != Null)
 		Free(string);
 	
 	FunctionEnd();
@@ -358,6 +367,7 @@ dll_export char* Win32GetCurrentDirectory() {
 
 dll_export void Win32SetCurrentDirectory(string_args(path)) {
 	FunctionStart(;);
+	AssertInternal(path != Null);
 	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
@@ -373,6 +383,7 @@ dll_export void Win32SetCurrentDirectory(string_args(path)) {
 
 dll_export void Win32CreateDirectory(string_args(path)) {
 	FunctionStart(;);
+	AssertInternal(path != Null);
 	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
@@ -388,6 +399,7 @@ dll_export void Win32CreateDirectory(string_args(path)) {
 
 dll_export void Win32DeleteDirectory(string_args(path)) {
 	FunctionStart(;);
+	AssertInternal(path != Null);
 	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function
@@ -404,6 +416,7 @@ dll_export void Win32DeleteDirectory(string_args(path)) {
 #include <shlwapi.h>
 dll_export bool Win32DirectoryExists(string_args(path)) {
 	FunctionStart(false);
+	AssertInternal(path != Null);
 	
 	if(stringArgsLength(path) != Null)
 		path = AllocateString(UnpackStringArgs(path)); // Allocate null-terminated string for Win32 function

@@ -50,7 +50,7 @@ dll_import void  Copy(string_args(source), string_args(destination));
 dll_import char* // Contains a null char at the end. Must be freed with Free(char*)
 					       ExtractSubstring(char* string, 
 																	ui16 	length); // Set to Null to extract until the EOS char. If this is larger than the actual string length, extraction will stop after the EOS char
-dll_import char* FindSubstring(string_args(sub), string_args(string)); // Return does not need to be freed.
+dll_import char* FindSubstring(string_args(sub), string_args(string)); // Will return the start of the substring within string, including everything after the former. Does not need to be freed.
 dll_import void  Free(void* string); // Only for strings allocated through this- or the memroy- APIs. Points to Free(void*) in apad_memory.cpp.
 dll_import ui16  // Will == Null if no EOS char is found within 300 chars from string start
 								 // If not == Null, will not include the EOS

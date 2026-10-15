@@ -120,21 +120,22 @@ void RunStringAPITest() {
 	
 	// ContainsAnySubstring(), ExtractSubstring(), Copy(), FindSubstring() & StringIsEqualToAny()
 	{
-		const char* subs[] = { "sample", "hello " };
-		const char* text = "this is a sample string, hello world";
+		char* subs[] = { "sample", "hello " };
+		char* text = "this is a sample string, hello world";
 		assert(ContainsAnySubstring(text, Null, subs, 2) == true);
 		
 		const ui8 length = 10;
 		char* string = ExtractSubstring(text + 3, length);
 		assert(GetLength(string) == length);
 		assert(AreEqual(string, Null, "s is a sam", Null) == true);
+		Free(string);
 		
 		char ar[length];
 		Copy((void*)(text + 17), length, ar);
 		assert(AreEqual(ar, length, "string, he", Null) == true);
 		
-		const char* sub = FindSubstring(subs[1], Null, text, Null);
-		assert(AreEqual(sub, Null, subs[1], Null) == true);
+		char* sub = FindSubstring(subs[1], Null, text, Null);
+		assert(AreEqual(sub, Null, "hello world", Null) == true);
 		
 		assert(StringIsEqualToAny(subs[1], Null, subs, 2) == true);
 	}
@@ -144,7 +145,7 @@ void RunStringAPITest() {
 		auto stack = AllocateStack();
 		assert(IsValid(stack) == true);
 		
-		const char* string = "temp string";
+		char* string = "temp string";
 		Push(string, Null, false, stack);
 		assert(stack.size == GetLength(string));
 		
@@ -163,29 +164,29 @@ void RunFileAPITest() {
 	system("mkdir temp");
 	system("echo hello>> temp/test_file.txt");
 	
-	const char* path = "temp/test_file.txt";
+	char* path = "temp/test_file.txt";
 	
 	// GetFileNameAndExtension(), GetFileExtension
 	{
-		const char* nameExtension = GetFileNameAndExtension(path);
+		char* nameExtension = GetFileNameAndExtension(path, Null);
 		ui16 pathLength = 18;
 		for(ui8 i = 0; i < pathLength - 5; i++)
 			assert(nameExtension[i] == path[i + 5]);
 		
-		const char* extension = GetFileExtension(path);
+		char* extension = GetFileExtension(path, Null);
 		for(ui8 i = 0; i < 3; i++)
 			assert(extension[i] == path[i + 15]);
 		
 		// Test without the slash
-		const char* path2 = "new_test_file.txt";
-		nameExtension = GetFileNameAndExtension(path2);
+		char* path2 = "new_test_file.txt";
+		nameExtension = GetFileNameAndExtension(path2, Null);
 		for(ui8 i = 0; i < 17; i++)
 			assert(nameExtension[i] == path2[i]);
 	}
 		
 	// FileExists(), LoadFile(), IsValid()
-	assert(FileExists(path) == true);
-	auto f = LoadFile(path);
+	assert(FileExists(path, Null) == true);
+	auto f = LoadFile(path, Null);
 	assert(IsValid(f) == true);
 	
 	// GetSize(), GetMemory()
@@ -193,7 +194,7 @@ void RunFileAPITest() {
 		ui32 size = GetSize(f);
 		assert(size == 7); // Cause echo >> .txt will add a newline
 		void* mem = GetMemory(f);
-		const char* string = (const char*)mem;
+		char* string = (char*)mem;
 		assert(string[0] == 'h' && string[1] == 'e' && string[2] == 'l' && 
 					 string[3] == 'l' && string[4] == 'o');
 	}
@@ -201,37 +202,37 @@ void RunFileAPITest() {
 	// FreeFile(), DeleteFile()
 	FreeFile(f);
 	assert(IsValid(f) == false);
-	DeleteFile(path);
-	assert(FileExists(path) == false);
+	DeleteFile(path, Null);
+	assert(FileExists(path, Null) == false);
 	
 	// SaveFile() + overload
 	{
-		const char* string = "world2";
-		SaveFile((void*)string, 6, path);
-		assert(FileExists(path) == true);
-		f = LoadFile(path);
+		char* string = "world2";
+		SaveFile((void*)string, 6, path, Null);
+		assert(FileExists(path, Null) == true);
+		f = LoadFile(path, Null);
 		assert(IsValid(f) == true);
-		const char* mem = (const char*)GetMemory(f);
+		char* mem = (char*)GetMemory(f);
 		assert(GetSize(f) == 6);
 		assert(mem[0] == 'w' && mem[1] == 'o' && mem[2] == 'r' && 
 					 mem[3] == 'l' && mem[4] == 'd' && mem[5] == '2');
 					 
-		const char* newPath = "test_file_2.txt";
-		assert(FileExists(newPath) == false);
-		SaveFile(f, newPath);
-		assert(FileExists(newPath) == true);
+		char* newPath = "test_file_2.txt";
+		assert(FileExists(newPath, Null) == false);
+		SaveFile(f, newPath, Null);
+		assert(FileExists(newPath, Null) == true);
 				
 		FreeFile(f);
-		DeleteFile(newPath);
+		DeleteFile(newPath, Null);
 	}
 	
 	// ParseLine(), IsValid(), GetDataElement() & Free()
 	{
-		const char* string = "56 hello 8.9\n\"more data\" 77";
+		char* string = "56 hello 8.9\n\"more data\" 77";
 		ui8 				length = 28;
-		SaveFile((void*)string, length, path);
-		assert(FileExists(path) == true);
-		file f = LoadFile(path);
+		SaveFile((void*)string, length, path, Null);
+		assert(FileExists(path, Null) == true);
+		file f = LoadFile(path, Null);
 		assert(IsValid(f) == true);
 		assert(GetSize(f) == length);
 		
@@ -255,7 +256,7 @@ void RunFileAPITest() {
 		assert(line.count == Null);
 		
 		Free(f);
-		DeleteFile(path);
+		DeleteFile(path, Null);
 	}
 	
 	// CreateFile(), Free(), WriteToFile() & overload
@@ -263,11 +264,11 @@ void RunFileAPITest() {
 		auto file = CreateFile();
 		assert(IsValid(file) == true);
 		
-		const char* string = "hello world ";
-		WriteToFile((char*)string, file);
+		char* string = "hello world ";
+		WriteToFile((char*)string, Null, file);
 		
 		string = "\"new string\"";
-		WriteToFile((char*)string, file);
+		WriteToFile((char*)string, Null, file);
 		
 		ui32 i = 90;
 		WriteToFile(&i, sizeof(i), file);

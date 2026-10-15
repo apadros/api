@@ -53,8 +53,8 @@ program_external si8 		 JumpBufferRefCounter;
 
 // NOT to be used directly
 #define EndInternalAssertion() \
-			program_external void DisplayError(const char* string); \
-			DisplayError((const char*)buffer); \
+			program_external void DisplayError(char* string); \
+			DisplayError((char*)buffer); \
 			\
 			program_external bool PrintAssertionsBacktrace; \
 			if(PrintAssertionsBacktrace == true) { \
