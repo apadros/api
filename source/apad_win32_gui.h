@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "apad_intrinsics.h"
 #include "apad_maths.h"
-#include "apad_string.h"
+#include "apad_string_args.h"
 
 // ******************** Core ******************** //
 

@@ -1,10 +1,81 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> // For system()
-#include "apad_intrinsics.h"
+#include "apad_error.h"
+#include "apad_error_internal.h"
 #include "apad_file.h"
+#include "apad_intrinsics.h"
+#include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+
+void ExitFunction() {
+	printf("\nExit function called\n");
+}
+
+// Must be run at the very end
+void RunErrorAPITest() {
+	{
+		// API internal assertions
+		dll_import bool PrintAssertionsBacktrace;
+		PrintAssertionsBacktrace = true;
+		
+		dll_import bool CallExitInAPIAssertions;
+		assert(CallExitInAPIAssertions == true); // True by default
+		SetCallExitInAPIAssertions(false);
+		assert(CallExitInAPIAssertions == false);
+		
+		// @TODO @WIP - This section does not behave as would have been expected
+		// printf("\nAn internal assertion should now trigger and print a backtrace\n");
+		// Clear(Null, Null);
+		// AssertInternal(false); // Should print a backtrace
+		
+		dll_import bool DisplayAPIAssertions;
+		assert(DisplayAPIAssertions == true); // True by default
+		SetDisplayAPIAssertions(false);
+		assert(DisplayAPIAssertions == false);
+		
+		// User code assertions
+		dll_import bool CallExitInExternalAssertion;
+		assert(CallExitInExternalAssertion == true); // By default
+		SetExitIfAssertionHit(false);
+		assert(CallExitInExternalAssertion == false);
+		
+		printf("\nAn assertion should now trigger and print a backtrace\n");
+		dll_import bool AssertionHit;
+		assert(AssertionHit == false);
+		Assert(false); // This should print a backtrace
+		assert(AssertionWasHit() == true);
+		assert(AssertionHit == true);
+		ClearAssertionHit();
+		assert(AssertionHit == false);
+	}
+	
+	printf("\nError API test running. The following strings should be printed:\n" 
+				 "  Sample error displayed\n"
+				 "  Exit function called\n");
+	RegisterExitFunction(ExitFunction);
+	DisplayError("Sample error displayed");
+	ExitProgram(false);
+	printf("\nERROR: ExitProgram() wasn't called successfuly\n");
+}
+
+void RunLogAPITest() {
+	auto log = OpenLogFile();
+	assert(IsValid(log) == true);
+	
+	Log(log, "hello%s, %si8, %ui8, %si16, %ui16, %si32, %ui32, %si64, %ui64, %f32, %f64", Null, 
+			" \"world\"", -26, 255, -25'619, 65'511, -3'874'331, 4'271'739'001, -10'638'231'058, 5'638'592'117, 4.32, 6.78);	
+	
+	char* testString = "hello \"world\", -26, 255, -25619, 65511, -3874331, 4271739001, -10638231058, 5638592117, 4.32, 6.78";
+	void* memory = GetMemory(log);
+	assert(AreEqual((char*)memory, log.size, testString, Null) == true);
+	
+	CloseLogFile(log);
+	assert(IsValid(log) == false);
+	
+	printf("\nLog API testing OK\n");
+}
 
 void RunStringAPITest() {
 	// GetLength(), ConvertStringToLowerCase() & Free()

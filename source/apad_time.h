@@ -3,7 +3,7 @@
 
 #include "apad_base_types.h"
 #include "apad_intrinsics.h"
-#include "apad_string.h"
+#include "apad_string_args.h"
 
 struct date {
   ui8  dayOfTheWeek; // 1 -> 7

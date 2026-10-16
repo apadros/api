@@ -18,7 +18,7 @@
 #include <setjmp.h> // For jmp_buf, setjmp() & longjmp()
 #include "apad_base_types.h"
 program_external jmp_buf JumpBuffer;
-program_external si8 		 JumpBufferRefCounter;
+program_external si8 		JumpBufferRefCounter;
 
 // This MUST be called at the start of every internal function which calls another API function or uses internal assertions before any such calls
 #define FunctionStart(_return /* Must contain a ; if empty */) { \

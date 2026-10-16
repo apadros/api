@@ -9,20 +9,19 @@
 
 // ******************** Internal API start ******************** //
 
-					 program_external bool GUIApp = false;
-					 
-dll_export program_external bool AssertionHit = false; // Declared as an export since it is used in external assertions
-dll_export program_external bool CallExitInExternalAssertion = true; // Declared as an export since it is used in external assertions
+									 program_external bool GUIApp = false;
+									 
+dll_export 				 program_external bool AssertionHit = false; // Declared as an export since it is used in external assertions
+dll_export 				 program_external bool CallExitInExternalAssertion = true; // Declared as an export since it is used in external assertions
 
-					 program_external bool DisplayAPIAssertions = true;
-					 program_external bool CallExitInAPIAssertions = true;
+dll_export_testing program_external bool DisplayAPIAssertions = true;
+dll_export_testing program_external bool CallExitInAPIAssertions = true;
 
 #ifdef APAD_ASSERTIONS_BACKTRACE					 
-dll_export program_external bool PrintAssertionsBacktrace = true;
+dll_export         program_external bool PrintAssertionsBacktrace = true;
 #else
-dll_export program_external bool PrintAssertionsBacktrace = false;
+dll_export         program_external bool PrintAssertionsBacktrace = false;
 #endif
-
 
 // ******************** Internal API end ******************** //
 

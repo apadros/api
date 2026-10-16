@@ -4,7 +4,7 @@
 #include "apad_base_types.h"
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
-#include "apad_string.h"
+#include "apad_string_args.h"
 #include "apad_win32.h"
 #include "apad_win32_gui.h"
 

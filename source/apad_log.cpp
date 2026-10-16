@@ -16,7 +16,7 @@
 dll_export log_file OpenLogFile() {
 	FunctionStart(log_file());
 	
-	auto ret = AllocateStack(KiB(10));
+	auto ret = AllocateStack(KiB(1));
 	
 	FunctionEnd();
   return ret;
