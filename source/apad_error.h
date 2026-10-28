@@ -48,7 +48,7 @@ dll_import void SetCallExitInAPIAssertions(bool b);  // True by default
 #define Assert(_condition) { \
 	ClearAssertionHit(); \
 	if(!(_condition)) { \
-	  dll_import bool AssertionHit; \
+	  dll_import program_external bool AssertionHit; \
 		AssertionHit = true; \
 		\
 	  char buffer[256] = {}; \

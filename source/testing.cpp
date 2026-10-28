@@ -4,7 +4,7 @@
 #include "apad_error.h"
 #include "apad_error_internal.h"
 #include "apad_file.h"
-#include "apad_intrinsics.h"
+// #include "apad_intrinsics.h"
 #include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
@@ -25,10 +25,23 @@ void RunErrorAPITest() {
 		SetCallExitInAPIAssertions(false);
 		assert(CallExitInAPIAssertions == false);
 		
-		// @TODO @WIP - This section does not behave as would have been expected
-		// printf("\nAn internal assertion should now trigger and print a backtrace\n");
-		// Clear(Null, Null);
-		// AssertInternal(false); // Should print a backtrace
+		printf("\nAn internal assertion should now trigger and print a backtrace\n");
+		Clear(Null, Null);
+		
+		// @WIP - This point isn't reached, Clear() triggers an assertion and program exits
+		// with an unhandled exception referring to stack unwind issue
+		// ExitProgram() is NOT being caled
+		// Turning off exceptions during compilation doesn't change anything
+		// Testing as a single exe reports the same exception, no different than as a dll
+		// Compiling with 02 with and without exception handling results in same behaviour
+		// Thought it refered to function call stack, but it may refer to automatic vars pushed
+		// onto the stack when functions are called, which would cause a memory leak if
+		// we go back to original setjump() call site (according to online forums)
+		// I.e., any locally defined vars in functions would leak if jumping out as intended.
+		// This may be what is causing the exception.
+		// Need test this this - create custom set of tests with locally-defined vars in functions.
+		// Need to link into exe to use AssertInternal()
+		printf("\nTESTING.CPP - Program execution resumed\n"); 
 		
 		dll_import bool DisplayAPIAssertions;
 		assert(DisplayAPIAssertions == true); // True by default
