@@ -29,7 +29,6 @@ program_external si8     JumpBufferRefCounter;
 	\
 	JumpBufferRefCounter += 1; \
 	if(JumpBufferRefCounter == 0) { \
-		printf("\nASSERTION - JumpBufferRefCounter was -1, exiting API\n"); /* @WIP - Remove */ \
 		JumpBufferRefCounter = 0; \
 		return _return; /* Exit API */ \
 	} \
@@ -67,14 +66,10 @@ program_external si8     JumpBufferRefCounter;
 		} \
 		\
 		program_external bool CallExitInAPIAssertions; \
-		if(CallExitInAPIAssertions == true) { \
-			printf("\nASSERTION - Calling ExitProgram()\n"); /* @WIP - Remove */ \
+		if(CallExitInAPIAssertions == true) \
 			ExitProgram(true); \
-		} \
 		\
-		printf("\nASSERTION - Calling longjmp()\n"); /* @WIP - Remove */ \
 		longjmp(JumpBuffer, -1); /* Unwind the call stack to the initial setjmp() call */ \
-		printf("\nASSERTION - longjmp() called\n"); /* @WIP - Remove */ \
 	}
 
 #define AssertInternal(_condition) { \

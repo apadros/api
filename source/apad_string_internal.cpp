@@ -2,8 +2,10 @@
 #include "apad_string.h"
 
 void CheckStringInternal(char*& string, ui16& length) {
+	FunctionStart(;);
 	AssertInternal(string != Null);
 	if(length == Null)
 		length = GetLength(string);
 	AssertInternal(length != Null);
+	FunctionEnd();
 }

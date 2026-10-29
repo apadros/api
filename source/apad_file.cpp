@@ -44,10 +44,11 @@ dll_export char* GetFileExtension(string_args(path)) {
 	
   char*  fileName = path + stringArgsLength(path);
   do 		 fileName -= 1;
-  while (fileName[0] != '.');
-  return fileName + 1;
-	
+  while (fileName[0] != '.' && fileName >= path);
+  AssertInternal(fileName >= path);
 	FunctionEnd();
+	
+	return fileName + 1;	
 }
 
 dll_export file_line ParseLine(file& f, ui32& readIndex) {

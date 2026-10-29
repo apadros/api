@@ -25,23 +25,16 @@ void RunErrorAPITest() {
 		SetCallExitInAPIAssertions(false);
 		assert(CallExitInAPIAssertions == false);
 		
-		printf("\nAn internal assertion should now trigger and print a backtrace\n");
+		printf("\n[ERROR API] An internal assertion should now trigger and print a backtrace, then continue execution. \n");
 		Clear(Null, Null);
 		
-		// @WIP - This point isn't reached, Clear() triggers an assertion and program exits
-		// with an unhandled exception referring to stack unwind issue
-		// ExitProgram() is NOT being caled
-		// Turning off exceptions during compilation doesn't change anything
-		// Testing as a single exe reports the same exception, no different than as a dll
-		// Compiling with 02 with and without exception handling results in same behaviour
-		// Thought it refered to function call stack, but it may refer to automatic vars pushed
-		// onto the stack when functions are called, which would cause a memory leak if
-		// we go back to original setjump() call site (according to online forums)
-		// I.e., any locally defined vars in functions would leak if jumping out as intended.
-		// This may be what is causing the exception.
-		// Need test this this - create custom set of tests with locally-defined vars in functions.
-		// Need to link into exe to use AssertInternal()
-		printf("\nTESTING.CPP - Program execution resumed\n"); 
+		// An assertions should have been hit in Clear()
+		assert(AssertionWasHit() == true);
+		dll_import bool AssertionHit;
+		assert(AssertionHit == true);
+		ClearAssertionHit();
+		assert(AssertionWasHit() == false);
+		assert(AssertionHit == false);
 		
 		dll_import bool DisplayAPIAssertions;
 		assert(DisplayAPIAssertions == true); // True by default
@@ -54,23 +47,18 @@ void RunErrorAPITest() {
 		SetExitIfAssertionHit(false);
 		assert(CallExitInExternalAssertion == false);
 		
-		printf("\nAn assertion should now trigger and print a backtrace\n");
-		dll_import bool AssertionHit;
-		assert(AssertionHit == false);
+		printf("\n[ERROR API] An external assertion should now trigger and print a backtrace, then continue execution. \n");
 		Assert(false); // This should print a backtrace
-		assert(AssertionWasHit() == true);
-		assert(AssertionHit == true);
-		ClearAssertionHit();
-		assert(AssertionHit == false);
 	}
 	
-	printf("\nError API test running. The following strings should be printed:\n" 
-				 "  Sample error displayed\n"
-				 "  Exit function called\n");
-	RegisterExitFunction(ExitFunction);
+	printf("\n[ERROR API] \"Sample error displayed\" should now be printed\n");
 	DisplayError("Sample error displayed");
-	ExitProgram(false);
-	printf("\nERROR: ExitProgram() wasn't called successfuly\n");
+	
+	printf("\n[ERROR API] An external assertion should now trigger and call ExitProgram(), \"Exit function called\" should be printed after the backtrace, then the program should exit.\n");
+	RegisterExitFunction(ExitFunction);
+	SetExitIfAssertionHit(true);
+	Assert(false);
+	printf("\n[ERROR API] This point shouldn't have been reached, ExitProgram() wasn't called successfuly\n");
 }
 
 void RunLogAPITest() {
