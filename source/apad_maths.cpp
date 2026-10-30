@@ -50,9 +50,8 @@ dll_export void vector::operator+=(vector& v) {
 }
 
 // Making this 'program_external' fails compilation when #including math.h. Go figure.
-dll_export void vector::operator==(vector& v) {
-	this->x == v.x;
-	this->y == v.y;
+dll_export bool vector::operator==(vector& v) {
+	return this->x == v.x && this->y == v.y;
 }
 
 // Making this 'program_external' fails compilation when #including math.h. Go figure.

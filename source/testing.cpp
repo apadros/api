@@ -9,6 +9,117 @@
 #include "apad_memory.h"
 #include "apad_string.h"
 
+void RunMathsAPITest() {
+	// Vector
+	{
+		auto v1 = CreateVector(10, 20);
+		assert(v1.x == 10.0f);
+		assert(v1.y == 20.0f);
+		
+		auto m = Magnitude(v1); // Should return 22.3606796
+		assert(m >= 22.36067f && m <= 22.3606797f);
+		
+		auto n = NullVector;
+		assert(n.x == 0);
+		assert(n.y == 0);
+		
+		auto v2 = CreateVector(UnpackVector(v1));
+		assert(v2.x == v1.x);
+		assert(v2.y == v1.y);
+		
+		v2 = CreateVector(45, 67);
+		
+		auto vp = v1 + v2;
+		assert(vp.x == v1.x + v2.x);
+		assert(vp.y == v1.y + v2.y);
+		auto vm = v1 - v2;
+		assert(vp.x == v1.x - v2.x);
+		assert(vp.y == v1.y - v2.y);
+		
+		auto v1copy = v1;
+		assert(v1copy.x == v1.x);
+		assert(v1copy.y == v1.y);
+		assert(v1copy == v1);
+		v1copy += v2;
+		assert(v1copy.x == v1.x + v2.x);
+		assert(v1copy.y == v1.y + v2.y);
+		v1copy = v1;
+		v1copy -= v2;
+		assert(v1copy.x == v1.x - v2.x);
+		assert(v1copy.y == v1.y - v2.y);
+		
+		auto vmm = v1 * 3.0f;
+		assert(vmm.x == v1.x * 3.0f);
+		assert(vmm.y == v1.y * 3.0f);
+		
+		auto vd = v1 / 3.0f;
+		assert(vd.x == v1.x / 3.0f);
+		assert(vd.y == v1.y / 3.0f);
+	}
+	
+	#if 0
+	// Rectangle and vector functions
+	{
+		
+		auto rec = CreateRectangle(10, 3, 34, 7);
+		assert(rec.left == 10.0f);
+		assert(rec.bottom == 3.0f);
+		assert(rec.width == 34.0f);
+		assert(rec.height == 7.0f);
+		assert(rec.left == rec.pos.x);
+		assert(rec.bottom == rec.pos.y);
+		assert(rec.width == rec.size.x);
+		assert(rec.height == rec.size.y);
+		
+		rec = CreateRectangle(vec, CreateVector(5, 6));
+		assert(rec.left == vec.x);
+		assert(rec.bottom == vec.y);
+		assert(rec.width == 5.0f);
+		assert(rec.height == 6.0f);
+		
+		auto center = GetCenter(rec);
+		assert(center.x == rec.left + rec.width / 2);
+		assert(center.y == rec.bottom + rec.height / 2);
+		
+		
+	}
+	
+	// Trigonometry functions
+	assert(Cos(8) == 0.990268052f);
+	assert(Sine(85) == 0.996194720f);
+	assert(Tan(89) == 57.2900391f);
+	
+	{
+	  auto ac = ArcCos(0.990268052f); // Should return 8.00000668
+		assert(ac >= 8.0f && ac <= 8.0000067f);
+	  auto as  = ArcSine(0.996194661f); // Should return 84.9999771
+	  assert(as >= 84.9999770f && as <= 84.999978f);
+	  auto at = ArcTan(57.2900391f); // Should return 89.0000000
+		assert(at >= 88.9999999f && at <= 89.0000001f);
+	}
+	
+	// Clamp
+	{
+		f32 val = 3.2f;
+		Clamp(val, 2.0f, 2.9f);
+		assert(val == 2.9f);
+		val = 1.2f;
+		Clamp(val, 2.0f, 2.9f);
+		assert(val == 2.0f);
+	}
+	
+	// ConvertHexToUI32
+	{
+		char* hex = "FA4C9D0B";
+		assert(ConvertHexToUI32(hex, 8) == 4'199'324'939);
+		assert(ConvertHexToUI32(hex + 2, 3) == 1225);
+	}
+	#endif
+	
+	
+	printf("\nMaths API testing OK\n");
+}
+
 void ExitFunction() {
 	printf("\nExit function called\n");
 }
