@@ -1,13 +1,75 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> // For system()
+#include <time.h> // For time testing
 #include "apad_error.h"
 #include "apad_error_internal.h"
 #include "apad_file.h"
 #include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_time.h"
 #include "apad_win32.h"
+
+void RunTimeAPITest() {
+	dll_import date ConvertCSLTimeToDate(struct tm* time);
+	date currentDate;
+	{
+		time_t timeNowSecs = time(NULL);
+	  auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
+	  currentDate = ConvertCSLTimeToDate(timeNow);
+	}
+	
+	// IsDateAndValid()
+	assert(IsDateAndValid("13/05") == true);
+	assert(IsDateAndValid("04/05/16") == true);
+	assert(IsDateAndValid("04/05/2004") == true);
+	assert(IsDateAndValid("today") == true);
+	assert(IsDateAndValid("tue") == true);
+	assert(IsDateAndValid("today+5") == true);
+	assert(IsDateAndValid("thu-3") == true);
+	
+	// DateToString()
+	{
+		dll_import char* DateFormatLong;
+		
+		char* string = DateToString(currentDate);
+		assert(GetLength(string) == GetLength(DateFormatLong));
+		
+		// Check day
+		char* temp = ToString(currentDate.day);
+		assert(AreEqual(string, 2, temp, Null) == true);
+		Free(temp);
+		
+		// Check month
+		temp = ToString(currentDate.month);
+		assert(AreEqual(string + 3, 2, temp, Null) == true);
+		Free(temp);
+		
+		// Check year
+		temp = ToString(currentDate.year);
+		assert(AreEqual(string + 6, 4, temp, Null) == true);
+		Free(temp);
+		
+		Free(string);
+	}
+	
+	// GetDate()
+	{
+		auto d = GetDate(Null);
+		assert(d.day == currentDate.day);
+		assert(d.dayOfTheWeek == currentDate.dayOfTheWeek);
+		assert(d.month == currentDate.month);
+		assert(d.year == currentDate.year);
+		
+		d = GetDate(3);
+		assert(d.dayOfWeek == (currentDate.dayOfTheWeek + 3) % 7);
+		d = GetDate(-5);
+		assert(d.dayOfWeek == (currentDate.dayOfTheWeek + 7 - 5) % 7); // +7 since dayOfTheWeek is a ui8
+		// @TODO - Test remaining part of date structure
+		
+	}
+}
 
 void RunMathsAPITest() {
 	// Vector

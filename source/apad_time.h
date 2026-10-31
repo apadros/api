@@ -19,10 +19,10 @@ struct date {
  * - date[[+ | -]days] e.g. today+5
  */
 												// Return string will be allocated on global API memory.
-dll_import char* DateToString(date d); // Returned string format is dd/mm/yyyy
+dll_import char* DateToString(date d); // Returned string format is dd/mm/yyyy, needs to be freed
 dll_import date  GetDate(si32 offsetDays);
 dll_import bool  IsDateAndValid(string_args(string)); 
-dll_import date  StringToDate(string_args(string)); // IsDate() should always be called before this
+dll_import date  StringToDate(string_args(string)); // IsDateAndValid() should always be called before this
 
 typedef ui64 time_marker;
 dll_export char* 			 GetTimeNow(); // Returns string with format hh:mm:ss

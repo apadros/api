@@ -53,7 +53,7 @@ Time
 	
 Testing
 	- @WIP - Develop test for the remaing API
-		- Left: maths, time, win32, how to test opengl & gui code in a console test?
+		- Left: time, win32, how to test opengl & gui code in a console test?
 	- @PRIORITY - Publish new version of APAD API after all test suites developed
 	
 Text
