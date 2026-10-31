@@ -137,8 +137,8 @@ dll_export program_external f32 Cos(f32 degs) {
 	return ret;
 }
 
-dll_export program_external f32 RoundToNearestInteger(f32 value) {
-	return round(value);
+dll_export program_external si32 RoundToNearestInteger(f32 value) {
+	return (si32)round(value);
 }
 
 dll_export program_external f32 SquareRoot(f32 f) {

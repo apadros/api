@@ -4,10 +4,10 @@
 #include "apad_error.h"
 #include "apad_error_internal.h"
 #include "apad_file.h"
-// #include "apad_intrinsics.h"
 #include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_win32.h"
 
 void RunMathsAPITest() {
 	// Vector
@@ -32,18 +32,21 @@ void RunMathsAPITest() {
 		auto vp = v1 + v2;
 		assert(vp.x == v1.x + v2.x);
 		assert(vp.y == v1.y + v2.y);
+		
 		auto vm = v1 - v2;
-		assert(vp.x == v1.x - v2.x);
-		assert(vp.y == v1.y - v2.y);
+		assert(vm.x == v1.x - v2.x);
+		assert(vm.y == v1.y - v2.y);
 		
 		auto v1copy = v1;
 		assert(v1copy.x == v1.x);
 		assert(v1copy.y == v1.y);
 		assert(v1copy == v1);
+		
 		v1copy += v2;
 		assert(v1copy.x == v1.x + v2.x);
 		assert(v1copy.y == v1.y + v2.y);
 		v1copy = v1;
+		
 		v1copy -= v2;
 		assert(v1copy.x == v1.x - v2.x);
 		assert(v1copy.y == v1.y - v2.y);
@@ -57,20 +60,17 @@ void RunMathsAPITest() {
 		assert(vd.y == v1.y / 3.0f);
 	}
 	
-	#if 0
-	// Rectangle and vector functions
+	// Rectangle
 	{
-		
 		auto rec = CreateRectangle(10, 3, 34, 7);
 		assert(rec.left == 10.0f);
 		assert(rec.bottom == 3.0f);
 		assert(rec.width == 34.0f);
 		assert(rec.height == 7.0f);
-		assert(rec.left == rec.pos.x);
-		assert(rec.bottom == rec.pos.y);
-		assert(rec.width == rec.size.x);
-		assert(rec.height == rec.size.y);
+		assert(rec.pos == CreateVector(rec.left, rec.bottom));
+		assert(rec.size == CreateVector(rec.width, rec.height));
 		
+		auto vec = CreateVector(10, 20);
 		rec = CreateRectangle(vec, CreateVector(5, 6));
 		assert(rec.left == vec.x);
 		assert(rec.bottom == vec.y);
@@ -81,24 +81,36 @@ void RunMathsAPITest() {
 		assert(center.x == rec.left + rec.width / 2);
 		assert(center.y == rec.bottom + rec.height / 2);
 		
+		auto tr = GetTopRight(rec);
+		assert(tr.x == rec.left + rec.width);
+		assert(tr.y == rec.bottom + rec.height);
 		
+		auto rec2 = CreateRectangle(UnpackRectangle(rec));
+		assert(rec2.left == rec.left);
+		assert(rec2.bottom == rec.bottom);
+		assert(rec2.width == rec.width);
+		assert(rec2.height == rec.height);
 	}
 	
-	// Trigonometry functions
-	assert(Cos(8) == 0.990268052f);
-	assert(Sine(85) == 0.996194720f);
-	assert(Tan(89) == 57.2900391f);
-	
+	// Trigonometry
 	{
-	  auto ac = ArcCos(0.990268052f); // Should return 8.00000668
-		assert(ac >= 8.0f && ac <= 8.0000067f);
-	  auto as  = ArcSine(0.996194661f); // Should return 84.9999771
-	  assert(as >= 84.9999770f && as <= 84.999978f);
-	  auto at = ArcTan(57.2900391f); // Should return 89.0000000
-		assert(at >= 88.9999999f && at <= 89.0000001f);
+		assert(Cos(8) == 0.990268052f);
+		assert(Sine(85) == 0.996194720f);
+		assert(Tan(89) == 57.2900391f);
+		
+		{
+			auto ac = ArcCos(0.990268052f); // Should return 8.00000668
+			assert(ac >= 8.0f && ac <= 8.0000067f);
+			auto as  = ArcSine(0.996194661f); // Should return 84.9999771
+			assert(as >= 84.9999770f && as <= 84.999978f);
+			auto at = ArcTan(57.2900391f); // Should return 89.0000000
+			assert(at >= 88.9999999f && at <= 89.0000001f);
+		}
 	}
 	
-	// Clamp
+	// Generic functions
+	
+	// Clamp()
 	{
 		f32 val = 3.2f;
 		Clamp(val, 2.0f, 2.9f);
@@ -108,14 +120,58 @@ void RunMathsAPITest() {
 		assert(val == 2.0f);
 	}
 	
-	// ConvertHexToUI32
+	// ConvertHexToUI32()
 	{
 		char* hex = "FA4C9D0B";
 		assert(ConvertHexToUI32(hex, 8) == 4'199'324'939);
 		assert(ConvertHexToUI32(hex + 2, 3) == 1225);
 	}
-	#endif
 	
+	// GenerateCircularCoords()
+	{
+		f32* coords = GenerateCircularCoords(9, 5.34f, 3.89f, 9.33f);
+		assert(coords[0] >= 5.34000014f && coords[0] <= 5.34000016f);
+		assert(coords[1] >= 13.2200002f && coords[1] <= 13.2200004f);
+		assert(coords[2] >= -0.657208442f && coords[2] <= -0.657208444f);
+		assert(coords[3] >= 11.0371942f && coords[3] <= 11.0371944f);
+		assert(coords[4] >= -3.84825610f && coords[4] <= -3.84825612f);
+		assert(coords[5] >= 5.51013707f && coords[5] <= 5.51013709f);
+		assert(coords[6] >= -2.74001693f && coords[6] <= -2.74001695f);
+		assert(coords[7] >= -0.775000333f && coords[7] <= -0.775000335f);
+		assert(coords[8] >= 2.14895343f && coords[8] <= 2.14895345f);
+		assert(coords[9] >= -4.87733268f && coords[9] <= -4.87733270f);
+		assert(coords[10] >= 8.53105067f && coords[10] <= 8.53105069f);
+		assert(coords[11] >= -4.87733077f && coords[11] <= -4.87733079f);
+		assert(coords[12] >= 13.4200171f && coords[12] <= 13.4200173f);
+		assert(coords[13] >= -0.774998902f && coords[13] <= -0.774998904f);
+		assert(coords[14] >= 14.5282554f && coords[14] <= 14.5282556f);
+		assert(coords[15] >= 5.51014184f && coords[15] <= 5.51014186f);
+		assert(coords[16] >= 11.3372058f && coords[16] <= 11.3372060f);
+		assert(coords[17] >= 11.0371961f && coords[17] <= 11.0371963f);
+
+		Win32FreeMemory((void*)coords);
+	}
+	
+	assert(GetMin(5, 10) == 5);
+	assert(GetMax(5, 10) == 10);
+	assert(LERP(7.5f, 13.4f, 0.39f) == 9.801f);
+	assert(Magnitude(-5.63f) == 5.63f);
+	assert(Overlap(1.0f, 2.0f, 0.5f, 0.3f, 4.3f, 6.9f) == true); // Point-rectangle
+	assert(Overlap(0.2f, 0.1f, 0.5f, 0.3f, 4.3f, 6.9f) == false); // Point-rectangle
+	assert(Overlap(0.5f, 0.5f, 0.6f, 0.6f, 1.0f, 1.0f, 5.0f, 8.0f) == true); // Rectangle-rectangle
+	assert(Overlap(0.5f, 0.5f, 0.3f, 0.3f, 1.0f, 1.0f, 5.0f, 6.0f) == false); // Rectangle-rectangle
+	assert(Overlap(1.0f, 1.0f, 3.0f, 3.0f, 3.0f) == true); // Point-circle / circle-circle
+	assert(Overlap(1.0f, 1.0f, 3.0f, 3.0f, 1.5f) == false); // Point-circle / circle-circle
+	assert(RoundToNearestInteger(5.21f) == 5);
+	assert(RoundToNearestInteger(5.5f) == 6);
+	assert(RoundToNearestInteger(-5.3f) == -5);
+	assert(RoundToNearestInteger(-5.5f) == -6);
+	
+	{
+		f32 f = SquareRoot(16.73f);
+		assert(f >= 4.09023236f); // Should return 4.09023237
+		assert(f <= 4.09023238f); // Should return 4.09023237
+	}
 	
 	printf("\nMaths API testing OK\n");
 }
