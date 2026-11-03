@@ -193,9 +193,9 @@ dll_export date StringToDate(string_args(string)) {
 dll_export date GetDate(si32 offsetDays) {
 	FunctionStart(date());
 	
-	time_t timeNowSecs = time(NULL) + offsetDays * 24 * 60 * 60;
-	auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
-	auto ret = ConvertCSLTimeToDate(timeNow);
+	time_t timeSecs = time(NULL) + offsetDays * 24 * 60 * 60;
+	auto*  time = localtime(&timeSecs); // Non-UTC time	
+	auto   ret = ConvertCSLTimeToDate(time);
 	
 	FunctionEnd();
 	return ret;

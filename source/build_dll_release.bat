@@ -14,7 +14,7 @@ REM Release version
 cl /w /nologo /O2 /std:c++17 ..\apad_*.cpp /LD /Fe: apad_api_v%1.%2.%3.dll /link user32.lib gdi32.lib opengl32.lib dbghelp.lib comdlg32.lib shlwapi.lib >> temp.txt
 
 REM Debug version including stack back tracing
-cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /std:c++17 ..\apad_*.cpp /LD /Fe: apad_api_v%1.%2.%3_debug.dll /link user32.lib gdi32.lib opengl32.lib dbghelp.lib comdlg32.lib shlwapi.lib >> temp.txt
+cl /w /nologo /Od /Zi /DAPAD_ASSERTIONS_BACKTRACE /std:c++17 ..\apad_*.cpp /LD /INCREMENTAL:NO /Fe: apad_api_v%1.%2.%3_debug.dll /link user32.lib gdi32.lib opengl32.lib dbghelp.lib comdlg32.lib shlwapi.lib >> temp.txt
 
 del *.obj
 del *.exp

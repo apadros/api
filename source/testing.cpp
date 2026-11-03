@@ -1,3 +1,4 @@
+#include <windows.h> // Sleep(), requires Kernel32.lib
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> // For system()
@@ -11,63 +12,154 @@
 #include "apad_time.h"
 #include "apad_win32.h"
 
+#define TimeAPIDayAssert(_condition) { \
+	if(!(_condition)) \
+		system("date %_current_date%"); \
+	assert(_condition); \
+}
+
+#define TimeAPITimeAssert(_condition) { \
+	if(!(_condition)) \
+		system("time %_current_time%"); \
+	assert(_condition); \
+}
+
+// Need admi privileges to run this properly
+// Must be called after String API test
 void RunTimeAPITest() {
-	dll_import date ConvertCSLTimeToDate(struct tm* time);
-	date currentDate;
-	{
-		time_t timeNowSecs = time(NULL);
-	  auto*  timeNow = localtime(&timeNowSecs); // Non-UTC time	
-	  currentDate = ConvertCSLTimeToDate(timeNow);
-	}
-	
 	// IsDateAndValid()
-	assert(IsDateAndValid("13/05") == true);
-	assert(IsDateAndValid("04/05/16") == true);
-	assert(IsDateAndValid("04/05/2004") == true);
-	assert(IsDateAndValid("today") == true);
-	assert(IsDateAndValid("tue") == true);
-	assert(IsDateAndValid("today+5") == true);
-	assert(IsDateAndValid("thu-3") == true);
+	assert(IsDateAndValid("13/05", Null) == true);
+	assert(IsDateAndValid("04/05/16", Null) == true);
+	assert(IsDateAndValid("04/05/2004", Null) == true);
+	assert(IsDateAndValid("today", Null) == true);
+	assert(IsDateAndValid("tue", Null) == true);
+	assert(IsDateAndValid("today+5", Null) == true);
+	assert(IsDateAndValid("thu-3", Null) == true);
 	
-	// DateToString()
-	{
-		dll_import char* DateFormatLong;
-		
-		char* string = DateToString(currentDate);
-		assert(GetLength(string) == GetLength(DateFormatLong));
-		
-		// Check day
-		char* temp = ToString(currentDate.day);
-		assert(AreEqual(string, 2, temp, Null) == true);
-		Free(temp);
-		
-		// Check month
-		temp = ToString(currentDate.month);
-		assert(AreEqual(string + 3, 2, temp, Null) == true);
-		Free(temp);
-		
-		// Check year
-		temp = ToString(currentDate.year);
-		assert(AreEqual(string + 6, 4, temp, Null) == true);
-		Free(temp);
-		
-		Free(string);
-	}
+	// Store current date to be restored later and set new value for testing
+	system("set _current_date=%date%");
+	system("date 02-11-26");
 	
 	// GetDate()
 	{
 		auto d = GetDate(Null);
-		assert(d.day == currentDate.day);
-		assert(d.dayOfTheWeek == currentDate.dayOfTheWeek);
-		assert(d.month == currentDate.month);
-		assert(d.year == currentDate.year);
+		TimeAPIDayAssert(d.dayOfTheWeek == 1);
+		TimeAPIDayAssert(d.day == 2);
+		TimeAPIDayAssert(d.month == 11);
+		TimeAPIDayAssert(d.year == 2026);
 		
-		d = GetDate(3);
-		assert(d.dayOfWeek == (currentDate.dayOfTheWeek + 3) % 7);
-		d = GetDate(-5);
-		assert(d.dayOfWeek == (currentDate.dayOfTheWeek + 7 - 5) % 7); // +7 since dayOfTheWeek is a ui8
-		// @TODO - Test remaining part of date structure
+		d = GetDate(5);
+		TimeAPIDayAssert(d.dayOfTheWeek == 6);
+		TimeAPIDayAssert(d.day == 7);
+		TimeAPIDayAssert(d.month == 11);
+		TimeAPIDayAssert(d.year == 2026);
 		
+		d = GetDate(-11);
+		TimeAPIDayAssert(d.dayOfTheWeek == 4);
+		TimeAPIDayAssert(d.day == 22);
+		TimeAPIDayAssert(d.month == 10);
+		TimeAPIDayAssert(d.year == 2026);
+	}
+		
+	// DateToString()
+	{
+		dll_import char* DateFormatLong;
+		
+		auto  currentDate = GetDate(Null);
+		char* string = DateToString(currentDate);
+		TimeAPIDayAssert(GetLength(string) == GetLength(DateFormatLong));
+		
+		TimeAPIDayAssert(AreEqual(string, 2, "02", Null) == true);
+		TimeAPIDayAssert(AreEqual(string + 3, 2, "11", Null) == true);
+		TimeAPIDayAssert(AreEqual(string + 6, 4, "2026", Null) == true);
+		
+		Free(string);
+	}
+	
+	// StringToDate()
+	{
+		auto d = GetDate(Null);
+		
+		auto testDate = StringToDate("today", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == d.dayOfTheWeek);
+		TimeAPIDayAssert(testDate.day == d.day);
+		TimeAPIDayAssert(testDate.month == d.month);
+		TimeAPIDayAssert(testDate.year == d.year);
+		
+		d = GetDate(4);
+		testDate = StringToDate("today+4", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == d.dayOfTheWeek);
+		TimeAPIDayAssert(testDate.day == d.day);
+		TimeAPIDayAssert(testDate.month == d.month);
+		TimeAPIDayAssert(testDate.year == d.year);
+		
+		d = GetDate(-6);
+		testDate = StringToDate("today-6", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == d.dayOfTheWeek);
+		TimeAPIDayAssert(testDate.day == d.day);
+		TimeAPIDayAssert(testDate.month == d.month);
+		TimeAPIDayAssert(testDate.year == d.year);
+		
+		testDate = StringToDate("15/11", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == 7);
+		TimeAPIDayAssert(testDate.day == 15);
+		TimeAPIDayAssert(testDate.month == 11);
+		TimeAPIDayAssert(testDate.year == 2026);
+		
+		testDate = StringToDate("15/01", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == 5);
+		TimeAPIDayAssert(testDate.day == 15);
+		TimeAPIDayAssert(testDate.month == 1);
+		TimeAPIDayAssert(testDate.year == 2027);
+		
+		
+		testDate = StringToDate("02/10/26", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == 5);
+		TimeAPIDayAssert(testDate.day == 2);
+		TimeAPIDayAssert(testDate.month == 10);
+		TimeAPIDayAssert(testDate.year == 2026);
+		
+		testDate = StringToDate("04/10/2026", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == 7);
+		TimeAPIDayAssert(testDate.day == 4);
+		TimeAPIDayAssert(testDate.month == 10);
+		TimeAPIDayAssert(testDate.year == 2026);
+		
+		testDate = StringToDate("thu", Null);
+		TimeAPIDayAssert(testDate.dayOfTheWeek == 4);
+		TimeAPIDayAssert(testDate.day == 5);
+		TimeAPIDayAssert(testDate.month == 11);
+		TimeAPIDayAssert(testDate.year == 2026);
+	}
+	
+	// Restore correct date
+	system("date %_current_date%");
+		
+	// GetTimeNow()
+	{
+		system("set _current_time=%time%"); // Store time to be restored later
+		
+		// @WIP - there seems to be a bug with the format returned by GetTimeNow()
+		char* time = GetTimeNow();
+		
+		system("time 15:27:31"); // Set new value for testing
+	
+	  // TimeAPITimeAssert(AreEqual(time + 6, 2, "31", Null) == true || AreEqual(time + 6, 2, "32", Null) == true); // Check seconds first just in case
+		TimeAPITimeAssert(AreEqual(time, 2, "15", Null) == true);
+		TimeAPITimeAssert(AreEqual(time + 3, 2, "27", Null) == true);
+		
+		system("time %_current_time%"); // Restore correct-ish time
+	}
+	
+	// GetTimeMarker() & GetTimeElapsedMilli()
+	{
+		auto marker = GetTimeMarker();
+		assert(marker > 0);
+		
+		Sleep(15);
+		
+		auto milli = GetTimeElapsedMilli(marker, GetTimeMarker());
+		assert(milli >= 15);
 	}
 }
 
