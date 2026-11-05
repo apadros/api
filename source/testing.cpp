@@ -1,4 +1,4 @@
-#include <windows.h> // Sleep(), requires Kernel32.lib
+#include <windows.h> // Everything related to Sleep(), need to link to kernel32.lib and winmm.lib
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> // For system()
@@ -12,21 +12,21 @@
 #include "apad_time.h"
 #include "apad_win32.h"
 
-#define TimeAPIDayAssert(_condition) { \
-	if(!(_condition)) \
-		system("date %_current_date%"); \
-	assert(_condition); \
-}
-
-#define TimeAPITimeAssert(_condition) { \
-	if(!(_condition)) \
-		system("time %_current_time%"); \
-	assert(_condition); \
-}
-
 // Need admi privileges to run this properly
 // Must be called after String API test
 void RunTimeAPITest() {
+	#define TimeAPIDayAssert(_condition) { \
+	if(!(_condition)) \
+		system("date %_current_date%"); \
+		assert(_condition); \
+	}
+	
+	#define TimeAPITimeAssert(_condition) { \
+		if(!(_condition)) \
+			system("time %_current_time%"); \
+		assert(_condition); \
+	}
+
 	// IsDateAndValid()
 	assert(IsDateAndValid("13/05", Null) == true);
 	assert(IsDateAndValid("04/05/16", Null) == true);
@@ -138,13 +138,11 @@ void RunTimeAPITest() {
 	// GetTimeNow()
 	{
 		system("set _current_time=%time%"); // Store time to be restored later
-		
-		// @WIP - there seems to be a bug with the format returned by GetTimeNow()
+	
+		system("time 15:27:31"); // Set new value for testing	
 		char* time = GetTimeNow();
 		
-		system("time 15:27:31"); // Set new value for testing
-	
-	  // TimeAPITimeAssert(AreEqual(time + 6, 2, "31", Null) == true || AreEqual(time + 6, 2, "32", Null) == true); // Check seconds first just in case
+		TimeAPITimeAssert(AreEqual(time + 6, 2, "31", Null) == true); // Check seconds first just in case
 		TimeAPITimeAssert(AreEqual(time, 2, "15", Null) == true);
 		TimeAPITimeAssert(AreEqual(time + 3, 2, "27", Null) == true);
 		
@@ -153,14 +151,28 @@ void RunTimeAPITest() {
 	
 	// GetTimeMarker() & GetTimeElapsedMilli()
 	{
+		// Set the Sleep() granularity first
+		{
+			TIMECAPS time = {};
+			MMRESULT ret = timeGetDevCaps(&time, sizeof(time));
+			assert(ret == MMSYSERR_NOERROR);
+			assert(time.wPeriodMin == 1); // Ensure period of 1 ms
+		}
+		
+		assert(timeBeginPeriod(1) == TIMERR_NOERROR); // Set Sleep() period 
+		
 		auto marker = GetTimeMarker();
-		assert(marker > 0);
-		
 		Sleep(15);
-		
 		auto milli = GetTimeElapsedMilli(marker, GetTimeMarker());
+		
+		assert(marker > 0);
 		assert(milli >= 15);
+		assert(milli <= 16);
+		
+		assert(timeEndPeriod(1) == TIMERR_NOERROR); // Restore Sleep() period
 	}
+	
+	printf("\n[Time API] OK\n");
 }
 
 void RunMathsAPITest() {
@@ -327,7 +339,7 @@ void RunMathsAPITest() {
 		assert(f <= 4.09023238f); // Should return 4.09023237
 	}
 	
-	printf("\nMaths API testing OK\n");
+	printf("\n[Maths API] OK\n");
 }
 
 void ExitFunction() {
@@ -396,7 +408,7 @@ void RunLogAPITest() {
 	CloseLogFile(log);
 	assert(IsValid(log) == false);
 	
-	printf("\nLog API testing OK\n");
+	printf("\n[Log API] OK\n");
 }
 
 void RunStringAPITest() {
@@ -548,7 +560,7 @@ void RunStringAPITest() {
 		Free(stack);
 	}
 	
-	printf("\nString API testing OK\n");
+	printf("\n[String API] OK\n");
 }
 
 void RunFileAPITest() {
@@ -679,7 +691,7 @@ void RunFileAPITest() {
 	
 	system("rmdir temp /s /q");
 	
-	printf("\nFile API testing OK\n");
+	printf("\n[File API] OK\n");
 }
 	
 void RunMemoryAPITest() {
@@ -939,5 +951,5 @@ void RunMemoryAPITest() {
 		assert(((void**)AllocatedMemory)[2] == Null);
 	}
 		
-	printf("\nMemory API testing OK\n");
+	printf("\n[Memory API] OK\n");
 }
