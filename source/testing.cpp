@@ -12,7 +12,73 @@
 #include "apad_time.h"
 #include "apad_win32.h"
 
-// Need admi privileges to run this properly
+// Must be called after Memory,File and String API tests
+void RunWin32APITest() {
+	// ConsoleAppEntryPoint() tested when running the entire test suite
+	
+	// Win32OutputDebugString() can only be tested through a debugger
+	
+	printf("\n[Win32 API] A backtrace should now be printed\n");
+	Win32PrintStackBackTrace();
+	printf("\n");
+	
+	Win32FreeMemory(Win32AllocateMemory(64));
+	
+	// Since File API pointers currently point to Win32 and will be tested later on,
+	// simply test the pointers
+	assert(DeleteFile == Win32DeleteFile);
+	assert(FileExists == Win32FileExists);
+	
+	// Win32DeleteFile(), Win32FileExists(), Win32LoadFile() & Win32SaveFile()
+	{
+		system("if exist temp ( rmdir temp /s /q )");
+		system("mkdir temp");
+		system("echo hello >> temp/test_file.txt");
+		
+		char* path = "temp/test_file.txt";
+		assert(Win32FileExists(path, Null) == true);
+		
+		auto file = Win32LoadFile(path, Null);
+		assert(IsValid(file) == true);
+		
+		system("del temp\\test_file.txt /q");
+		Win32SaveFile(file.memory, file.size, path, Null);
+		assert(Win32FileExists(path, Null) == true);
+		
+		Free(file);
+		
+		system("rmdir temp /s /q");
+	}
+	
+	// Win32CreateDirectory(), Win32DeleteDirectory(), Win32DirectoryExists(), 
+	// Win32GetCurrentDirectory(), Win32GetCurrentDirectoryFullPath() & Win32SetCurrentDirectory()
+	{
+		system("if exist temp2 ( rmdir temp2 /s /q )");
+		char* path = "temp2";
+		Win32CreateDirectory(path, Null);
+		assert(Win32DirectoryExists(path, Null) == true);
+		
+		Win32SetCurrentDirectory(path, Null);
+		char* current = Win32GetCurrentDirectory();
+		assert(AreEqual(current, Null, path, Null) == true);
+		
+		char* currentFull = Win32GetCurrentDirectoryFullPath();
+		assert(currentFull != Null);
+		printf("\n[Win32 API] A full path should now be printed, ending in \\temp2\n\n%s\n", currentFull);
+		
+		Free(current);
+		Free(currentFull);
+		
+		Win32SetCurrentDirectory("..", Null);
+		
+		Win32DeleteDirectory(path, Null);
+		assert(Win32DirectoryExists(path, Null) == false);
+	}
+	
+	printf("\n[Win32 API] OK\n");
+}
+
+// Need admin privileges to run this properly
 // Must be called after String API test
 void RunTimeAPITest() {
 	#define TimeAPIDayAssert(_condition) { \
@@ -952,4 +1018,16 @@ void RunMemoryAPITest() {
 	}
 		
 	printf("\n[Memory API] OK\n");
+}
+
+ConsoleAppEntryPoint(args, argsCount) {
+	RunMemoryAPITest();
+	RunMathsAPITest();
+	RunStringAPITest();
+	RunFileAPITest();
+	RunLogAPITest();
+	RunTimeAPITest();
+	RunWin32APITest();
+	RunErrorAPITest(); // This must stay last
+	return 0;
 }
