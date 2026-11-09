@@ -6,11 +6,140 @@
 #include "apad_error.h"
 #include "apad_error_internal.h"
 #include "apad_file.h"
+#include "apad_gui.h"
 #include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
 #include "apad_time.h"
 #include "apad_win32.h"
+
+// Must be run after Memory API & String API tests
+void RunGUIAPITest() {
+	// GetUIElementLayout() & FreeUIElementLayouts()
+	{
+	  auto* layouts = GetUIElementLayouts(10.3f, 20.5f, 3, 1.5f, 2.3f, 0.7f);
+		
+		assert(layouts[0].start == 10.3f);
+		assert(layouts[0].size == 1.5f);
+		assert(layouts[0].end == layouts[0].start + layouts[0].size);
+		assert(layouts[0].center == layouts[0].start + layouts[0].size / 2);
+	  
+		assert(layouts[1].start == 14.65f);
+		assert(layouts[1].size == 2.3f);
+		assert(layouts[1].end == layouts[1].start + layouts[1].size);
+		assert(layouts[1].center == layouts[1].start + layouts[1].size / 2);
+	  
+		assert(layouts[2].start == 19.8f);
+		assert(layouts[2].size == 0.7f);
+		assert(layouts[2].end == layouts[2].start + layouts[2].size);
+		assert(layouts[2].center == layouts[2].start + layouts[2].size / 2);
+	  
+		FreeUIElementLayouts(layouts);
+	}
+	
+	// CreateColour() overloads, UnpackColour() overloads & UI8ColourToF32()
+	{
+		auto colour = CreateColourUI8(255, 0, 128);
+		assert(colour.red.i == 255);
+		assert(colour.red.f == 1.0f);
+		assert(colour.green.i == 0);
+		assert(colour.green.f == 0);
+		assert(colour.blue.i == 128);
+		assert(colour.blue.f == (f32)128 / 255);
+		
+		colour = CreateColourF32(0.78f, 1.0f, 0);
+		assert(colour.red.i == (ui8)(0.78 * 255));
+		assert(colour.red.f == 0.78f);
+		assert(colour.green.i == 255);
+		assert(colour.green.f == 1.0f);
+		assert(colour.blue.i == 0);
+		assert(colour.blue.f == 0);
+		
+		auto unpackedColour = CreateColourUI8(UnpackColourUI8(colour));
+		assert(unpackColour.red.i == colour.red.i);
+		assert(unpackColour.red.f == colour.red.f);
+		assert(unpackColour.green.i == colour.green.i);
+		assert(unpackColour.green.f == colour.green.f);
+		assert(unpackColour.blue.i == colour.blue.i);
+		assert(unpackColour.blue.f == colour.blue.f);
+		
+		unpackedColour = CreateColourF32(UnpackColourF32(colour));
+		assert(unpackColour.red.i == colour.red.i);
+		assert(unpackColour.red.f == colour.red.f);
+		assert(unpackColour.green.i == colour.green.i);
+		assert(unpackColour.green.f == colour.green.f);
+		assert(unpackColour.blue.i == colour.blue.i);
+		assert(unpackColour.blue.f == colour.blue.f);
+		
+		assert(UI8ColourToF32(60) == 60.0f / 255);
+	}
+	
+	// AllocateButton() & FreeButtonText()
+	{
+		char* text = "sample text";
+		auto  button = AllocateButton(0.32f, 0.78f, 2.3f, 1.2f, texts, Null, 0.9f, 255, 0, 0, 0.25f);
+		assert(button.text != Null);
+		assert(StringsAreEqual(button.text, Null, text, Mull) == true);
+		assert(button.textHeight = 0.9f);
+		assert(button.rectangle.left == 0.32f);
+		assert(button.rectangle.bottom == 0.78f);
+		assert(button.rectangle.width == 2.3f);
+		assert(button.rectangle.height == 1.2f);
+		assert(button.rectangle.highlightColour.red.i == 255);
+		assert(button.rectangle.highlightColour.green.i == 0);
+		assert(button.rectangle.highlightColour.blue.i == 0);
+		assert(button.rectangle.highlightAlpha == 0.25f);
+		
+		FreeButtonText(button);
+		assert(button.text == Null);
+	}
+	
+	// AllocateTextBody()
+	{
+		auto body = AllocateTextBody(0.32f, 0.45f, 10.9f, 0.25f, 1.1f, 4096, TextBodyFlagLetters | TextBodyFlagNewlines);
+		assert(IsValid(body.memory) == true);
+		assert(body.container.textHeight == 1.1f);
+		assert(body.container.textBorderOffset == 0.25f);
+		assert(body.container.left == 0.32f);
+		assert(body.container.bottom == 0.45f);
+		assert(body.container.width == 10.9f);
+		assert(body.container.height == body.textHeight + body.textBorderOffset * 2);
+		assert(body.maxLength == 4096);
+		assert((body.flags & TextBodyFlagLetters) > 0);
+		assert((body.flags & TextBodyFlagNewlines) > 0);
+		
+		assert(IsValid(body) == true);
+		assert(GetTextLength(body) == 0);
+		
+		char* buffer = "buffer text ";
+		Insert(buffer, Null, body, 0);
+		char* textAdded = "sample text";
+		ui8   textStartingPos = GetLength(buffer);;
+		assert(Insert(textAdded, Null, body, textStartingPos) == GetLength(text));
+		
+		char* text = GetText(body);
+		assert(text != Null);
+		assert(AreEqual(text, Null, textAdded, Null) == true);
+		assert(GetTextLength(body) == GetLength(text));
+		
+		assert(FindChar('p', 2, true, body) == text + textStartingPos + 3);
+		assert(FindChar('a', textStartingPos + 1, false, body) == Null);
+		assert(FindChar('a', textStartingPos + 2, false, body) == text + textStartingPos + 1);
+		assert(FindChar('e', 128, false, body) == text + textStartingPos + 8);
+		
+		RemoveChar(body, textStartingPos);
+		assert(AreEqual(GetText(body), Null, textAdded + 1, Null) == true);
+		
+		auto rec = GetTextRectangle(body);
+		// @TODO @WIP - Finish this
+		
+		ClearText(body);
+		assert(body.memory.size == 0);
+		
+		FreeText(body);
+		assert(IsValid(body.memory) == false);
+	}
+}
 
 // Must be called after Memory,File and String API tests
 void RunWin32APITest() {
@@ -1028,6 +1157,7 @@ ConsoleAppEntryPoint(args, argsCount) {
 	RunLogAPITest();
 	RunTimeAPITest();
 	RunWin32APITest();
+	RunGUIAPITest();
 	RunErrorAPITest(); // This must stay last
 	return 0;
 }

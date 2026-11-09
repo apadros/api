@@ -66,7 +66,7 @@ dll_import bool 	ButtonClicked(button& b, win32_state& state);
 dll_import void 	FreeButtonText(button& b); // Call only if text was supplied to AllocateButton()
 dll_import void 	Render( // Will render the background highlight colour
 												  button& b, 
-												  ui8 		 borderThickness, // Set to Null if no border wanted
+												  ui8 		borderThickness, // Set to Null if no border wanted
 												  vector  mousePos,
 												  bool    renderText);
 
