@@ -608,7 +608,7 @@ void RunErrorAPITest() {
 		printf("\n[ERROR API] An internal assertion should now trigger and print a backtrace, then continue execution. \n");
 		Clear(Null, Null);
 		
-		// An assertions should have been hit in Clear()
+		// An assertion should have been hit in Clear()
 		assert(AssertionWasHit() == true);
 		dll_import bool AssertionHit;
 		assert(AssertionHit == true);

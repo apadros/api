@@ -799,8 +799,10 @@ dll_export program_external char* FindChar(char c, ui16 pos, bool scanForward, t
 	ui32  start = scanForward == true ? pos : pos - 1;
 	ui32  end = scanForward == true ? GetTextLength(tb) : 0;
 	FromTo(start, end) {
-		if(text[it] == c)
+		if(text[it] == c) {
+			FunctionEnd();
 			return text + it;
+		}
 	}
 
 	FunctionEnd();
