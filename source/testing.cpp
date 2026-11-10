@@ -47,6 +47,14 @@ void RunGUIAPITest() {
 		assert(colour.blue.i == 128);
 		assert(colour.blue.f == (f32)128 / 255);
 		
+		auto unpackedColour = CreateColourUI8(UnpackColourUI8(colour));
+		assert(unpackedColour.red.i == colour.red.i);
+		assert(unpackedColour.red.f == colour.red.f);
+		assert(unpackedColour.green.i == colour.green.i);
+		assert(unpackedColour.green.f == colour.green.f);
+		assert(unpackedColour.blue.i == colour.blue.i);
+		assert(unpackedColour.blue.f == colour.blue.f);
+		
 		colour = CreateColourF32(0.78f, 1.0f, 0);
 		assert(colour.red.i == (ui8)(0.78 * 255));
 		assert(colour.red.f == 0.78f);
@@ -55,21 +63,13 @@ void RunGUIAPITest() {
 		assert(colour.blue.i == 0);
 		assert(colour.blue.f == 0);
 		
-		auto unpackedColour = CreateColourUI8(UnpackColourUI8(colour));
-		assert(unpackColour.red.i == colour.red.i);
-		assert(unpackColour.red.f == colour.red.f);
-		assert(unpackColour.green.i == colour.green.i);
-		assert(unpackColour.green.f == colour.green.f);
-		assert(unpackColour.blue.i == colour.blue.i);
-		assert(unpackColour.blue.f == colour.blue.f);
-		
 		unpackedColour = CreateColourF32(UnpackColourF32(colour));
-		assert(unpackColour.red.i == colour.red.i);
-		assert(unpackColour.red.f == colour.red.f);
-		assert(unpackColour.green.i == colour.green.i);
-		assert(unpackColour.green.f == colour.green.f);
-		assert(unpackColour.blue.i == colour.blue.i);
-		assert(unpackColour.blue.f == colour.blue.f);
+		assert(unpackedColour.red.i == colour.red.i);
+		assert(unpackedColour.red.f == colour.red.f);
+		assert(unpackedColour.green.i == colour.green.i);
+		assert(unpackedColour.green.f == colour.green.f);
+		assert(unpackedColour.blue.i == colour.blue.i);
+		assert(unpackedColour.blue.f == colour.blue.f);
 		
 		assert(UI8ColourToF32(60) == 60.0f / 255);
 	}
@@ -77,32 +77,34 @@ void RunGUIAPITest() {
 	// AllocateButton() & FreeButtonText()
 	{
 		char* text = "sample text";
-		auto  button = AllocateButton(0.32f, 0.78f, 2.3f, 1.2f, texts, Null, 0.9f, 255, 0, 0, 0.25f);
+		auto  button = AllocateButton(0.32f, 0.78f, 2.3f, 1.2f, text, Null, 0.9f, 255, 0, 0, 0.25f);
 		assert(button.text != Null);
-		assert(StringsAreEqual(button.text, Null, text, Mull) == true);
+		assert(AreEqual(button.text, Null, text, Null) == true);
 		assert(button.textHeight = 0.9f);
 		assert(button.rectangle.left == 0.32f);
 		assert(button.rectangle.bottom == 0.78f);
 		assert(button.rectangle.width == 2.3f);
 		assert(button.rectangle.height == 1.2f);
-		assert(button.rectangle.highlightColour.red.i == 255);
-		assert(button.rectangle.highlightColour.green.i == 0);
-		assert(button.rectangle.highlightColour.blue.i == 0);
-		assert(button.rectangle.highlightAlpha == 0.25f);
+		assert(button.highlightColour.red.i == 255);
+		assert(button.highlightColour.green.i == 0);
+		assert(button.highlightColour.blue.i == 0);
+		assert(button.highlightAlpha == 0.25f);
 		
 		FreeButtonText(button);
 		assert(button.text == Null);
 	}
 	
-	// AllocateTextBody()
+	// AllocateTextBody(), ClearText(), FreeText(), FindChar(), 
+	// GetText(), GetTextLength(), GetTextRectangle(), 
+	// Insert(), IsValid() & RemoveChar()
 	{
-		auto body = AllocateTextBody(0.32f, 0.45f, 10.9f, 0.25f, 1.1f, 4096, TextBodyFlagLetters | TextBodyFlagNewlines);
+		auto body = AllocateTextBody(0.32f, 0.45f, 5.9f, 0.25f, 1.1f, 4096, TextBodyFlagLeftAligned | TextBodyFlagLetters | TextBodyFlagNewlines);
 		assert(IsValid(body.memory) == true);
-		assert(body.container.textHeight == 1.1f);
-		assert(body.container.textBorderOffset == 0.25f);
+		assert(body.textHeight == 1.1f);
+		assert(body.textBorderOffset == 0.25f);
 		assert(body.container.left == 0.32f);
 		assert(body.container.bottom == 0.45f);
-		assert(body.container.width == 10.9f);
+		assert(body.container.width == 5.9f);
 		assert(body.container.height == body.textHeight + body.textBorderOffset * 2);
 		assert(body.maxLength == 4096);
 		assert((body.flags & TextBodyFlagLetters) > 0);
@@ -114,13 +116,14 @@ void RunGUIAPITest() {
 		char* buffer = "buffer text ";
 		Insert(buffer, Null, body, 0);
 		char* textAdded = "sample text";
-		ui8   textStartingPos = GetLength(buffer);;
-		assert(Insert(textAdded, Null, body, textStartingPos) == GetLength(text));
+		ui8   textStartingPos = GetLength(buffer);
+		assert(Insert(textAdded, Null, body, textStartingPos) == GetLength(textAdded));
 		
+		char  conc[] = { "buffer text sample text\0" };
 		char* text = GetText(body);
 		assert(text != Null);
-		assert(AreEqual(text, Null, textAdded, Null) == true);
-		assert(GetTextLength(body) == GetLength(text));
+		assert(AreEqual(text, Null, conc, Null) == true);
+		assert(GetTextLength(body) == GetLength(conc));
 		
 		assert(FindChar('p', 2, true, body) == text + textStartingPos + 3);
 		assert(FindChar('a', textStartingPos + 1, false, body) == Null);
@@ -128,10 +131,14 @@ void RunGUIAPITest() {
 		assert(FindChar('e', 128, false, body) == text + textStartingPos + 8);
 		
 		RemoveChar(body, textStartingPos);
-		assert(AreEqual(GetText(body), Null, textAdded + 1, Null) == true);
+		assert(AreEqual(GetText(body), Null, "buffer text ample text", Null) == true);
 		
 		auto rec = GetTextRectangle(body);
-		// @TODO @WIP - Finish this
+		assert(rec.height >= body.textHeight);
+		assert(rec.left == body.container.left + body.textBorderOffset);
+		assert(rec.width > 0);
+		assert(rec.bottom = body.container.bottom + body.textBorderOffset);
+		assert(rec.height == body.container.height - body.textBorderOffset * 2);
 		
 		ClearText(body);
 		assert(body.memory.size == 0);
@@ -139,6 +146,51 @@ void RunGUIAPITest() {
 		FreeText(body);
 		assert(IsValid(body.memory) == false);
 	}
+	
+	// BeginTextUpdate(), EndTextUpdate(), GetTextLineHeight(), 
+	// IsBeingUpdated(), TextIsBeingUpdated(), GetCharOffsetFromStart(),
+	// GetCurrentTextBody(), GetCursorCharOffset() & InsertCharAtCursor()
+	{
+		auto body = AllocateTextBody(0.32f, 0.45f, 5.9f, 0.25f, 1.1f, 4096, TextBodyFlagLetters);
+		
+		assert(IsBeingUpdated(body) == false);
+		assert(TextIsBeingUpdated() == false);
+		
+		Insert("sample text", Null, body, 0);
+		BeginTextUpdate(body, NullVector);
+		
+		assert(IsBeingUpdated(body) == true);
+		assert(TextIsBeingUpdated() == true);
+		
+		{
+			ui8   offset = 2;
+			char* c = GetText(body) + offset;
+			assert(*c == 'm');
+			assert(GetCharOffsetFromStart(c) == offset);
+		}
+		
+		assert(GetCurrentTextBody() == &body);
+		assert(GetCursorCharOffset() == GetTextLength(body));
+		
+		{
+			auto before = GetTextLength(body);
+			char c = 't';
+			InsertCharAtCursor(c);
+			assert(GetTextLength(body) == before + 1);
+			assert(*(GetText(body) + before) == c);
+		}
+		
+		EndTextUpdate();
+		
+		assert(IsBeingUpdated(body) == false);
+		assert(TextIsBeingUpdated() == false);
+		
+		FreeText(body);
+		
+		assert(GetTextLineHeight(1.5f) >= 1.5f);
+	}
+	
+	printf("\n[GUI API] OK - As much tested as could be on a console app\n");
 }
 
 // Must be called after Memory,File and String API tests

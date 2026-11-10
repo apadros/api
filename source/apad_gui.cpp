@@ -304,9 +304,11 @@ dll_export program_external text_update_pipeline_data RunTextUpdatePipeline(win3
 dll_export program_external void RemoveChar(text_body& tb, ui32 pos) {
 	FunctionStart(;);
 	AssertInternal(IsValid(tb) == true);
-	if(pos < GetTextLength(tb))
+	if(pos < GetTextLength(tb)) {
 		Remove(sizeof(char), pos, tb.memory);
-	SetCursorPos(pos); // In case we removed the very last char
+		if(TextIsBeingUpdated() == true)
+			SetCursorPos(pos); // In case we removed the very last char
+	}
 	FunctionEnd();
 }
 
@@ -792,8 +794,7 @@ dll_export program_external char* FindChar(char c, ui16 pos, bool scanForward, t
 		return Null;
 
 	FunctionStart(Null);
-	AssertInternal(TextIsBeingUpdated() == true);
-
+	
 	char* text = GetText(tb);
 	ui32  start = scanForward == true ? pos : pos - 1;
 	ui32  end = scanForward == true ? GetTextLength(tb) : 0;
@@ -965,8 +966,10 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 
 dll_export program_external void FreeButtonText(button& b) {
 	FunctionStart(;);
-	if(b.text != Null)
+	if(b.text != Null) {
 		Free(b.text);
+		b.text = Null;
+	}
 	FunctionEnd();
 }
 

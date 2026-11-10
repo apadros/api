@@ -39,7 +39,7 @@ dll_import char* // Contains a null char at the end. Must be freed with Free(cha
 															...); // All args must be char*
 dll_import bool  ContainsAnySubstring(string_args(string), char** substrings, ui8 subsCount); 
 dll_import void  Copy(string_args(source), string_args(destination));
-dll_import char* // Contains a null char at the end. Must be freed with Free(char*)
+dll_import char* // Contains a null char at the end. Must be freed with Free(void*)
 					       ExtractSubstring(char* string, 
 																	ui16 	length); // Set to Null to extract until the EOS char. If this is larger than the actual string length, extraction will stop after the EOS char
 dll_import char* FindSubstring(string_args(sub), string_args(string)); // Will return the start of the substring within string, including everything after the former. Does not need to be freed.

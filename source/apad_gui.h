@@ -88,13 +88,22 @@ struct text_body {
 	ui8          flags;
 };
 
-dll_import text_body AllocateTextBody(f32 left, f32 bottom, f32 width, f32 textBorderOffset, f32 textHeight, ui16 maxLength /* Set to Null for no limit */, ui8 flags);
+dll_import text_body AllocateTextBody(f32  containerLeft, 
+																			f32  containerBottom, 
+																			f32  containerWidth, 
+																			f32  textBorderOffset, 
+																			f32  textHeight, 
+																			ui16 maxLength, // Set to Null for no limit 
+																			ui8  flags);
 dll_import void 		 ClearText(text_body& tb);
 dll_import void 		 FreeText(text_body& tb);
 dll_import char* 		 FindChar(char c, ui16 pos, bool scanForward, text_body& tb);
 dll_import char* 		 GetText(text_body& tb); // Do not use this to check for presence of text in text_body memory
 dll_import ui32 		 GetTextLength(text_body& tb);
-dll_import rectangle GetTextRectangle(text_body& tb); // Will have a min height of tb.textHeight, width will be 0 if it doesn't contain any text. Absolute coords.
+dll_import rectangle // Absolute coords
+										 // width will be 0 if it doesn't contain any text
+										 // Will have a min height of tb.textHeight
+										 GetTextRectangle(text_body& tb);
 dll_import ui16      Insert(string_args(string), text_body& tb, ui32 pos); // Returns chars inserted
 dll_import bool 		 IsValid(text_body& tb);
 dll_import void 		 RemoveChar(text_body& tb, ui32 pos);
