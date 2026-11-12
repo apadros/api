@@ -356,17 +356,14 @@ dll_export void* Allocate(memory_pool& pool) {
 	AssertInternal(IsValid(pool) == true);
 	
 	void* ret = Null;
-	ui16 count = pool.memory.size / (sizeof(b8) + pool.elementSize);
-	ForAll(count) {
-		void* mem = (ui8*)pool.memory.memory + (sizeof(b8) + pool.elementSize) * it;
-		b8* initted = (b8*)mem;
+	BeginMemoryPoolLoop(pool, initted, mem) {
 		if(*initted == false) {
 			*initted = true;
-			MovePtr(mem, sizeof(b8));
 			ret = mem;
 			break;
 		}
 	}
+	EndMemoryPoolLoop();
 	
 	// If we get here, we didn't find space
 	if(ret == Null) {

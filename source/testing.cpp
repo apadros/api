@@ -245,7 +245,7 @@ void RunWin32APITest() {
 		
 		char* currentFull = Win32GetCurrentDirectoryFullPath();
 		assert(currentFull != Null);
-		printf("\n[Win32 API] A full path should now be printed, ending in \\temp2\n\n%s\n", currentFull);
+		printf("\n[Win32 API] A full path should now be printed, ending in \"\\temp2\"\n\n%s\n", currentFull);
 		
 		Free(current);
 		Free(currentFull);
@@ -414,7 +414,7 @@ void RunTimeAPITest() {
 		
 		assert(marker > 0);
 		assert(milli >= 15);
-		assert(milli <= 16);
+		assert(milli < 17);
 		
 		assert(timeEndPeriod(1) == TIMERR_NOERROR); // Restore Sleep() period
 	}

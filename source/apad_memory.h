@@ -79,9 +79,16 @@ struct memory_pool {
 	ui16         elementSize;
 };
 
+#define BeginMemoryPoolLoop(_pool, _allocatedBoolPtrID, _memPtrID) { \
+					ForAll(_pool.memory.size / (sizeof(b8) + _pool.elementSize)) { \
+					b8*   _allocatedBoolPtrID = (b8*)((ui8*)_pool.memory.memory + (sizeof(b8) + _pool.elementSize) * it); \
+					void* _memPtrID = (ui8*)_allocatedBoolPtrID + 1;
+
+#define EndMemoryPoolLoop() } }
+
 dll_import memory_pool   AllocatePool(ui16 elementSize, ui16 count = Null); // Can leave count == Null to initialise
-dll_import void* 				 Allocate( // Do NOT store the returned raw pointer, call GetOffset(void*, pool.memory) instead.
-																	 // AllocatePool() with valid elementSize must have been called beforehand.
+dll_import void* 				 // Do NOT store the returned raw pointer, call GetOffset(void*, pool.memory) instead.
+												 Allocate( // AllocatePool() with valid elementSize must have been called beforehand.
 																	 memory_pool& pool);
 dll_import memory_offset Allocate(void* memory, ui16 size, memory_pool&); // AllocatePool() with valid elementSize must have been called beforehand
 dll_import void 				 Deallocate(void* memory, memory_pool& pool); // Must be called before any other pool API call after respective Allocate() call to avoid internal memory reallocation

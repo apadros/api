@@ -52,8 +52,6 @@ Time
 	- Check for dates not available on the calendar (e.g. 30th feb)
 	
 Testing
-	- @WIP - Develop test for the remaing API
-		- Left: all GUI section which can be tested in a console app, how to test opengl ?
 	- @PRIORITY - Publish new version of APAD API after all test suites developed
 	
 Text
