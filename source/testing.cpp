@@ -1191,6 +1191,13 @@ void RunMemoryAPITest() {
 		Deallocate(offset, pool);
 		assert(*((b8*)mem) == false);
 		
+		// Clear()
+		Clear(pool);
+		ForAll(capacity) {
+			ui8* u = (ui8*)pool.memory.memory + it;
+			assert(*u == Null);
+		}
+		
 		// Free()
 		Free(pool);
 		assert(IsValid(pool.memory) == false);

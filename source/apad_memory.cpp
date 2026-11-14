@@ -456,3 +456,10 @@ dll_export void Free(memory_pool& pool) {
 	pool.elementSize = Null;
 	FunctionEnd();
 }
+
+dll_export void Clear(memory_pool& pool) {
+	FunctionStart();
+	AssertInternal(IsValid(pool) == true);
+	Clear(pool.memory.memory, pool.memory.size);
+	FunctionEnd();
+}
