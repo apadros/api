@@ -460,6 +460,13 @@ dll_export void Free(memory_pool& pool) {
 dll_export void Clear(memory_pool& pool) {
 	FunctionStart();
 	AssertInternal(IsValid(pool) == true);
-	Clear(pool.memory.memory, pool.memory.size);
+	Clear(pool.memory.memory, GetCapacity(pool));
 	FunctionEnd();
+}
+
+dll_export ui32 GetCapacity(memory_pool& pool) {
+	FunctionStart(Null);
+	AssertInternal(IsValid(pool) == true);
+	FunctionEnd();
+	return pool.memory.size;
 }

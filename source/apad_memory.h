@@ -94,5 +94,6 @@ dll_import void          Clear(memory_pool& pool);
 dll_import void 				 Deallocate(void* memory, memory_pool& pool); // Must be called before any other pool API call after respective Allocate() call to avoid internal memory reallocation
 dll_import void 			 	 Deallocate(memory_offset offset, memory_pool& pool);
 dll_import void 				 Free(memory_pool& pool);
+dll_import ui32 				 GetCapacity(memory_pool& pool);
 
 #endif

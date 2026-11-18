@@ -1135,12 +1135,12 @@ void RunMemoryAPITest() {
 	
 	// memory_pool
 	{
-		// AllocatePool()
+		// AllocatePool(), GetCapacity()
 		memory_block element;
 		ui16 				 count = 2;
 		auto pool = AllocatePool(sizeof(element), count);
 		assert(pool.elementSize == sizeof(element));
-		ui32 capacity = pool.memory.size;
+		ui32 capacity = GetCapacity(pool);
 		assert(capacity == (sizeof(b8) + sizeof(element)) * count);
 		assert(IsValid(pool.memory) == true);
 		assert(((void**)AllocatedMemory)[1] == pool.memory.memory);
@@ -1158,7 +1158,7 @@ void RunMemoryAPITest() {
 		assert(*((b8*)mem) == true);
 		
 		mem = Allocate(pool);
-		capacity = pool.memory.size;
+		capacity = GetCapacity(pool);
 		assert(capacity == (sizeof(b8) + sizeof(element)) * count * 2);
 		assert(mem == (ui8*)pool.memory.memory + (sizeof(b8) + sizeof(element)) * 2 + sizeof(b8));
 		mem = (ui8*)mem - sizeof(b8);
