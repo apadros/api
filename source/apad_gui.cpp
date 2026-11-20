@@ -421,6 +421,11 @@ dll_export program_external rectangle RenderText(string_args(text), f32 x, f32 y
 				RenderTextLineVert(nextX + height / 3, nextY, height);
 				RenderTextLineVert(nextX + height * 2 / 3, nextY, height);
 			} break;
+			
+			case('/'): {
+				glVertex2f(nextX, nextY);
+				glVertex2f(nextX + height, nextY + height);
+			} break;
 
 			case('a'):
 			case('A'): {

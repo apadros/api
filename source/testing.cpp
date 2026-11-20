@@ -1135,11 +1135,12 @@ void RunMemoryAPITest() {
 	
 	// memory_pool
 	{
-		// AllocatePool(), GetCapacity()
+		// AllocatePool(), IsValid() & GetCapacity()
 		memory_block element;
 		ui16 				 count = 2;
 		auto pool = AllocatePool(sizeof(element), count);
 		assert(pool.elementSize == sizeof(element));
+		assert(IsValid(pool) == true);
 		ui32 capacity = GetCapacity(pool);
 		assert(capacity == (sizeof(b8) + sizeof(element)) * count);
 		assert(IsValid(pool.memory) == true);
@@ -1198,11 +1199,12 @@ void RunMemoryAPITest() {
 			assert(*u == Null);
 		}
 		
-		// Free()
+		// Free() & IsValid()
 		Free(pool);
 		assert(IsValid(pool.memory) == false);
 		assert(pool.elementSize == Null);
 		assert(((void**)AllocatedMemory)[2] == Null);
+		assert(IsValid(pool) == false);
 	}
 		
 	printf("\n[Memory API] OK\n");

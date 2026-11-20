@@ -34,13 +34,6 @@ program_local void* GetEnd(memory_block block) {
 	return ret;
 }
 
-program_local bool IsValid(memory_pool& pool) {
-	FunctionStart(false);
-	bool ret = IsValid(pool.memory) && pool.elementSize > 0;
-	FunctionEnd();
-	return ret;
-}
-
 // ******************** Internal API end ******************** //
 
 dll_export void Reset(memory_stack& stack) {
@@ -469,4 +462,11 @@ dll_export ui32 GetCapacity(memory_pool& pool) {
 	AssertInternal(IsValid(pool) == true);
 	FunctionEnd();
 	return pool.memory.size;
+}
+
+dll_export program_external bool IsValid(memory_pool& pool) {
+	FunctionStart(false);
+	bool ret = IsValid(pool.memory) && pool.elementSize > 0;
+	FunctionEnd();
+	return ret;
 }
