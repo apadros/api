@@ -470,3 +470,13 @@ dll_export program_external bool IsValid(memory_pool& pool) {
 	FunctionEnd();
 	return ret;
 }
+
+dll_export program_external void* GetEnd(memory_stack stack) {
+	FunctionStart(Null);
+	
+	void* ret = (ui8*)GetMemory(stack) + stack.size;
+	
+	FunctionEnd();
+	
+	return ret;
+}

@@ -7,7 +7,7 @@
 #include "apad_maths.h"
 #include "apad_memory.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 
 // ******************** Internal API start ******************** //
 
@@ -21,6 +21,15 @@ program_local char* PushNullChar(memory_stack& stack) {
 }
 
 // ******************** Internal API end ******************** //
+
+dll_export void CheckStringArgs(char*& string, ui16& length) {
+	FunctionStart(;);
+	AssertInternal(string != Null);
+	if(length == Null)
+		length = GetLength(string);
+	AssertInternal(length != Null);
+	FunctionEnd();
+}
 
 dll_export char* Push(char* string, ui16 length, bool addEOS, memory_stack& stack) {
   FunctionStart(Null);
@@ -51,7 +60,7 @@ dll_export bool IsWhitespace(char c) {
 
 dll_export char* ConvertStringToLowerCase(char* s, ui16 length) {
 	FunctionStart(Null);
-	CheckStringInternal(s, length);
+	CheckStringArgs(s, length);
 	
 	char* ret = AllocateString(s, length);
 	
@@ -91,7 +100,7 @@ dll_export char* Concatenate(ui8 count, ...) {
 
 dll_export char* AllocateString(char* s, ui16 length) {
 	FunctionStart(Null);
-	CheckStringInternal(s, length);
+	CheckStringArgs(s, length);
 
 	auto stack = AllocateStack(length + 1);
 	Push(s, length, true, stack);
@@ -237,8 +246,8 @@ dll_export bool AreEqual(char* s1, ui16 s1Length, char* s2, ui16 s2Length) {
 		return false;
 	}
 	
-	CheckStringInternal(s1, s1Length);
-	CheckStringInternal(s2, s2Length);
+	CheckStringArgs(s1, s1Length);
+	CheckStringArgs(s2, s2Length);
 		
 	if(s1Length != s2Length) {
 		FunctionEnd();
@@ -258,8 +267,8 @@ dll_export bool AreEqual(char* s1, ui16 s1Length, char* s2, ui16 s2Length) {
 
 dll_export char* FindSubstring(char* sub, ui16 subLength, char* string, ui16 stringLength) {
   FunctionStart(Null);
-	CheckStringInternal(sub, subLength);
-	CheckStringInternal(string, stringLength);
+	CheckStringArgs(sub, subLength);
+	CheckStringArgs(string, stringLength);
 	
 	ForAll(stringLength) {
 		if(AreEqual(sub, subLength, string + it, subLength) == true) {
@@ -274,7 +283,7 @@ dll_export char* FindSubstring(char* sub, ui16 subLength, char* string, ui16 str
 
 dll_export bool ContainsAnySubstring(char* string, ui16 length, char** substrings, ui8 subsCount) {
   FunctionStart(false);
-	CheckStringInternal(string, length);
+	CheckStringArgs(string, length);
 	
 	ForAll(subsCount) {
     auto* sub = substrings[it];
@@ -292,8 +301,8 @@ dll_export bool ContainsAnySubstring(char* string, ui16 length, char** substring
 dll_export void Copy(char* source, ui16 srcLength, char* destination, ui16 destLength) {
 	FunctionStart(;);
 	
-	CheckStringInternal(source, srcLength);
-	CheckStringInternal(destination, destLength);
+	CheckStringArgs(source, srcLength);
+	CheckStringArgs(destination, destLength);
 	AssertInternal(srcLength >= destLength);
 	
 	Copy((void*)source, srcLength, (void*)destination);
@@ -307,7 +316,7 @@ dll_export bool IsLetter(char c) {
 
 dll_export bool IsWord(char* string, ui16 length) {
 	FunctionStart(false);
-	CheckStringInternal(string, length);
+	CheckStringArgs(string, length);
 	
 	ForAll(length) {
 		if(IsLetter(string[it]) == false)
@@ -324,7 +333,7 @@ dll_export bool IsNumber(char c) {
 
 dll_export bool IsNumber(char* string, ui16 length) {
 	FunctionStart(false);
-	CheckStringInternal(string, length);
+	CheckStringArgs(string, length);
 	
 	ForAll(length) {
 		if(IsNumber(string[it]) == false)
@@ -338,7 +347,7 @@ dll_export bool IsNumber(char* string, ui16 length) {
 #include <stdlib.h>
 dll_export si32 StringToInt(char* string, ui16 length) {
   FunctionStart(0);
-	CheckStringInternal(string, length);
+	CheckStringArgs(string, length);
 	
 	// Want to convert only part of the string or string is an array without a null char
 	auto copy = AllocateString(string, length);
@@ -360,7 +369,7 @@ dll_export char* ExtractSubstring(char* s, ui16 length) {
 
 dll_export bool StringIsEqualToAny(char* string, ui16 length, char** strings, ui8 count) {
 	FunctionStart(false);
-	CheckStringInternal(string, length);
+	CheckStringArgs(string, length);
 	AssertInternal(strings != Null);
 	AssertInternal(count > 0);
 	

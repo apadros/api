@@ -9,7 +9,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 #include "apad_win32.h" 
 #include "apad_win32_gui.h"
 
@@ -90,7 +90,7 @@ dll_export program_external bool IsValid(text_body& tb) {
 
 dll_export program_external ui16 Insert(string_args(string), text_body& tb, ui32 pos) {
 	FunctionStart(Null);
-	CheckStringInternal(UnpackStringArgs(string));
+	CheckStringArgs(UnpackStringArgs(string));
 
 	AssertInternal(IsValid(tb) == true);
 
@@ -339,7 +339,7 @@ dll_export program_external rectangle GetTextRectangle(text_body& tb) {
 
 dll_export program_external vector GetTextRenderSize(string_args(text), f32 height) {
 	FunctionStart(vector());
-	CheckStringInternal(UnpackStringArgs(text));
+	CheckStringArgs(UnpackStringArgs(text));
 	AssertInternal(height > 0);
 
 	vector ret = CreateVector(Null, height);
@@ -384,7 +384,7 @@ program_local void RenderTextLineVert(ui16 x, ui16 y, ui8 height) {
 
 dll_export program_external rectangle RenderText(string_args(text), f32 x, f32 y, f32 height, bool center) {
 	FunctionStart(rectangle());
-	CheckStringInternal(UnpackStringArgs(text));
+	CheckStringArgs(UnpackStringArgs(text));
 
 	rectangle ret = {};
 	ret.left = x;
@@ -956,7 +956,7 @@ dll_export program_external f32 GetCursorAlphaValue() {
 
 dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 width, f32 height, string_args(text), f32 textHeight, ui8 highlightRed, ui8 highlightGreen, ui8 highlightBlue, f32 highlightAlpha) {
 	FunctionStart(button());
-	CheckStringInternal(UnpackStringArgs(text));
+	CheckStringArgs(UnpackStringArgs(text));
 	
 	button ret = {};
 	ret.rectangle = CreateRectangle(left, bottom, width, height);

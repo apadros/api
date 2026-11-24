@@ -6,7 +6,7 @@
 #include "apad_opengl.h"
 #include "apad_opengl_internal.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 #include "apad_win32_gui.h"
 #include "apad_win32_internal.h"
 

@@ -4,7 +4,7 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 
 dll_export void SaveFile(file& f, string_args(path)) {
 	FunctionStart(;);
@@ -23,7 +23,7 @@ dll_export void SaveFile(void* data, ui32 dataSize, string_args(path)) {
 
 dll_export char* GetFileNameAndExtension(string_args(path)) {
 	FunctionStart(Null);
-	CheckStringInternal(UnpackStringArgs(path));
+	CheckStringArgs(UnpackStringArgs(path));
 	
   char* fileName = path + GetLength(path);
 	char* ret = Null;
@@ -40,7 +40,7 @@ dll_export char* GetFileNameAndExtension(string_args(path)) {
 
 dll_export char* GetFileExtension(string_args(path)) {
 	FunctionStart(Null);
-	CheckStringInternal(UnpackStringArgs(path));
+	CheckStringArgs(UnpackStringArgs(path));
 	
   char*  fileName = path + stringArgsLength(path);
   do 		 fileName -= 1;

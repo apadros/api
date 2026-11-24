@@ -6,7 +6,7 @@
 #include "apad_intrinsics.h"
 #include "apad_memory.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 #include "apad_win32.h"
 #include "apad_win32_internal.h"
 
@@ -14,7 +14,7 @@
 
 program_local void CheckPath(string_args(path)) {
 	FunctionStart(;);
-	CheckStringInternal(UnpackStringArgs(path));
+	CheckStringArgs(UnpackStringArgs(path));
 	AssertInternal(stringArgsLength(path) + 1 <= MAX_PATH); // Include the EOS char
 	FunctionEnd();
 }

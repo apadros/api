@@ -10,6 +10,7 @@
 #include "apad_log.h"
 #include "apad_memory.h"
 #include "apad_string.h"
+#include "apad_string_args.h"
 #include "apad_time.h"
 #include "apad_win32.h"
 
@@ -659,6 +660,14 @@ void RunLogAPITest() {
 }
 
 void RunStringAPITest() {
+	// CheckStringArgs()
+	{
+		char* string = "hello";
+		ui16  length = Null;
+		CheckStringArgs(string, length);
+		assert(length == 5);
+	}
+	
 	// GetLength(), ConvertStringToLowerCase() & Free()
 	{
 		char* string = "HeL_Lo1";
@@ -1046,7 +1055,7 @@ void RunMemoryAPITest() {
 		ui32 u1 = 0xFE56A;
 		ui16 u2 = 0xA7;
 		
-		// Push(), GetMemory() & GetCapacity()
+		// Push(), GetMemory(), GetCapacity() & GetEnd()
 		void* mem = Push(&u1, sizeof(u1), stack);
 		assert(GetMemory(stack) != Null && GetMemory(stack) == mem);
 		assert(stack.size == sizeof(u1));
@@ -1054,6 +1063,7 @@ void RunMemoryAPITest() {
 		assert(stack.memory.size == sizeof(u1)); // Test expanded capacity as a result of pushing beyond previous one
 		assert(stack.memory.size == stack.size);
 		assert(GetCapacity(stack) == sizeof(u1));
+		assert(GetEnd(stack) == (ui8*)GetMemory(stack) + stack.size);
 		
 		// Memory layout: u1 (ui32)
 		

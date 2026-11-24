@@ -4,7 +4,7 @@
 #include "apad_error_internal.h"
 #include "apad_intrinsics.h"
 #include "apad_string.h"
-#include "apad_string_internal.h"
+#include "apad_string_args.h"
 #include "apad_time.h"
 
 // ******************** Local API start ******************** //
@@ -29,7 +29,7 @@ program_local date ConvertCSLTimeToDate(struct tm* time) {
 
 dll_export bool IsDateAndValid(string_args(string)) {
 	FunctionStart(false);
-	CheckStringInternal(UnpackStringArgs(string));
+	CheckStringArgs(UnpackStringArgs(string));
 	
 	char* stringCopy = ConvertStringToLowerCase(UnpackStringArgs(string));
 	
@@ -99,7 +99,7 @@ dll_export bool IsDateAndValid(string_args(string)) {
 
 dll_export date StringToDate(string_args(string)) {
 	FunctionStart(date());
-	CheckStringInternal(UnpackStringArgs(string));
+	CheckStringArgs(UnpackStringArgs(string));
 	
 	char* stringCopy = ConvertStringToLowerCase(UnpackStringArgs(string));
 	
