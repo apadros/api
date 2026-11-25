@@ -971,6 +971,21 @@ dll_export program_external button AllocateButton(f32 left, f32 bottom, f32 widt
 	return ret;
 }
 
+dll_export program_external bool IsValid(button b) {
+	FunctionStart(false);
+	bool ret = b.rectangle.width != 0 && b.rectangle.height != 0;
+	FunctionEnd();
+	return ret;
+}
+
+dll_export program_external void SetInvalid(button& b) {
+	FunctionStart(;);
+	char* text = b.text;
+	ClearInstance(b);
+	b.text = text;
+	FunctionEnd();
+}
+
 dll_export program_external void FreeButtonText(button& b) {
 	FunctionStart(;);
 	if(b.text != Null) {

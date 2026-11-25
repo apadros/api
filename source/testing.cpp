@@ -75,24 +75,32 @@ void RunGUIAPITest() {
 		assert(UI8ColourToF32(60) == 60.0f / 255);
 	}
 	
-	// AllocateButton() & FreeButtonText()
+	// AllocateButton(), IsValid(button), FreeButtonText() & SetInvalid(button&)
 	{
-		char* text = "sample text";
-		auto  button = AllocateButton(0.32f, 0.78f, 2.3f, 1.2f, text, Null, 0.9f, 255, 0, 0, 0.25f);
-		assert(button.text != Null);
-		assert(AreEqual(button.text, Null, text, Null) == true);
-		assert(button.textHeight = 0.9f);
-		assert(button.rectangle.left == 0.32f);
-		assert(button.rectangle.bottom == 0.78f);
-		assert(button.rectangle.width == 2.3f);
-		assert(button.rectangle.height == 1.2f);
-		assert(button.highlightColour.red.i == 255);
-		assert(button.highlightColour.green.i == 0);
-		assert(button.highlightColour.blue.i == 0);
-		assert(button.highlightAlpha == 0.25f);
+		button b = {};
+		assert(IsValid(b) == false);
 		
-		FreeButtonText(button);
-		assert(button.text == Null);
+		char* text = "sample text";
+		b = AllocateButton(0.32f, 0.78f, 2.3f, 1.2f, text, Null, 0.9f, 255, 0, 0, 0.25f);
+		assert(b.text != Null);
+		assert(AreEqual(b.text, Null, text, Null) == true);
+		assert(b.textHeight = 0.9f);
+		assert(b.rectangle.left == 0.32f);
+		assert(b.rectangle.bottom == 0.78f);
+		assert(b.rectangle.width == 2.3f);
+		assert(b.rectangle.height == 1.2f);
+		assert(b.highlightColour.red.i == 255);
+		assert(b.highlightColour.green.i == 0);
+		assert(b.highlightColour.blue.i == 0);
+		assert(b.highlightAlpha == 0.25f);
+		assert(IsValid(b) == true);
+		
+		FreeButtonText(b);
+		assert(b.text == Null);
+		assert(IsValid(b) == true);
+		
+		SetInvalid(b);
+		assert(IsValid(b) == false);
 	}
 	
 	// AllocateTextBody(), ClearText(), FreeText(), FindChar(), 
